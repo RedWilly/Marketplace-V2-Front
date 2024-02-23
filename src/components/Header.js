@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import React, { useState } from 'react';
 import {
   Box,
@@ -80,9 +81,23 @@ function Header() {
   const { isOpen, onToggle } = useDisclosure();
   const [searchValue, setSearchValue] = useState('');
   const { connect, active, account, chainId } = useWallet();
+  const navigate = useNavigate(); // Instantiate the useNavigate hook
 
   const handleSearchChange = (event) => {
     setSearchValue(event.target.value);
+  };
+
+  const handleSearchSubmit = () => {
+    // Use the navigate function to redirect the user to the search result
+    // Ensure the address is normalized to lowercase for consistency
+    navigate(`/collection/${searchValue.toLowerCase()}`);
+  };
+
+  // Detect the "Enter" key press in the search input to trigger the search
+  const handleKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      handleSearchSubmit();
+    }
   };
 
   return (
@@ -105,11 +120,13 @@ function Header() {
             <InputLeftElement children={<SearchIcon color="gray.300" />} />
             <Input
               borderRadius="3xl"
-              placeholder="Search by collectible or collection address"
+              placeholder="Search by collection address"
               size="md"
               value={searchValue}
               onChange={handleSearchChange}
+              onKeyPress={handleKeyPress} // Add the key press event handler
             />
+            <Button onClick={handleSearchSubmit} ml={2}>Search</Button> {/* Search button */}
           </InputGroup>
         </Box>
         <Box pl="5" display={{ base: 'none', md: 'flex' }}>
@@ -155,7 +172,7 @@ function Header() {
             size="md"
             onClick={!active ? connect : undefined} // Repeated for mobile view
           >
-            {!active ? (chainId ? 'Chain not supported': 'Connect Wallet') : `Wallet: ${account}`}
+            {!active ? (chainId ? 'Chain not supported' : 'Connect Wallet') : `Wallet: ${account}`}
           </Button>
           <ColorModeSwitcher justifySelf="flex-end" />
         </Stack>
