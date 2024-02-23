@@ -18,8 +18,7 @@ export function useWallet() {
 
   const defaultProvider = async () => {
     return new ethers.providers.JsonRpcProvider(
-      process.env.REACT_APP_DEFAULT_RPC,
-      process.env.REACT_APP_DEFAULT_NETWORK_ID
+      process.env.REACT_APP_DEFAULT_RPC
     )
   }
 
