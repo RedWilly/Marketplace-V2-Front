@@ -20,6 +20,8 @@ import { GET_ACTIVE_LISTING_BY_NFT, GET_ACTIVE_BIDS_FOR_NFT, GET_ALL_SOLD_FOR_NF
 import BuyNow from '../components/Market/BuyNow';
 import MakeOffer from '../components/Market/MakeOffer';
 import AcceptOffer from '../components/Market/AcceptOffer';
+import axios from "axios";
+import Nft from "../util/Nft";
 
 
 const NFTDetail = () => {
@@ -114,34 +116,30 @@ const NFTDetail = () => {
     useEffect(() => {
         const fetchNFTDetails = async () => {
             if (!contractAddress || !tokenId) return;
+
+            // Now safe to use contractAddress and tokenId
+            contractAddress = contractAddress.toLowerCase();
             try {
-                let contract = new ethers.Contract(contractAddress, NFTAbi, await defaultProvider());
-                if(active && library) {
-                    contract = new ethers.Contract(contractAddress, NFTAbi, library);
-                }
-                const tokenURI = await contract.tokenURI(tokenId);
-                const response = await fetch(resolveIPFS(tokenURI)); // Use resolveIPFS here
-                const metadata = await response.json();
-                const owner = await contract.ownerOf(tokenId);
+                const nft = new Nft(168587773, contractAddress, tokenId);
+                const metadata = await nft.metadata();
 
-                // Assuming 'metadata.image' might be an IPFS URL
-                const resolvedImageUrl = resolveIPFS(metadata.image);
-
+                //price based on whether the NFT is listed
                 const price = isListed && data.listings[0].price ? ethers.utils.formatUnits(data.listings[0].price, 'ether') : null;
 
                 setNftDetails({
                     ...metadata,
-                    owner: owner,
-                    image: resolvedImageUrl, // Use the resolved IPFS URL for the image
+                    owner: await nft.owner(),
+                    image: nft.image(),
                     price,
                 });
+                console.log(nft.image())
             } catch (error) {
-                console.error("Failed to fetch NFT details", error);
+                console.error("Failed to fetch NFT details from middleware", error);
             }
         };
 
         fetchNFTDetails();
-    }, [library, contractAddress, tokenId, data, isListed, active, defaultProvider]);
+    }, [contractAddress, tokenId, data, isListed]);
 
 
     return (
@@ -151,7 +149,7 @@ const NFTDetail = () => {
                     <GridItem p={4}>
                         <Image src={nftDetails.image} alt={nftDetails.name} borderRadius='5px' objectFit="cover" />
                         <Text fontSize="2xl" fontWeight="bold">{nftDetails.name}</Text>
-                        { nftDetails && nftDetails.owner ? <Text fontSize="sm">
+                        { nftDetails && nftDetails.owner != null ? <Text fontSize="sm">
                             Owned by: {nftDetails.owner.substring(0,6)}...{nftDetails.owner.substring(38)}
                         </Text> : ''}
                         <Text fontSize="lg">{nftDetails.description}</Text>

@@ -55,40 +55,6 @@ const Collection = () => {
         }
     }, [library, contractAddress]);
 
-    // Correcting the listing metadata fetching process
-    // useEffect(() => {
-    //     if (listingsData && listingsData.listings && library) {
-    //         console.log("Processing listings data...");
-    //         const fetchListingsMetadata = async () => {
-    //             const contract = new ethers.Contract(contractAddress, ERC721Abi, library);
-    //             const updatedListings = await Promise.all(
-    //                 listingsData.listings.map(async (listing) => {
-    //                     try {
-    //                         const tokenURI = await contract.tokenURI(listing.tokenId);
-    //                         const metadataResponse = await fetch(tokenURI);
-    //                         if (!metadataResponse.ok) {
-    //                             throw new Error(`Failed to fetch metadata: ${metadataResponse.statusText}`);
-    //                         }
-    //                         const metadata = await metadataResponse.json();
-    //                         console.log("Fetched Metadata:", metadata);
-    //                         return {
-    //                             ...listing,
-    //                             image: metadata.image,
-    //                             name: metadata.name,
-    //                         };
-    //                     } catch (error) {
-    //                         console.error("Error fetching token URI for listing:", listing, error);
-    //                         return listing; // Return listing without metadata in case of error
-    //                     }
-    //                 })
-    //             );
-    //             console.log("Updated Listings with Metadata:", updatedListings);
-    //             setListings(updatedListings);
-    //         };
-
-    //         fetchListingsMetadata();
-    //     }
-    // }, [listingsData, library, contractAddress]);
     useEffect(() => {
         const currentTimestamp = Math.floor(Date.now() / 1000);
         if (listingsData && listingsData.listings && library) {
