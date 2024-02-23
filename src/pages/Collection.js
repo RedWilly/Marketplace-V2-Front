@@ -7,6 +7,7 @@ import { GET_COLLECTION_STATS, GET_LISTINGS_FOR_NFT_ADDRESS } from '../graphql/Q
 import ERC721Abi from '../abi/erc721.json';
 import { useWallet } from '../hooks/useWallet';
 import BuyNow from '../components/Market/BuyNow';
+import Nft from "../util/Nft";
 
 const Collection = () => {
     let { contractAddress } = useParams();
@@ -60,22 +61,16 @@ const Collection = () => {
         if (listingsData && listingsData.listings && library) {
             console.log("Processing listings data...");
             const fetchListingsMetadata = async () => {
-                const contract = new ethers.Contract(contractAddress, ERC721Abi, library);
                 const updatedListings = await Promise.all(
                     listingsData.listings
                         .filter(listing => parseInt(listing.expireTimestamp) > currentTimestamp) // Filter out expired listings
                         .map(async (listing) => {
                             try {
-                                const tokenURI = await contract.tokenURI(listing.tokenId);
-                                const metadataResponse = await fetch(tokenURI);
-                                if (!metadataResponse.ok) {
-                                    throw new Error(`Failed to fetch metadata: ${metadataResponse.statusText}`);
-                                }
-                                const metadata = await metadataResponse.json();
-                                console.log("Fetched Metadata:", metadata);
+                                const nft = new Nft(168587773, contractAddress,listing.tokenId)
+                                const metadata = await nft.metadata();
                                 return {
                                     ...listing,
-                                    image: metadata.image,
+                                    image: nft.image(),
                                     name: metadata.name,
                                 };
                             } catch (error) {
@@ -96,8 +91,6 @@ const Collection = () => {
     const handleNFTClick = (tokenId) => {
         navigate(`/collection/${contractAddress}/${tokenId}`);
     };
-
-
 
     return (
         <Box p={5}>

@@ -14,20 +14,18 @@ import {
 } from '@chakra-ui/react';
 import { ethers } from 'ethers';
 import { useQuery } from '@apollo/client';
-import NFTAbi from '../abi/erc721.json';
 import { useWallet } from '../hooks/useWallet';
 import { GET_ACTIVE_LISTING_BY_NFT, GET_ACTIVE_BIDS_FOR_NFT, GET_ALL_SOLD_FOR_NFT } from '../graphql/Queries';
 import BuyNow from '../components/Market/BuyNow';
 import MakeOffer from '../components/Market/MakeOffer';
 import AcceptOffer from '../components/Market/AcceptOffer';
-import axios from "axios";
 import Nft from "../util/Nft";
 
 
 const NFTDetail = () => {
     let { contractAddress, tokenId } = useParams();
     contractAddress = contractAddress.toLowerCase();
-    const { active, account, library, defaultProvider } = useWallet();
+    const { active, account } = useWallet();
     const [nftDetails, setNftDetails] = useState({});
     const [isListed, setIsListed] = useState(false);
     const [isSeller, setIsSeller] = useState(false);
@@ -99,20 +97,6 @@ const NFTDetail = () => {
 
     }, [data, account, nftDetails]);
 
-    //ipfs helper
-    const resolveIPFS = (url) => {
-        if (!url) return '';
-
-        // Check if the URL starts with 'ipfs://'
-        if (url.startsWith('ipfs://')) {
-            // Convert it to a public gateway URL
-            return `https://ipfs.io/ipfs/${url.substring(7)}`;
-        }
-
-        // Return the original URL if it's not an IPFS URL
-        return url;
-    };
-
     useEffect(() => {
         const fetchNFTDetails = async () => {
             if (!contractAddress || !tokenId) return;
@@ -140,7 +124,6 @@ const NFTDetail = () => {
 
         fetchNFTDetails();
     }, [contractAddress, tokenId, data, isListed]);
-
 
     return (
         <VStack spacing={4} p={10} align="stretch">

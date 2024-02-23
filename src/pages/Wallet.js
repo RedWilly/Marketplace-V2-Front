@@ -28,12 +28,13 @@ import {
   Text,
   Image,
 } from '@chakra-ui/react';
+import Nft from "../util/Nft";
 
 const Wallet = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [contractAddress, setContractAddress] = useState('');
   const [nfts, setNfts] = useState([]);
-  const { account, library } = useWallet();
+  const { account, library, defaultProvider } = useWallet();
   const [bids, setBids] = useState([]);
   const [listings, setListings] = useState([]);
   //list,cancel list, cancel bid
@@ -43,8 +44,6 @@ const Wallet = () => {
   const [selectedNFTForDelist, setSelectedNFTForDelist] = useState(null);
   const [isCancelBidModalOpen, setIsCancelBidModalOpen] = useState(false);
   const [selectedNFTForBidCancel, setSelectedNFTForBidCancel] = useState(null);
-
-
 
   const { data, loading, error } = useQuery(GET_LISTED_NFTS_FOR_ADDRESS, {
     variables: { seller: account?.toLowerCase() },
@@ -62,18 +61,6 @@ const Wallet = () => {
     console.log("GraphQL Query Error:", error);
   }, [data, loading, error]);
 
-  const fetchNFTMetadata = async (tokenURI) => {
-    try {
-      const response = await fetch(tokenURI);
-      if (!response.ok) throw new Error(`Failed to fetch metadata: ${response.statusText}`);
-      const metadata = await response.json();
-      return metadata;
-    } catch (error) {
-      console.error("Error fetching NFT metadata:", error);
-      return null;
-    }
-  };
-
   useEffect(() => {
     const savedAddress = localStorage.getItem('contractAddress');
     if (savedAddress) {
@@ -85,9 +72,10 @@ const Wallet = () => {
     if (data && data.listings) {
       const fetchAllMetadata = async () => {
         const listingsWithMetadata = await Promise.all(data.listings.map(async (listing) => {
-          const contract = new ethers.Contract(listing.erc721Address, ERC721ABI, library.getSigner());
-          const tokenURI = await contract.tokenURI(listing.tokenId);
-          const metadata = await fetchNFTMetadata(tokenURI); return {
+          const nft = new Nft(168587773, listing.erc721Address, listing.tokenId)
+          const metadata = await nft.metadata();
+          metadata.image = nft.image()
+          return {
             ...listing,
             metadata,
             contractAddress: listing.erc721Address, // Ensure correct property names
@@ -108,9 +96,9 @@ const Wallet = () => {
     if (bidsData && bidsData.bids) {
       const fetchBidsMetadata = async () => {
         const bidsWithMetadata = await Promise.all(bidsData.bids.map(async (bid) => {
-          const contract = new ethers.Contract(bid.erc721Address, ERC721ABI, library.getSigner());
-          const tokenURI = await contract.tokenURI(bid.tokenId);
-          const metadata = await fetchNFTMetadata(tokenURI);
+          const nft = new Nft(168587773, bid.erc721Address, bid.tokenId)
+          const metadata = await nft.metadata();
+          metadata.image = nft.image()
           return {
             ...bid,
             metadata,
@@ -129,13 +117,18 @@ const Wallet = () => {
   useEffect(() => {
     if (account && library && contractAddress) {
       const fetchNFTs = async () => {
-        const contract = new ethers.Contract(contractAddress, ERC721ABI, library.getSigner());
+        let provider = library.getSigner();
+        if(!provider) provider = await defaultProvider()
+
+        const contract = new ethers.Contract(contractAddress, ERC721ABI, provider);
         const balance = await contract.balanceOf(account);
         const fetchedNfts = [];
         for (let i = 0; i < balance.toNumber(); i++) {
           const tokenId = await contract.tokenOfOwnerByIndex(account, i);
-          const tokenURI = await contract.tokenURI(tokenId);
-          const metadata = await fetchNFTMetadata(tokenURI);
+
+          const nft = new Nft(168587773, contractAddress, tokenId)
+          const metadata = await nft.metadata();
+          metadata.image = nft.image()
           if (metadata) {
             fetchedNfts.push({
               metadata,
