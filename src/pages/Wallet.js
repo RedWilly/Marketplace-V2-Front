@@ -29,10 +29,11 @@ import {
   Image,
 } from '@chakra-ui/react';
 import Nft from "../util/Nft";
+import whitelist from "../components/Whitelist";
 
 const Wallet = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [contractAddress, setContractAddress] = useState('');
+  const [contractAddresses, setContractAddresses] = useState([]);
   const [nfts, setNfts] = useState([]);
   const { account, library, defaultProvider } = useWallet();
   const [bids, setBids] = useState([]);
@@ -62,9 +63,21 @@ const Wallet = () => {
   }, [data, loading, error]);
 
   useEffect(() => {
-    const savedAddress = localStorage.getItem('contractAddress');
-    if (savedAddress) {
-      setContractAddress(savedAddress);
+    const savedAddress = localStorage.getItem('contractAddresses');
+    let collections = [];
+    for(let i in savedAddress) {
+      collections.push(savedAddress[i]);
+    }
+    for(let j in whitelist) {
+      if(!collections.includes(whitelist[j])) {
+        collections.push(whitelist[j])
+      }
+    }
+
+    console.log(collections)
+
+    if (collections.length > 0) {
+      setContractAddresses(collections);
     }
   }, []); // This effect runs once on mount
 
@@ -115,26 +128,29 @@ const Wallet = () => {
 
 
   useEffect(() => {
-    if (account && library && contractAddress) {
+    if (account && library && contractAddresses) {
       const fetchNFTs = async () => {
         let provider = library.getSigner();
         if(!provider) provider = await defaultProvider()
 
-        const contract = new ethers.Contract(contractAddress, ERC721ABI, provider);
-        const balance = await contract.balanceOf(account);
         const fetchedNfts = [];
-        for (let i = 0; i < balance.toNumber(); i++) {
-          const tokenId = await contract.tokenOfOwnerByIndex(account, i);
+        for(let i in contractAddresses) {
+          const contractAddress = contractAddresses[i]
+          const contract = new ethers.Contract(contractAddress, ERC721ABI, provider);
+          const balance = await contract.balanceOf(account);
+          for (let i = 0; i < balance.toNumber(); i++) {
+            const tokenId = await contract.tokenOfOwnerByIndex(account, i);
 
-          const nft = new Nft(168587773, contractAddress, tokenId)
-          const metadata = await nft.metadata();
-          metadata.image = nft.image()
-          if (metadata) {
-            fetchedNfts.push({
-              metadata,
-              tokenId: tokenId.toString(),
-              contractAddress // contractAddress
-            });
+            const nft = new Nft(168587773, contractAddress, tokenId)
+            const metadata = await nft.metadata();
+            metadata.image = nft.image()
+            if (metadata) {
+              fetchedNfts.push({
+                metadata,
+                tokenId: tokenId.toString(),
+                contractAddress // contractAddress
+              });
+            }
           }
         }
 
@@ -150,7 +166,7 @@ const Wallet = () => {
 
       fetchNFTs();
     }
-  }, [account, library, contractAddress, listings]);
+  }, [account, library, contractAddresses, listings]);
 
 
 
@@ -261,9 +277,9 @@ const Wallet = () => {
                 <ModalHeader>Import Collection Address</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody pb={6}>
-                  <Input placeholder="Contract Address" value={contractAddress} onChange={(e) => setContractAddress(e.target.value)} />
+                  <Input placeholder="Contract Address" value={''} onChange={(e) => setContractAddresses([...contractAddresses, e.target.value])} />
                   <Button mt={4} onClick={() => {
-                    localStorage.setItem('contractAddress', contractAddress);
+                    localStorage.setItem('contractAddresses', contractAddresses);
                     onClose();
                   }}>Import</Button>
                 </ModalBody>
