@@ -81,49 +81,43 @@ const NFTDetail = () => {
     useEffect(() => {
         if (data && data.listings && data.listings.length > 0) {
             setIsListed(true);
-            setIsSeller(data.listings[0].seller.toLowerCase() === account.toLowerCase());
+            setIsSeller(account && data.listings[0].seller.toLowerCase() === account.toLowerCase());
         } else {
             setIsListed(false);
             setIsSeller(false); // Ensure isSeller is reset if there's no listing
         }
-
-        if(nftDetails && nftDetails.owner) {
-            if(nftDetails.owner.toLowerCase() === account.toLowerCase()) {
-                setIsOwner(true)
-            } else {
-                setIsOwner(false)
-            }
-        }
-
-    }, [data, account, nftDetails]);
+    }, [data, account]);
 
     useEffect(() => {
         const fetchNFTDetails = async () => {
             if (!contractAddress || !tokenId) return;
 
-            // Now safe to use contractAddress and tokenId
-            contractAddress = contractAddress.toLowerCase();
             try {
                 const nft = new Nft(168587773, contractAddress, tokenId);
                 const metadata = await nft.metadata();
 
-                //price based on whether the NFT is listed
-                const price = isListed && data.listings[0].price ? ethers.utils.formatUnits(data.listings[0].price, 'ether') : null;
+                const price = isListed && data.listings[0] ? ethers.utils.formatUnits(data.listings[0].price, 'ether') : null;
+
+                let owner = null;
+                if (active) { // Only attempt to fetch owner if wallet is connected
+                    owner = await nft.owner();
+                    setIsOwner(account && owner.toLowerCase() === account.toLowerCase());
+                }
 
                 setNftDetails({
                     ...metadata,
-                    owner: await nft.owner(),
+                    owner,
                     image: nft.image(),
                     price,
                 });
-                console.log(nft.image())
             } catch (error) {
-                console.error("Failed to fetch NFT details from middleware", error);
+                console.error("Failed to fetch NFT details", error);
             }
         };
 
         fetchNFTDetails();
-    }, [contractAddress, tokenId, data, isListed]);
+    }, [contractAddress, tokenId, data, isListed, active, account]);
+
 
     return (
         <VStack spacing={4} p={10} align="stretch">
@@ -132,8 +126,8 @@ const NFTDetail = () => {
                     <GridItem p={4}>
                         <Image src={nftDetails.image} alt={nftDetails.name} borderRadius='5px' objectFit="cover" />
                         <Text fontSize="2xl" fontWeight="bold">{nftDetails.name}</Text>
-                        { nftDetails && nftDetails.owner != null ? <Text fontSize="sm">
-                            Owned by: {nftDetails.owner.substring(0,6)}...{nftDetails.owner.substring(38)}
+                        {nftDetails && nftDetails.owner != null ? <Text fontSize="sm">
+                            Owned by: {nftDetails.owner.substring(0, 6)}...{nftDetails.owner.substring(38)}
                         </Text> : ''}
                         <Text fontSize="lg">{nftDetails.description}</Text>
 
@@ -173,7 +167,7 @@ const NFTDetail = () => {
                                 <Text>Price: {ethers.utils.formatEther(bid.value)} ETH</Text>
                                 <Text>Expires: {formatExpiration(bid.expireTimestamp)}</Text>
                                 <Text>Bidder: {formatAddress(bid.bidder)}</Text>
-                                {isSeller && (
+                                {isOwner && (
                                     <Button size="sm" colorScheme="blue" onClick={() => handleSelectBid(bid)}>
                                         Accept Offer
                                     </Button>

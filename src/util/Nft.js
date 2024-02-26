@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const middlewareBaseURL = 'http://localhost:9001'; // Replace with your middleware's base URL
+const middlewareBaseURL = 'https://marketplacev2-api.onrender.com'; // Replace with your middleware's base URL this is a running on render free for testing
 
 class Nft {
     constructor(chain, collection, id) {
@@ -9,7 +9,7 @@ class Nft {
         this.id = id
     }
 
-    async metadata () {
+    async metadata() {
         // Fetch metadata from your middleware
         const metadataResponse = await axios.get(`${middlewareBaseURL}/metadata/${this.chain}/${this.collection}/${this.id}`);
         if (metadataResponse.status !== 200 || !metadataResponse.data) {
@@ -18,11 +18,11 @@ class Nft {
         return metadataResponse.data;
     }
 
-    image () {
+    image() {
         return `${middlewareBaseURL}/image/${this.chain}/${this.collection}/${this.id}`
     }
 
-    async owner () {
+    async owner() {
         const metadataResponse = await axios.get(`${middlewareBaseURL}/owner/${this.chain}/${this.collection}/${this.id}`);
         if (metadataResponse.status !== 200 || !metadataResponse.data) {
             throw new Error('Failed to fetch metadata from middleware');

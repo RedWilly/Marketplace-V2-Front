@@ -36,7 +36,7 @@ const MakeOffer = ({ isOpen, onClose, erc721Address, tokenId }) => {
             const allowance = await WETHContract.allowance(account, marketplaceAddress);
             setIsApproved(allowance.gt(ethers.utils.parseEther(value || '0')));
         };
-        // checkAllowance();
+        checkAllowance();
     }, [account, library, value, WETHAddress, marketplaceAddress]);
 
     const calculateExpiryTimestamp = () => {

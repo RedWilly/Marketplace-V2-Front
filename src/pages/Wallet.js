@@ -1,25 +1,17 @@
 import { useNavigate } from 'react-router-dom'; // Step 1
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import ERC721ABI from '../abi/erc721.json';
+// import ERC721ABI from '../abi/erc721.json';
 import { useWallet } from '../hooks/useWallet';
 import { useQuery } from '@apollo/client';
-import { GET_LISTED_NFTS_FOR_ADDRESS, GET_BIDS_BY_ADDRESS } from '../graphql/Queries';
-import client from '../graphql/apollo-client';
+import { GET_LISTED_NFTS_FOR_ADDRESS, GET_BIDS_BY_ADDRESS, GET_ALL_NFTS_OWNED_BY_USER } from '../graphql/Queries';
+// import client from '../graphql/apollo-client';
 import ListNFTModal from '../components/Market/ListNFTModal';
 import DeListNFTModal from '../components/Market/DeListNFTModal';
 import CancelBidModal from '../components/Market/CancelBidModel';
 import {
   Box,
   Button,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  Input,
-  useDisclosure,
   Tabs,
   TabList,
   TabPanels,
@@ -29,16 +21,14 @@ import {
   Image,
 } from '@chakra-ui/react';
 import Nft from "../util/Nft";
-import whitelist from "../components/Whitelist";
+// import whitelist from "../components/Whitelist";
 
 const Wallet = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [contractAddresses, setContractAddresses] = useState([]);
   const [nfts, setNfts] = useState([]);
-  const { account, library, defaultProvider } = useWallet();
+  const { account, library } = useWallet();
   const [bids, setBids] = useState([]);
   const [listings, setListings] = useState([]);
-  //list,cancel list, cancel bid
+  //list,cancel list, cancel bid//
   const [isListModalOpen, setIsListModalOpen] = useState(false);
   const [selectedNFT, setSelectedNFT] = useState({});
   const [isDeListModalOpen, setIsDeListModalOpen] = useState(false);
@@ -46,40 +36,31 @@ const Wallet = () => {
   const [isCancelBidModalOpen, setIsCancelBidModalOpen] = useState(false);
   const [selectedNFTForBidCancel, setSelectedNFTForBidCancel] = useState(null);
 
+  // Fetching Listed NFTs for the connected wallet
   const { data, loading, error } = useQuery(GET_LISTED_NFTS_FOR_ADDRESS, {
     variables: { seller: account?.toLowerCase() },
-    client: client,
+    skip: !account, // Skip this query if account is not available
   });
 
-  //Fetching Active Bids for the Connected wallets
+  // Fetching Active Bids for the connected wallet
   const { data: bidsData } = useQuery(GET_BIDS_BY_ADDRESS, {
     variables: { bidder: account?.toLowerCase() },
-    client: client,
+    skip: !account, // Skip this query if account is not available
   });
+
+  // Use the useQuery hook to fetch NFTs owned by the user with skip option
+  const { data: ownedNFTsData, loading: ownedNFTsLoading, error: ownedNFTsError } = useQuery(GET_ALL_NFTS_OWNED_BY_USER, {
+    variables: { owner: account?.toLowerCase() },
+    skip: !account, // Skip this query if account is not available
+  });
+
   useEffect(() => {
     console.log("GraphQL Query Data:", data);
     console.log("GraphQL Query Loading:", loading);
     console.log("GraphQL Query Error:", error);
   }, [data, loading, error]);
 
-  useEffect(() => {
-    const savedAddress = localStorage.getItem('contractAddresses');
-    let collections = [];
-    for(let i in savedAddress) {
-      collections.push(savedAddress[i]);
-    }
-    for(let j in whitelist) {
-      if(!collections.includes(whitelist[j])) {
-        collections.push(whitelist[j])
-      }
-    }
 
-    console.log(collections)
-
-    if (collections.length > 0) {
-      setContractAddresses(collections);
-    }
-  }, []); // This effect runs once on mount
 
   useEffect(() => {
     if (data && data.listings) {
@@ -128,47 +109,35 @@ const Wallet = () => {
 
 
   useEffect(() => {
-    if (account && library && contractAddresses) {
-      const fetchNFTs = async () => {
-        let provider = library.getSigner();
-        if(!provider) provider = await defaultProvider()
+    if (ownedNFTsData && !ownedNFTsLoading && !ownedNFTsError) {
+      const processOwnedNFTs = async () => {
+        try {
+          // Process the fetched NFTs
+          const ownedNfts = await Promise.all(ownedNFTsData.erc721S.map(async (nft) => {
+            const metadataNft = new Nft(168587773, nft.address, nft.tokenId);
+            const metadata = await metadataNft.metadata();
+            return {
+              metadata,
+              tokenId: nft.tokenId.toString(),
+              contractAddress: nft.address,
+            };
+          }));
 
-        const fetchedNfts = [];
-        for(let i in contractAddresses) {
-          const contractAddress = contractAddresses[i]
-          const contract = new ethers.Contract(contractAddress, ERC721ABI, provider);
-          const balance = await contract.balanceOf(account);
-          for (let i = 0; i < balance.toNumber(); i++) {
-            const tokenId = await contract.tokenOfOwnerByIndex(account, i);
-
-            const nft = new Nft(168587773, contractAddress, tokenId)
-            const metadata = await nft.metadata();
-            metadata.image = nft.image()
-            if (metadata) {
-              fetchedNfts.push({
-                metadata,
-                tokenId: tokenId.toString(),
-                contractAddress // contractAddress
-              });
-            }
-          }
+          // Update the state with the fetched NFTs
+          setNfts(ownedNfts.filter(nft =>
+            // Optionally filter out NFTs based on certain criteria, such as being listed
+            !listings.some(listing =>
+              listing.tokenId === nft.tokenId && listing.erc721Address.toLowerCase() === nft.contractAddress.toLowerCase()
+            )
+          ));
+        } catch (error) {
+          console.error("Error processing owned NFTs:", error);
         }
-
-        // Filter out listed NFTs
-        const unlistedNfts = fetchedNfts.filter(nft =>
-          !listings.some(listing =>
-            listing.tokenId === nft.tokenId && listing.erc721Address.toLowerCase() === nft.contractAddress.toLowerCase()
-          )
-        );
-
-        setNfts(unlistedNfts); // Keep the entire NFT object, including tokenId and contractAddress
       };
 
-      fetchNFTs();
+      processOwnedNFTs();
     }
-  }, [account, library, contractAddresses, listings]);
-
-
+  }, [ownedNFTsData, ownedNFTsLoading, ownedNFTsError, listings]);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
@@ -176,7 +145,7 @@ const Wallet = () => {
   // Handler for opening the listing modal with selected NFT details
   const openListModal = (nft) => {
     console.log("Opening modal for NFT with:", nft);
-    setSelectedNFT(nft); // Now nft includes metadata, tokenId, and contractAddress
+    setSelectedNFT(nft); // nft includes metadata, tokenId, and contractAddress
     setIsListModalOpen(true);
   };
 
@@ -270,21 +239,6 @@ const Wallet = () => {
         </TabList>
         <TabPanels>
           <TabPanel>
-            <Button onClick={onOpen}>Import Collection</Button>
-            <Modal isOpen={isOpen} onClose={onClose}>
-              <ModalOverlay />
-              <ModalContent>
-                <ModalHeader>Import Collection Address</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody pb={6}>
-                  <Input placeholder="Contract Address" value={''} onChange={(e) => setContractAddresses([...contractAddresses, e.target.value])} />
-                  <Button mt={4} onClick={() => {
-                    localStorage.setItem('contractAddresses', contractAddresses);
-                    onClose();
-                  }}>Import</Button>
-                </ModalBody>
-              </ModalContent>
-            </Modal>
             <Box display="grid" gridTemplateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap={6}>
               {nfts.map((nft, index) => (
                 <NFTCard key={index} nft={nft} />

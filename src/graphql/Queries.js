@@ -150,6 +150,29 @@ export const GET_COLLECTION_STATS = gql`
       id
       floorPrice
       totalVolumeTraded
+      totalVolumeTradedWETH
     }
   }
+`;
+
+
+// Get  the ALL nfts owned by a specific user/wallet
+export const GET_ALL_NFTS_OWNED_BY_USER = gql`
+  query GetAllNFTsOwnedByUser($owner: Bytes!) {
+    erc721S(where: {owner: $owner}) {
+      address
+      tokenId
+      owner
+    }
+  }
+`;
+
+//query to get nft collection name
+export const GET_COLLECTION_NAME = gql`
+query GetCollectionName($id: ID!) {
+  collection(id: $id) {
+    id
+    name
+  }
+}
 `;

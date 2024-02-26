@@ -3,9 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Text, Tabs, TabList, TabPanels, Tab, TabPanel, VStack, Flex, Image, Grid } from '@chakra-ui/react';
 import { useQuery } from '@apollo/client';
 import { ethers } from 'ethers';
-import { GET_COLLECTION_STATS, GET_LISTINGS_FOR_NFT_ADDRESS } from '../graphql/Queries';
-import ERC721Abi from '../abi/erc721.json';
-import { useWallet } from '../hooks/useWallet';
+import { GET_COLLECTION_STATS, GET_LISTINGS_FOR_NFT_ADDRESS, GET_COLLECTION_NAME } from '../graphql/Queries';
+// import ERC721Abi from '../abi/erc721.json';
+// import { useWallet } from '../hooks/useWallet';
 import BuyNow from '../components/Market/BuyNow';
 import Nft from "../util/Nft";
 
@@ -13,9 +13,8 @@ const Collection = () => {
     let { contractAddress } = useParams();
     // Converting contractAddress to lowercase to ensure consistency with the subgraph
     contractAddress = contractAddress.toLowerCase();
-    const { library } = useWallet();
+    // const { library } = useWallet();
     const [collectionName, setCollectionName] = useState('');
-    const [totalSupply, setTotalSupply] = useState('');
     const [listings, setListings] = useState([]);
     const navigate = useNavigate();
 
@@ -31,34 +30,27 @@ const Collection = () => {
     const { data: listingsData } = useQuery(GET_LISTINGS_FOR_NFT_ADDRESS, {
         variables: { erc721Address: contractAddress },
     });
-
     console.log("Listings Data:", listingsData);
 
-    // Fetch collection name and total supply from the blockchain
+    // Fetch collection name from the GraphQL endpoint
+    const { data: collectionNameData } = useQuery(GET_COLLECTION_NAME, {
+        variables: { id: contractAddress },
+    });
+
     useEffect(() => {
-        if (library && contractAddress) {
-            const contract = new ethers.Contract(contractAddress, ERC721Abi, library);
-            async function fetchCollectionDetails() {
-                try {
-                    console.log("Fetching collection details...");
-                    const name = await contract.name();
-                    console.log("Collection Name:", name);
-                    setCollectionName(name);
-                    // Assuming totalSupply is a method you want to call
-                    const totalSupply = await contract.totalSupply();
-                    console.log("Total Supply:", totalSupply.toString());
-                    setTotalSupply(totalSupply.toString());
-                } catch (error) {
-                    console.error("Error fetching collection details:", error);
-                }
+        if (collectionNameData && collectionNameData.collection) {
+            const name = collectionNameData.collection.name;
+            if (name) {
+                console.log("Collection Name:", name);
+                setCollectionName(name);
             }
-            fetchCollectionDetails();
+            console.log("Collection Data:", collectionNameData);
         }
-    }, [library, contractAddress]);
+    }, [collectionNameData]);
 
     useEffect(() => {
         const currentTimestamp = Math.floor(Date.now() / 1000);
-        if (listingsData && listingsData.listings && library) {
+        if (listingsData && listingsData.listings) {
             console.log("Processing listings data...");
             const fetchListingsMetadata = async () => {
                 const updatedListings = await Promise.all(
@@ -66,7 +58,7 @@ const Collection = () => {
                         .filter(listing => parseInt(listing.expireTimestamp) > currentTimestamp) // Filter out expired listings
                         .map(async (listing) => {
                             try {
-                                const nft = new Nft(168587773, contractAddress,listing.tokenId)
+                                const nft = new Nft(168587773, contractAddress, listing.tokenId)
                                 const metadata = await nft.metadata();
                                 return {
                                     ...listing,
@@ -85,7 +77,7 @@ const Collection = () => {
 
             fetchListingsMetadata();
         }
-    }, [listingsData, library, contractAddress]);
+    }, [listingsData, contractAddress]);
 
     //Handle NFT Clicks
     const handleNFTClick = (tokenId) => {
@@ -100,14 +92,12 @@ const Collection = () => {
                     <Box textAlign="right">
                         <Text fontSize="2xl" fontWeight="bold">{ethers.utils.formatEther(collectionStatsData?.collectionStats[0]?.totalVolumeTraded || "0")} ETH</Text>
                         <Text fontSize="lg" color="gray.600">Total Volume</Text>
-                        {/* Displaying total supply */}
-                        <Text fontSize="lg" color="gray.600">{totalSupply} supply</Text>
+                        {/* Description */}
                     </Box>
                 </Flex>
                 <Tabs isFitted variant="enclosed">
                     <TabList mb="1em">
                         <Tab>Listings</Tab>
-                        <Tab>Sort</Tab>
                     </TabList>
                     <TabPanels>
                         <TabPanel>
@@ -130,7 +120,7 @@ const Collection = () => {
                             </Grid>
                         </TabPanel>
                         <TabPanel>
-                            <Text>sort by price, expiration, or by activities(listed,sold) goes here...</Text>
+                            <Text>sort by price (highest to lowest, lowest to highest), ending soon ( base on expireTimestamp listing.expireTimestamp )before here...</Text>
                             {/* Future implementation for displaying sold items */}
                         </TabPanel>
                     </TabPanels>
