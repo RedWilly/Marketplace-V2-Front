@@ -110,6 +110,7 @@ const NFTDetail = () => {
                     image: nft.image(),
                     price,
                 });
+                console.log(nft.image())
             } catch (error) {
                 console.error("Failed to fetch NFT details", error);
             }

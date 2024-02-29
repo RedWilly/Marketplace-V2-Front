@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const middlewareBaseURL = 'https://marketplacev2-api.onrender.com'; // Replace with your middleware's base URL this is a running on render free for testing
+const middlewareBaseURL = 'https://rooni.site'; // Replace with your middleware's base URL this is a running on render free for testing
 
 class Nft {
     constructor(chain, collection, id) {

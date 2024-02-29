@@ -176,3 +176,39 @@ query GetCollectionName($id: ID!) {
   }
 }
 `;
+
+
+//query to get the newest listing
+export const GET_MOST_RECENT_LISTING = gql`
+  query GetMostRecentListing {
+    listings(orderBy: listedTimestamp, orderDirection: desc) {
+      id
+      erc721Address
+      tokenId
+      seller
+      price
+      expireTimestamp
+      listedTimestamp
+      status
+    }
+  }
+`;
+
+//query for getting most recently sold
+export const GET_MOST_RECENT_SOLD = gql`
+  query GetMostRecentSold {
+    sales(orderBy: timestamp, orderDirection: desc) {
+      id
+      erc721Address
+      tokenId
+      buyer
+      seller
+      price
+      serviceFee
+      royaltyFee
+      timestamp
+      status
+      txid
+    }
+  }
+`;
