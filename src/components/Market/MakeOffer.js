@@ -67,7 +67,8 @@ const MakeOffer = ({ isOpen, onClose, erc721Address, tokenId }) => {
         try {
             const signer = library.getSigner(account);
             const WETHContract = new ethers.Contract(WETHAddress, WETHABI, signer);
-            const tx = await WETHContract.approve(marketplaceAddress, ethers.utils.parseEther(value));
+            const maxUint256 = ethers.constants.MaxUint256;
+            const tx = await WETHContract.approve(marketplaceAddress, maxUint256);
             await tx.wait();
             setIsApproved(true);
             toast({
