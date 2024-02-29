@@ -13,13 +13,17 @@ import {
     FormLabel,
     Input,
     Select,
-    useToast
+    useToast,
+    Image,
+    Text,
+    Box
 } from '@chakra-ui/react';
 import MarketABI from '../../abi/market.json';
 import WETHABI from '../../abi/erc20.json';
 import { useWallet } from '../../hooks/useWallet';
 
-const MakeOffer = ({ isOpen, onClose, erc721Address, tokenId }) => {
+// Include nft in the component props
+const MakeOffer = ({ isOpen, onClose, erc721Address, tokenId, nft }) => {
     const { account, library } = useWallet();
     const marketplaceAddress = process.env.REACT_APP_MARKETPLACE_ADDRESS;
     const WETHAddress = process.env.REACT_APP_WETH_ADDRESS;
@@ -140,6 +144,11 @@ const MakeOffer = ({ isOpen, onClose, erc721Address, tokenId }) => {
                 <ModalHeader>Make an Offer</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
+                    {/* Displaying NFT Image and Name */}
+                    <Box mb={4} textAlign="center">
+                        <Image borderRadius="md" src={nft.image} alt={nft.name} boxSize="100px" objectFit="cover" m="auto" />
+                        <Text fontWeight="bold" mt={2}>{nft.name}</Text>
+                    </Box>
                     <FormControl>
                         <FormLabel>Amount in WETH</FormLabel>
                         <Input value={value} onChange={(e) => setValue(e.target.value)} placeholder="Enter amount in WETH" />

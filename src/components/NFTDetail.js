@@ -143,7 +143,14 @@ const NFTDetail = () => {
                             </Button>
                         )}
 
-                        <MakeOffer isOpen={isOfferOpen} onClose={onOfferClose} erc721Address={contractAddress} tokenId={tokenId} />
+                        {/* <MakeOffer isOpen={isOfferOpen} onClose={onOfferClose} erc721Address={contractAddress} tokenId={tokenId} /> */}
+                        <MakeOffer
+                            isOpen={isOfferOpen}
+                            onClose={onOfferClose}
+                            erc721Address={contractAddress}
+                            tokenId={tokenId}
+                            nft={{ name: nftDetails.name, image: nftDetails.image }}
+                        />
                     </GridItem>
                     <GridItem p={4}>
                         <Grid templateColumns="repeat(3, 1fr)" gap={4}>

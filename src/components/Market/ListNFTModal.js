@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Button, FormControl, FormLabel, Input, Select } from '@chakra-ui/react';
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Button, FormControl, FormLabel, Input, Select, useToast } from '@chakra-ui/react';
 import { ethers } from 'ethers';
 import ERC721ABI from '../../abi/erc721.json';
 import MarketABI from '../../abi/market.json';
 import { useWallet } from '../../hooks/useWallet';
+
 
 
 const ListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
@@ -11,6 +12,7 @@ const ListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
     const [duration, setDuration] = useState('24h');
     const marketplaceAddress = process.env.REACT_APP_MARKETPLACE_ADDRESS;
     const { account, library } = useWallet();
+    const toast = useToast();
 
     const listNFT = async () => {
         console.log("Attempting to list NFT with:", { contractAddress, tokenId, price });
@@ -61,11 +63,23 @@ const ListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
             const txList = await marketContract.listToken(contractAddress, tokenId, priceInWei, Math.floor(expiryTimestamp));
             await txList.wait();
 
-            alert('NFT listed successfully!');
-            onClose(); // Close the modal
+            toast({
+                title: 'Listing Successful',
+                description: 'Your NFT has been listed for sale.',
+                status: 'success',
+                duration: 5000,
+                isClosable: true,
+            });
+            onClose(); // Close the modal after successful listing
         } catch (error) {
             console.error('Failed to list NFT:', error);
-            alert('Error listing NFT. See console for details.');
+            toast({
+                title: 'Listing Failed',
+                description: 'Error listing NFT. See console for details.',
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
         }
     };
 

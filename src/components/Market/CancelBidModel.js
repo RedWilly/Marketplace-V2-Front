@@ -9,31 +9,51 @@ import {
     ModalCloseButton,
     Button,
     Text,
+    useToast,
 } from '@chakra-ui/react';
 import { ethers } from 'ethers';
-import MarketABI from '../../abi/market.json'; // Adjust the import path as needed
+import MarketABI from '../../abi/market.json';
 import { useWallet } from '../../hooks/useWallet';
 
-const CancelBidModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
+const DeListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
     const marketplaceAddress = process.env.REACT_APP_MARKETPLACE_ADDRESS;
     const { library } = useWallet();
+    const toast = useToast();
 
-    const cancelBid = async () => {
+    const deListNFT = async () => {
         if (!library || !contractAddress || !tokenId) {
-            alert('Please ensure you have selected a valid NFT to cancel the bid for.');
+            toast({
+                title: 'Error',
+                description: 'Please ensure you have selected a valid NFT to delist.',
+                status: 'error',
+                duration: 9000,
+                isClosable: true,
+            });
             return;
         }
 
         try {
             const marketContract = new ethers.Contract(marketplaceAddress, MarketABI, library.getSigner());
-            const tx = await marketContract.withdrawBidForToken(contractAddress, tokenId);
+            const tx = await marketContract.delistToken(contractAddress, tokenId);
             await tx.wait();
 
-            alert('Bid cancelled successfully!');
-            onClose(); // Close the modal after successful bid cancellation
+            toast({
+                title: 'NFT Delisted',
+                description: 'The NFT has been successfully delisted.',
+                status: 'success',
+                duration: 5000,
+                isClosable: true,
+            });
+            onClose(); // Close the modal after successful delisting
         } catch (error) {
-            console.error('Failed to cancel bid:', error);
-            alert('Error cancelling bid. See console for details.');
+            console.error('Failed to delist NFT:', error);
+            toast({
+                title: 'Delisting Failed',
+                description: 'Failed to delist NFT. See console for details.',
+                status: 'error',
+                duration: 9000,
+                isClosable: true,
+            });
         }
     };
 
@@ -41,14 +61,14 @@ const CancelBidModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
         <Modal isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />
             <ModalContent>
-                <ModalHeader>Cancel Bid</ModalHeader>
+                <ModalHeader>Delist NFT</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
-                    <Text>Are you sure you want to cancel your bid on this NFT?</Text>
+                    <Text>Are you sure you want to delist this NFT?</Text>
                 </ModalBody>
                 <ModalFooter>
-                    <Button colorScheme="blue" mr={3} onClick={cancelBid}>
-                        Confirm Cancel Bid
+                    <Button colorScheme="blue" mr={3} onClick={deListNFT}>
+                        Confirm Delist
                     </Button>
                     <Button variant="ghost" onClick={onClose}>Cancel</Button>
                 </ModalFooter>
@@ -57,4 +77,4 @@ const CancelBidModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
     );
 };
 
-export default CancelBidModal;
+export default DeListNFTModal;

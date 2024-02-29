@@ -9,6 +9,7 @@ import {
     ModalCloseButton,
     Button,
     Text,
+    useToast,
 } from '@chakra-ui/react';
 import { ethers } from 'ethers';
 import MarketABI from '../../abi/market.json'; // Adjust the import path as needed
@@ -17,10 +18,17 @@ import { useWallet } from '../../hooks/useWallet';
 const DeListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
     const marketplaceAddress = process.env.REACT_APP_MARKETPLACE_ADDRESS;
     const { library } = useWallet();
+    const toast = useToast();
 
     const deListNFT = async () => {
         if (!library || !contractAddress || !tokenId) {
-            alert('Please ensure you have selected a valid NFT to delist.');
+            toast({
+                title: 'Error',
+                description: 'Please ensure you have selected a valid NFT to delist.',
+                status: 'error',
+                duration: 9000,
+                isClosable: true,
+            });
             return;
         }
 
@@ -29,11 +37,23 @@ const DeListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
             const tx = await marketContract.delistToken(contractAddress, tokenId);
             await tx.wait();
 
-            alert('NFT delisted successfully!');
+            toast({
+                title: 'NFT Delisted',
+                description: 'The NFT has been successfully delisted.',
+                status: 'success',
+                duration: 5000,
+                isClosable: true,
+            });
             onClose(); // Close the modal after successful delisting
         } catch (error) {
             console.error('Failed to delist NFT:', error);
-            alert('Error delisting NFT. See console for details.');
+            toast({
+                title: 'Delisting Failed',
+                description: 'Failed to delist NFT. See console for details.',
+                status: 'error',
+                duration: 9000,
+                isClosable: true,
+            });
         }
     };
 
