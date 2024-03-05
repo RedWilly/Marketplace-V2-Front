@@ -1,17 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-    Box,
-    Text,
-    Image,
-    VStack,
-    Grid,
-    Button,
-    useDisclosure,
-    Collapse,
-    Link as ChakraLink,
-    GridItem
-} from '@chakra-ui/react';
+
+import { Grid, GridItem, Link as ChakraLink, Button, Text, Box, VStack, Collapse, Image, useDisclosure } from '@chakra-ui/react';
+
 import { ethers } from 'ethers';
 import { useQuery } from '@apollo/client';
 import { useWallet } from '../hooks/useWallet';
@@ -120,6 +111,56 @@ const NFTDetail = () => {
     }, [contractAddress, tokenId, data, isListed, active, account]);
 
 
+    const OffersTable = () => (
+        <Collapse in={isBidsOpen} animateOpacity>
+            <Grid templateColumns="repeat(5, 1fr)" gap={4} textAlign="center" marginTop="4">
+                <GridItem><Text fontWeight="bold">Price</Text></GridItem>
+                <GridItem><Text fontWeight="bold">Expires</Text></GridItem>
+                <GridItem><Text fontWeight="bold">Bidder</Text></GridItem>
+                <GridItem colSpan={2}></GridItem> {/* Adjust accordingly if you need more columns */}
+                {bidsData?.bids.map((bid, index) => (
+                    <React.Fragment key={index}>
+                        <GridItem>{ethers.utils.formatEther(bid.value)} ETH</GridItem>
+                        <GridItem>{formatExpiration(bid.expireTimestamp)}</GridItem>
+                        <GridItem>{formatAddress(bid.bidder)}</GridItem>
+                        <GridItem>
+                            {isOwner && (
+                                <Button size="sm" colorScheme="blue" onClick={() => handleSelectBid(bid)}>Accept Offer</Button>
+                            )}
+                        </GridItem>
+                    </React.Fragment>
+                ))}
+            </Grid>
+        </Collapse>
+    );
+
+    const SalesHistoryTable = () => (
+        <Collapse in={isSalesOpen} animateOpacity>
+            <Grid templateColumns="repeat(5, 1fr)" gap={4} textAlign="center" marginTop="4">
+                <GridItem><Text fontWeight="bold">Price</Text></GridItem>
+                <GridItem><Text fontWeight="bold">Seller</Text></GridItem>
+                <GridItem><Text fontWeight="bold">Buyer</Text></GridItem>
+                <GridItem><Text fontWeight="bold">Sold On</Text></GridItem>
+                <GridItem><Text fontWeight="bold">View TXID</Text></GridItem>
+                {salesData?.sales.map((sale, index) => (
+                    <React.Fragment key={index}>
+                        <GridItem>{ethers.utils.formatEther(sale.price)} ETH</GridItem>
+                        <GridItem>{formatAddress(sale.seller)}</GridItem>
+                        <GridItem>{formatAddress(sale.buyer)}</GridItem>
+                        <GridItem>{formatDate(sale.timestamp)}</GridItem>
+                        <GridItem>
+                            <ChakraLink href={`https://testnet.blastscan.io/tx/${sale.id.split('-')[0]}`} isExternal>
+                                Transaction
+                            </ChakraLink>
+                        </GridItem>
+                    </React.Fragment>
+                ))}
+            </Grid>
+        </Collapse>
+    );
+
+
+
     return (
         <VStack spacing={4} p={10} align="stretch">
             <Box>
@@ -130,6 +171,7 @@ const NFTDetail = () => {
                         {nftDetails && nftDetails.owner != null ? <Text fontSize="sm">
                             Owned by: {nftDetails.owner.substring(0, 6)}...{nftDetails.owner.substring(38)}
                         </Text> : ''}
+                        <Text>{nftDetails.price && `${nftDetails.price} ETH`}</Text>
                         <Text fontSize="lg">{nftDetails.description}</Text>
 
                         {/* Show Buy Now button only if NFT is listed and user is not the seller */}
@@ -165,25 +207,10 @@ const NFTDetail = () => {
                 </Grid>
             </Box>
 
-            {/* Existing elements */}
-            <VStack align={'stretch'}>
-                <Button onClick={onBidsToggle}>{isBidsOpen ? 'Hide Offers/Bids' : 'Show Offers/Bids'} ({bidsData ? bidsData?.bids.length : ''})</Button>
-                <Collapse in={isBidsOpen} animateOpacity>
-                    <VStack spacing={4}>
-                        {bidsData?.bids.map((bid, index) => (
-                            <Box key={index} p={4} shadow="md" borderWidth="1px">
-                                <Text>Price: {ethers.utils.formatEther(bid.value)} ETH</Text>
-                                <Text>Expires: {formatExpiration(bid.expireTimestamp)}</Text>
-                                <Text>Bidder: {formatAddress(bid.bidder)}</Text>
-                                {isOwner && (
-                                    <Button size="sm" colorScheme="blue" onClick={() => handleSelectBid(bid)}>
-                                        Accept Offer
-                                    </Button>
-                                )}
-                            </Box>
-                        ))}
-                    </VStack>
-                </Collapse>
+            {/* Offer Section */}
+            <VStack spacing={4} p={10} align="stretch">
+                <Button onClick={onBidsToggle}>{isBidsOpen ? 'Hide Offers' : 'Show Offers'}</Button>
+                <OffersTable />
                 {selectedBid && isOwner && (
                     <AcceptOffer
                         isOpen={isAcceptOfferOpen}
@@ -196,26 +223,8 @@ const NFTDetail = () => {
                 )}
 
                 {/* Sales History Section */}
-                <Button onClick={onSalesToggle}>{isSalesOpen ? 'Hide History/Sales' : 'Show History/Sales '} ({salesData ? salesData.sales.length : ''})</Button>
-                <Collapse in={isSalesOpen} animateOpacity>
-                    {salesData && salesData.sales.length > 0 ? (
-                        <VStack spacing={4} align={'stretch'}>
-                            {salesData.sales.map((sale, index) => (
-                                <Box key={index} p={4} shadow="md" borderWidth="1px">
-                                    <Text fontWeight={'bold'}>Price: {ethers.utils.formatEther(sale.price)} ETH</Text>
-                                    <Text>Seller: {formatAddress(sale.seller)}</Text>
-                                    <Text>Buyer: {formatAddress(sale.buyer)}</Text>
-                                    <Text>Sold on: {formatDate(sale.timestamp)}</Text>
-                                    <ChakraLink href={`https://testnet.blastscan.io/tx/${sale.id.split('-')[0]}`} isExternal>
-                                        View Transaction
-                                    </ChakraLink>
-                                </Box>
-                            ))}
-                        </VStack>
-                    ) : (
-                        <Text>No sales</Text>
-                    )}
-                </Collapse>
+                <Button onClick={onSalesToggle}>{isSalesOpen ? 'Hide Sales History' : 'Show Sales History'}</Button>
+                <SalesHistoryTable />
             </VStack>
         </VStack>
 

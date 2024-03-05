@@ -2,7 +2,6 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://tigransimonyan.github.io/NFT-Marketplace-UI",
   "dependencies": {
     "@apollo/client": "^3.9.5",
     "@chakra-ui/icons": "^1.0.13",
