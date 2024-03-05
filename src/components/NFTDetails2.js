@@ -182,51 +182,26 @@ const NFTDetail = () => {
             <Box>
                 <Grid spacing={8} templateAreas={`"nft traits"`} gridTemplateColumns={'400px 1fr'}>
                     <GridItem p={4}>
-                        {isListingLoading ? (
-                            <Skeleton height="350px" width="100%" />
-                        ) : (
-                            <Image src={nftDetails.image} alt={nftDetails.name} borderRadius='5px' objectFit="cover" />
-                        )}
+                        <Image src={nftDetails.image} alt={nftDetails.name} borderRadius='5px' objectFit="cover" />
+                        <Text fontSize="2xl" fontWeight="bold">{nftDetails.name}</Text>
+                        {nftDetails && nftDetails.owner != null ? <Text fontSize="sm">
+                            Owned by: {nftDetails.owner.substring(0, 6)}...{nftDetails.owner.substring(38)}
+                        </Text> : ''}
+                        <Text>{nftDetails.price && `${nftDetails.price} ETH`}</Text>
+                        <Text fontSize="lg">{nftDetails.description}</Text>
 
-                        {isListingLoading ? (
-                            <Skeleton height="20px" my="2" />
-                        ) : (
-                            <Text fontSize="2xl" fontWeight="bold">{nftDetails.name}</Text>
-                        )}
-
-                        {isListingLoading ? (
-                            <Skeleton height="15px" my="2" />
-                        ) : (
-                            nftDetails && nftDetails.owner != null && (
-                                <Text fontSize="sm">
-                                    Owned by: {nftDetails.owner.substring(0, 6)}...{nftDetails.owner.substring(38)}
-                                </Text>
-                            )
-                        )}
-
-                        {isListingLoading ? (
-                            <Skeleton height="15px" my="2" />
-                        ) : (
-                            <Text>{nftDetails.price && `${nftDetails.price} ETH`}</Text>
-                        )}
-
-                        {isListingLoading ? (
-                            <Skeleton height="10px" my="2" width="80%" />
-                        ) : (
-                            <Text fontSize="lg">{nftDetails.description}</Text>
-                        )}
-
-                        {/* Since actions like Buy Now or Make Offer depend on the NFT's state rather than its loading state, they can remain as is. */}
+                        {/* Show Buy Now button only if NFT is listed and user is not the seller */}
                         {active && nftDetails.price && isListed && !isSeller && (
                             <BuyNow erc721Address={contractAddress} tokenId={tokenId} price={ethers.utils.parseUnits(nftDetails.price, 'ether')} />
                         )}
-
-                        {active && !isOwner && (!isListed || !isSeller) && (
+                        {/* Show Make Offer button if NFT is not listed or user is not the seller */}
+                        {(active && !isOwner && (!isListed || !isSeller)) && (
                             <Button colorScheme="blue" mt="4" onClick={onOfferOpen}>
                                 Make Offer
                             </Button>
                         )}
 
+                        {/* <MakeOffer isOpen={isOfferOpen} onClose={onOfferClose} erc721Address={contractAddress} tokenId={tokenId} /> */}
                         <MakeOffer
                             isOpen={isOfferOpen}
                             onClose={onOfferClose}
@@ -235,7 +210,16 @@ const NFTDetail = () => {
                             nft={{ name: nftDetails.name, image: nftDetails.image }}
                         />
                     </GridItem>
-
+                    {/* <GridItem p={4}>
+                        <Grid templateColumns="repeat(3, 1fr)" gap={4}>
+                            {nftDetails.attributes?.map((attr, index) => (
+                                <Box key={index} p="5" shadow="md" borderWidth="1px">
+                                    <Text fontWeight="bold">{attr.trait_type}</Text>
+                                    <Text>{attr.value}</Text>
+                                </Box>
+                            ))}
+                        </Grid>
+                    </GridItem> */}
                     <GridItem p={4}>
                         <Grid templateColumns="repeat(3, 1fr)" gap={4}>
                             {isListingLoading ? (

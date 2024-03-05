@@ -235,7 +235,7 @@ const Wallet = () => {
         <TabList mb="1em">
           <Tab>Assets</Tab>
           <Tab>Listings</Tab>
-          <Tab>Bids</Tab>
+          <Tab >Bids</Tab>
         </TabList>
         <TabPanels>
           <TabPanel>
