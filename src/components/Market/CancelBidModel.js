@@ -15,7 +15,7 @@ import { ethers } from 'ethers';
 import MarketABI from '../../abi/market.json';
 import { useWallet } from '../../hooks/useWallet';
 
-const DeListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
+const CancelBidModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
     const marketplaceAddress = process.env.REACT_APP_MARKETPLACE_ADDRESS;
     const { library } = useWallet();
     const toast = useToast();
@@ -34,22 +34,22 @@ const DeListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
 
         try {
             const marketContract = new ethers.Contract(marketplaceAddress, MarketABI, library.getSigner());
-            const tx = await marketContract.delistToken(contractAddress, tokenId);
+            const tx = await marketContract.withdrawBidForToken(contractAddress, tokenId);
             await tx.wait();
 
             toast({
-                title: 'NFT Delisted',
-                description: 'The NFT has been successfully delisted.',
+                title: 'Bid Cancelled',
+                description: 'Bid cancelled successfully!',
                 status: 'success',
                 duration: 5000,
                 isClosable: true,
             });
             onClose(); // Close the modal after successful delisting
         } catch (error) {
-            console.error('Failed to delist NFT:', error);
+            console.error('Failed to Cancelled Bid:', error);
             toast({
-                title: 'Delisting Failed',
-                description: 'Failed to delist NFT. See console for details.',
+                title: 'Cancellation Failed',
+                description: 'Failed to Cancelled bid . See console for details.',
                 status: 'error',
                 duration: 9000,
                 isClosable: true,
@@ -64,11 +64,11 @@ const DeListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
                 <ModalHeader>Delist NFT</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
-                    <Text>Are you sure you want to delist this NFT?</Text>
+                    <Text>Are you sure you want to Cancel your Bid for this NFT?</Text>
                 </ModalBody>
                 <ModalFooter>
                     <Button colorScheme="blue" mr={3} onClick={deListNFT}>
-                        Confirm Delist
+                        Confirm Cancel Bid
                     </Button>
                     <Button variant="ghost" onClick={onClose}>Cancel</Button>
                 </ModalFooter>
@@ -77,4 +77,4 @@ const DeListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
     );
 };
 
-export default DeListNFTModal;
+export default CancelBidModal;
