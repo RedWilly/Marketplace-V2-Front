@@ -165,7 +165,7 @@ const NFTDetail = () => {
                         <GridItem>{formatAddress(sale.buyer)}</GridItem>
                         <GridItem>{formatDate(sale.timestamp)}</GridItem>
                         <GridItem>
-                            <ChakraLink href={`https://testnet.blastscan.io/tx/${sale.id.split('-')[0]}`} isExternal>
+                            <ChakraLink href={`https://sepolia.blastscan.io/tx/${sale.id.split('-')[0]}`} isExternal>
                                 Transaction
                             </ChakraLink>
                         </GridItem>
