@@ -105,3 +105,7 @@ input[type=checkbox]:checked::after {
   ::-webkit-scrollbar-thumb:hover {
     background: #555; 
   }
+
+  .Toastify__toast-container--top-center{
+    z-index: 999999999999 !important;
+  }

@@ -73,44 +73,27 @@ const AcceptOffer = ({ isOpen, onClose, erc721Address, tokenId, bidder, value })
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center" onClick={onClose}>
-            <div className="relative mx-auto p-5 border w-96 shadow-lg rounded-md bg-white" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center bg-black-500/80" onClick={onClose}>
+            <div className="relative mx-auto p-5 sm:px-0 w-96 shadow-lg rounded-md bg-white dark:bg-black-600 sm:w-[90%]" onClick={e => e.stopPropagation()}>
                 <div className="mt-3 text-center">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Accept Offer</h3>
+                    <h3 className="text-xl font-semibold font-Kallisto dark:text-white">Accept Offer</h3>
                     <div className="mt-2 px-7 py-3">
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-black-400 dark:text-white">
                             Are you sure you want to accept this offer?
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center justify-center p-6 border-t border-solid border-gray-200 rounded-b">
+                <div className="flex items-center justify-center mt-6 gap-3 border-t border-solid border-gray-200 rounded-b">
                     {!isApproved && (
                         <button
-                            style={{
-                                backgroundColor: 'blue',
-                                color: 'white',
-                                padding: '10px 20px',
-                                borderRadius: '5px',
-                                border: 'none',
-                                cursor: 'pointer',
-                                fontSize: '16px',
-                                marginRight: '10px'
-                            }}
+                           className='text-[12px] sm:px-6 py-1 sm:text-[10px] uppercase font-Kallisto text-white px-7 py-2 tracking-wider font-medium hover:bg-grey-100/85 dark:text-white bg-black-500 cursor-pointer hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-150 ease-in-out'
                             onClick={handleApprove}>
                             Approve
                         </button>
                     )}
                     <button
                         disabled={!isApproved}
-                        style={{
-                            backgroundColor: isApproved ? 'green' : 'grey',
-                            color: 'white',
-                            padding: '10px 20px',
-                            borderRadius: '5px',
-                            border: 'none',
-                            cursor: isApproved ? 'pointer' : 'not-allowed',
-                            fontSize: '16px',
-                        }}
+                        className='text-[12px] sm:px-6 py-1 sm:text-[10px] uppercase font-Kallisto text-white px-7 py-2 tracking-wider font-medium hover:bg-grey-100/85 dark:text-white bg-black-500 cursor-pointer hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-150 ease-in-out'
                         onClick={handleAcceptOffer}>
                         Accept Offer
                     </button>

@@ -97,7 +97,7 @@ const MakeOffer = ({ isOpen, onClose, erc721Address, tokenId, nft }) => {
 
     return (
         <>
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full bg-black-600/80" onClick={onClose}></div>
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full bg-black-500/80" onClick={onClose}></div>
             <div className="fixed top-20 left-1/4 right-1/4 bg-white dark:bg-black-600 rounded-lg shadow-xl p-6 sm:left-5 sm:right-5">
                 <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold font-Kallisto dark:text-white">Make an Offer</h2>

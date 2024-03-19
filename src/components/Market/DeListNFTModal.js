@@ -38,18 +38,18 @@ const DeListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
 
     return (
         <>
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" onClick={onClose}></div>
-            <div className="fixed inset-0 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg shadow-xl overflow-hidden max-w-sm w-full">
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full  bg-black-500/80" onClick={onClose}></div>
+            <div className="fixed inset-0 flex items-center justify-center p-4 ">
+                <div className="rounded-lg shadow-xl overflow-hidden max-w-sm w-full  bg-white dark:bg-black-600">
                     <div className="p-6">
-                        <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Delist NFT</h3>
-                        <p className="text-sm text-gray-500">Are you sure you want to delist this NFT?</p>
+                        <h3 className="text-xl font-semibold font-Kallisto dark:text-white">Delist NFT</h3>
+                        <p className="text-sm text-black-400 dark:text-white">Are you sure you want to delist this NFT?</p>
                     </div>
                     <div className="px-6 py-3 bg-gray-50 flex justify-end items-center gap-3">
-                        <button className="py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-500 hover:bg-blue-700 focus:outline-none" onClick={deListNFT}>
+                        <button className="text-[12px] sm:text-[10px] uppercase font-Kallisto text-white px-7 py-2 tracking-wider font-medium hover:bg-grey-100/85 dark:text-white bg-black-500 cursor-pointer hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-150 ease-in-out" onClick={deListNFT}>
                             Confirm Delist
                         </button>
-                        <button className="py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none" onClick={onClose}>
+                        <button className="text-[12px] sm:text-[10px] uppercase font-Kallisto text-white px-7 py-2 tracking-wider font-medium hover:bg-grey-100/85 dark:text-white bg-black-500 cursor-pointer hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-150 ease-in-out" onClick={onClose}>
                             Cancel
                         </button>
                     </div>

@@ -73,21 +73,22 @@ const ListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
 
     return (
         <>
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" onClick={onClose}></div>
-            <div className="fixed top-20 left-1/4 right-1/4 bg-white rounded-lg shadow-xl p-6">
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full bg-black-500/80" onClick={onClose}></div>
+            <div className="fixed top-20 left-1/4 right-1/4 bg-white rounded-lg shadow-xl p-6 dark:bg-black-600 sm:right-5 sm:left-5">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-medium leading-6 text-gray-900">List NFT for Sale</h3>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
+                    <h3 className="ext-xl font-semibold font-Kallisto dark:text-white">List NFT for Sale</h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-500 dark:text-white">
                         <span className="sr-only">Close</span>X
                     </button>
                 </div>
-                <div className="mb-4">
-                    <label htmlFor="price" className="block text-sm font-medium text-gray-700">Price in ETH</label>
-                    <input type="text" id="price" value={price} onChange={(e) => setPrice(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Enter price in ETH" />
+                <div className='flex gap-4'>
+                <div className="mb-4 w-[50%] flex-col flex gap-1">
+                    <label htmlFor="price" className="text-sm text-black-50 font-Kallisto dark:text-grey-100">Price in ETH</label>
+                    <input type="text" id="price" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full p-2 mb-3 text-sm bg-transparent border-[1px] border-black-50 rounded-md outline-none text-black-50 font-Kallisto dark:text-grey-100" placeholder="Enter price in ETH" />
                 </div>
-                <div className="mb-4">
-                    <label htmlFor="duration" className="block text-sm font-medium text-gray-700">Duration</label>
-                    <select id="duration" value={duration} onChange={(e) => setDuration(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                <div className="mb-4 w-[50%] flex-col flex gap-1">
+                    <label htmlFor="duration" className="text-sm text-black-50 font-Kallisto dark:text-grey-100">Duration</label>
+                    <select id="duration" value={duration} onChange={(e) => setDuration(e.target.value)} className="w-full p-2 mb-3 text-sm bg-transparent border-[1px] border-black-50 rounded-md outline-none text-black-50 font-Kallisto dark:text-grey-100">
                         <option value="24h">24 hours</option>
                         <option value="7d">7 days</option>
                         <option value="1m">1 month</option>
@@ -95,11 +96,12 @@ const ListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
                         <option value="6m">6 months</option>
                     </select>
                 </div>
+                </div>
                 <div className="flex justify-end gap-3">
-                    <button onClick={listNFT} className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-500 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <button onClick={listNFT} className="text-[12px] sm:text-[10px] uppercase font-Kallisto text-white px-7 py-2 tracking-wider font-medium hover:bg-grey-100/85 dark:text-white bg-black-500 cursor-pointer hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-150 ease-in-out'">
                         Complete Listing
                     </button>
-                    <button onClick={onClose} className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <button onClick={onClose} className="text-[12px] sm:text-[10px] uppercase font-Kallisto text-white px-7 py-2 tracking-wider font-medium hover:bg-grey-100/85 dark:text-white bg-black-500 cursor-pointer hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-150 ease-in-out'">
                         Cancel
                     </button>
                 </div>
