@@ -1,0 +1,107 @@
+@font-face {
+    font-family: 'Kallisto';
+    src: url('./font/Kallisto Thin.otf');
+    font-weight: 300;
+}
+@font-face {
+    font-family: 'Kallisto';
+    src: url('./font/Kallisto Light.otf');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: 'Kallisto';
+    src: url('./font/Kallisto Medium.otf');
+    font-weight: 500;
+}
+
+@font-face {
+    font-family: 'Kallisto';
+    src: url('./font/Kallisto Heavy.otf');
+    font-weight: bold; /* or 700 */
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.card:hover> a >img{
+    scale: 1.1;
+}
+
+.card:hover> .div{
+    bottom: 0px;
+}
+
+
+.breadcramps > .active{
+    color: #0401f6 !important;
+}
+
+.info:hover ~ div{
+    opacity: 1;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hide the default checkbox */
+input[type=checkbox] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #555;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+}
+
+/* Style the custom checkbox when checked */
+input[type=checkbox]:checked {
+    background-color: #0401f6; /* Change background color when checked */
+}
+
+/* Create the checkmark */
+input[type=checkbox]::after {
+    content: "\2713"; /* Unicode character for checkmark */
+    font-size: 14px; /* Adjust size of the checkmark */
+    color: #fff; /* Color of the checkmark */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none; /* Initially hide the checkmark */
+}
+
+/* Show the checkmark when checkbox is checked */
+input[type=checkbox]:checked::after {
+    display: block;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+  }
+  
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: #565656; 
+    border-radius: 10px;
+  }
+   
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #343434; 
+    border-radius: 10px;
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555; 
+  }
