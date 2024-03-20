@@ -43,7 +43,7 @@ function Navbar() {
 
   return (
     <div className='fixed top-0 left-0 w-full z-[9999999] flex justify-center items-center dark:bg-black-600 bg-grey-10'>
-      <div className='dark:bg-black-600 bg-grey-10  sm:px-5 w-[1257px] sm:w-full py-2.5 flex justify-between items-center '>
+      <div className='dark:bg-black-600 bg-grey-10  sm:px-5 w-[1257px] md:w-[95%] sm:w-full py-2.5 flex justify-between items-center '>
         <div className='flex gap-16 sm:gap-2 sm:justify-between sm:items-center sm:w-full'>
           <Link to='/' className='z-20' onClick={() => setDrawer(false)}>
             <img src={require('../assets/logo.034ef726.png')} className='w-10 sm:w-8' />
@@ -51,7 +51,7 @@ function Navbar() {
 
           <span className='z-20 rounded-md border-grey-50 py-1 px-2 sm:gap-2 gap-3 bg-white border-[1px] flex justify-start items-center dark:bg-black-500'>
             <CiSearch className='text-black-50 text-2xl sm:text-lg' />
-            <input type='text' className='outline-none text-black-50 bg-transparent sm:text-[11px] w-[350px] sm:w-[180px] font-Kallisto text-sm font-medium tracking-wider' placeholder='NFTs, collections and users' />
+            <input type='text' className='outline-none text-black-50 bg-transparent sm:text-[11px] w-[350px] sm:w-[150px] font-Kallisto text-sm font-medium tracking-wider' placeholder='NFTs, collections and users' />
           </span>
 
           <HiMiniBars3CenterLeft className='text-black-400 dark:text-white text-[30px] hidden sm:flex' onClick={() => setDrawer(true)} />

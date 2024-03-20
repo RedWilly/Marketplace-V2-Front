@@ -111,8 +111,8 @@ function Collection() {
       <img className='w-full h-[400px] sm:h-[250px] object-cover z-0' src={collectionDetails?.coverImage} alt="Collection Cover" />
       {/* <img className='w-full h-[400px] sm:h-[250px] object-cover z-0' src={collectionDetails?.coverImage || require("../assets/fallback_cover.png")} alt="Collection Cover" /> */}
 
-      <div className='flex justify-center items-center -mt-20 z-30 relative sm:px-7 sm:-mt-14'>
-        <div className='w-[1257px] sm:w-full'>
+      <div className='flex justify-center items-center -mt-20 z-30 relative sm:px-5 sm:-mt-14'>
+        <div className='w-[1257px] sm:w-full md:w-[95%]'>
           <div className='w-[160px] h-[160px] sm:w-[120px] sm:h-[120px] bg-white rounded-lg dark:bg-black-500 p-2 '>
             <img className='w-full h-full object-cover rounded-lg' src={collectionDetails?.image || require("../assets/IMG/pfp_not_found.png")} alt="Profile PFP" />
           </div>
@@ -186,7 +186,7 @@ function Collection() {
 
 
           <div className='flex justify-center items-start'>
-            <div className='w-[1257px] overflow-hidden'>
+            <div className='w-[1257px] overflow-hidden md:w-[95%]'>
               <div className={`mt-6 flex justify-center items-start gap-9`}>
                 {sidebar && <span className='w-[287px] sm:w-full sm:top-[45px] overflow-hidden sm:fixed sm:z-50 sm:h-screen'>
                   <div className='relative z-30 border-[1px]  rounded-md bg-white dark:bg-transparent sm:dark:bg-black-600 border-grey-50'>
