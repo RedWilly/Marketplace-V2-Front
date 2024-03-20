@@ -24,6 +24,7 @@ import whitelist from '../components/whitelist';
 
 function Home() {
 
+  //subgraph sold and listed
   const { data: recentListingsData } = useQuery(GET_MOST_RECENT_LISTING);
   const { data: recentSalesData } = useQuery(GET_MOST_RECENT_SOLD);
 
@@ -103,11 +104,11 @@ function Home() {
     <div className='flex justify-center items-center flex-col w-full py-20 px-20 sm:px-4 sm:pb-10'>
       <div className='w-[1257px] sm:w-[95%]'>
 
-        <h1 className='text-black-400 font-Kallisto font-semibold text-[40px] text-center dark:text-black-50 tracking-wider sm:text-sm'>The Leading XRPL NFT Marketplace</h1>
+        <h1 className='text-black-400 font-Kallisto font-semibold text-[40px] text-center dark:text-black-50 tracking-wider sm:text-sm'>The Leading NFT Marketplace</h1>
         <h1 className='text-black-50 font-Kallisto font-medium text-xl text-center dark:text-white sm:text-[12px]'>Buy, Sell, Mint and Trade Non-Fungible Digital Assets</h1>
 
         {/* <Slides /> */}
-
+        {/* 
         <div className="slider-container w-[1280px] mt-4 sm:mt-0 sm:w-full sm:px-0">
           <Slider {...settings}>
             {[1, 1, 11, 1, 1, 1,].map((s, index) => {
@@ -129,7 +130,7 @@ function Home() {
               </Link>
             })}
           </Slider>
-        </div>
+        </div> */}
 
 
         <div className='bg-grey-50 px-10 py-8 flex sm:py-4 sm:px-5 sm:gap-5 justify-between items-center w-full mt-8 sm:mt-0 rounded-lg sm:overflow-x-scroll'>
@@ -200,7 +201,7 @@ function Home() {
                 <div className='flex justify-between items-center gap-20 mb-2'>
                   <p className='text-[11px] sm:text-[10px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left w-[65%] sm:w-[55%]'>COLLECTION</p>
                   <div className='flex justify-start gap-10 items-center w-[35%] sm:w-[45%] sm:gap-7'>
-                    <p className='text-[11px] sm:text-[10px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left'>FLOOR</p>
+                    {/* <p className='text-[11px] sm:text-[10px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left'>FLOOR</p> */}
                     <p className='text-[11px] sm:text-[10px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left'>VOLUME</p>
                   </div>
                 </div>
@@ -213,7 +214,7 @@ function Home() {
                       <p className='text-sm uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left sm:text-[12px]'>{collection.name}</p>
                     </div>
                     <div className='flex justify-start gap-10 items-center w-[30%] sm:w-[35%] sm:gap-8'>
-                      <p className='text-sm sm:text-[10px] uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left'>$ {collection.floor || 'N/A'}</p>
+                      {/* <p className='text-sm sm:text-[10px] uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left'>$ {collection.floor || 'N/A'}</p> */}
                       <p className='text-sm sm:text-[10px] uppercase font-Kallisto font-semibold text-black-400 dark:text-grey-100 text-left'>$ {collection.volume || 'N/A'}</p>
                     </div>
                   </Link>
@@ -230,14 +231,14 @@ function Home() {
                 </div>
 
                 {secondHalfCollections?.map((collection, index) => {
-                  return <Link to={`/collection/${0}`} key={index} className='flex justify-between py-4 px-2 sm:py-3 hover:bg-grey-100/10 rounded-md'>
+                  return <Link to={`/collection/${collection.address}`} key={index} className='flex justify-between py-4 px-2 sm:py-3 hover:bg-grey-100/10 rounded-md'>
                     <div className='flex justify-start items-center gap-3 sm:gap-2 w-[65%]  sm:w-[60%]'>
                       <p className='text-[10px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left'>{collection.index}</p>
                       <img className='w-[60px] h-[60px] sm:w-[40px] sm:h-[40px] rounded-lg object-cover' src={collection.image} alt={collection.name} />
                       <p className='text-sm uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left sm:text-[12px]'>{collection.name}</p>
                     </div>
                     <div className='flex justify-start gap-10 items-center w-[30%] sm:w-[35%] sm:gap-8'>
-                      <p className='text-sm sm:text-[10px] uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left'>$ 320</p>
+                      {/* <p className='text-sm sm:text-[10px] uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left'>$ 320</p> */}
                       <p className='text-sm sm:text-[10px] uppercase font-Kallisto font-semibold text-black-400 dark:text-grey-100 text-left'>$ 3410</p>
                     </div>
                   </Link>

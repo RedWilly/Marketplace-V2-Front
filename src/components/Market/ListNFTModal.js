@@ -4,27 +4,31 @@ import ERC721ABI from '../../abi/erc721.json';
 import MarketABI from '../../abi/market.json';
 import { useWallet } from '../../hooks/useWallet';
 
+import {
+    useToast
+} from '@chakra-ui/react';
+
 const ListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
     const [price, setPrice] = useState('');
     const [duration, setDuration] = useState('24h');
     const marketplaceAddress = process.env.REACT_APP_MARKETPLACE_ADDRESS;
     const { account, library } = useWallet();
-
-    // const showToast = (message, status) => {
-    //     // toast ?.
-    //     console.log(`${status}: ${message}`);
-    // };
-    const showToast = (message) => {
-        alert(message);
-    };
+    const toast = useToast();
+    const [isLoading, setIsLoading] = useState(false); // State to track loading
 
     const listNFT = async () => {
-        console.log("Attempting to list NFT with:", { contractAddress, tokenId, price });
-
-        if (!price || !duration) {
-            showToast('Please fill in all fields and ensure you have a valid contract address and token ID.', 'error');
+        if (!price || !duration || !account || !library) {
+            toast({
+                title: 'Error',
+                description: 'Please ensure you have entered a valid price and duration.',
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
             return;
         }
+
+        setIsLoading(true); // Set loading state to true when listing NFT
 
         const erc721Contract = new ethers.Contract(contractAddress, ERC721ABI, library.getSigner());
         const marketContract = new ethers.Contract(marketplaceAddress, MarketABI, library.getSigner());
@@ -61,11 +65,25 @@ const ListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
             const txList = await marketContract.listToken(contractAddress, tokenId, priceInWei, Math.floor(expiryTimestamp));
             await txList.wait();
 
-            showToast('Your NFT has been listed for sale.', 'success');
+            toast({
+                title: 'Listing Successful',
+                description: 'Your NFT has been successfully listed.',
+                status: 'success',
+                duration: 5000,
+                isClosable: true,
+            });
             onClose();
         } catch (error) {
             console.error('Failed to list NFT:', error);
-            showToast('Error listing NFT. See console for details.', 'error');
+            toast({
+                title: 'Listing Failed',
+                description: 'Failed to list NFT. Please check the console for details.',
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+        } finally {
+            setIsLoading(false); // Set loading state to false after listing completes or fails
         }
     };
 
@@ -82,26 +100,26 @@ const ListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
                     </button>
                 </div>
                 <div className='flex gap-4'>
-                <div className="mb-4 w-[50%] flex-col flex gap-1">
-                    <label htmlFor="price" className="text-sm text-black-50 font-Kallisto dark:text-grey-100">Price in ETH</label>
-                    <input type="text" id="price" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full p-2 mb-3 text-sm bg-transparent border-[1px] border-black-50 rounded-md outline-none text-black-50 font-Kallisto dark:text-grey-100" placeholder="Enter price in ETH" />
-                </div>
-                <div className="mb-4 w-[50%] flex-col flex gap-1">
-                    <label htmlFor="duration" className="text-sm text-black-50 font-Kallisto dark:text-grey-100">Duration</label>
-                    <select id="duration" value={duration} onChange={(e) => setDuration(e.target.value)} className="w-full p-2 mb-3 text-sm bg-transparent border-[1px] border-black-50 rounded-md outline-none text-black-50 font-Kallisto dark:text-grey-100">
-                        <option value="24h">24 hours</option>
-                        <option value="7d">7 days</option>
-                        <option value="1m">1 month</option>
-                        <option value="3m">3 months</option>
-                        <option value="6m">6 months</option>
-                    </select>
-                </div>
+                    <div className="mb-4 w-[50%] flex-col flex gap-1">
+                        <label htmlFor="price" className="text-sm text-black-50 font-Kallisto dark:text-grey-100">Price in ETH</label>
+                        <input type="text" id="price" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full p-2 mb-3 text-sm bg-transparent border-[1px] border-black-50 rounded-md outline-none text-black-50 font-Kallisto dark:text-grey-100" placeholder="Enter price in ETH" />
+                    </div>
+                    <div className="mb-4 w-[50%] flex-col flex gap-1">
+                        <label htmlFor="duration" className="text-sm text-black-50 font-Kallisto dark:text-grey-100">Duration</label>
+                        <select id="duration" value={duration} onChange={(e) => setDuration(e.target.value)} className="w-full p-2 mb-3 text-sm bg-transparent border-[1px] border-black-50 rounded-md outline-none text-black-50 font-Kallisto dark:text-grey-100">
+                            <option value="24h">24 hours</option>
+                            <option value="7d">7 days</option>
+                            <option value="1m">1 month</option>
+                            <option value="3m">3 months</option>
+                            <option value="6m">6 months</option>
+                        </select>
+                    </div>
                 </div>
                 <div className="flex justify-end gap-3">
-                    <button onClick={listNFT} className="text-[12px] sm:text-[10px] uppercase font-Kallisto text-white px-7 py-2 tracking-wider font-medium hover:bg-grey-100/85 dark:text-white bg-black-500 cursor-pointer hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-150 ease-in-out'">
-                        Complete Listing
+                    <button onClick={listNFT} className="text-[12px] sm:text-[10px] uppercase font-Kallisto text-white px-7 py-2 tracking-wider font-medium hover:bg-grey-100/85 dark:text-white bg-black-500 cursor-pointer hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-150 ease-in-out">
+                        {isLoading ? 'Loading...' : 'Complete Listing'}
                     </button>
-                    <button onClick={onClose} className="text-[12px] sm:text-[10px] uppercase font-Kallisto text-white px-7 py-2 tracking-wider font-medium hover:bg-grey-100/85 dark:text-white bg-black-500 cursor-pointer hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-150 ease-in-out'">
+                    <button onClick={onClose} className="text-[12px] sm:text-[10px] uppercase font-Kallisto text-white px-7 py-2 tracking-wider font-medium hover:bg-grey-100/85 dark:text-white bg-black-500 cursor-pointer hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-150 ease-in-out">
                         Cancel
                     </button>
                 </div>

@@ -1,33 +1,53 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ethers } from 'ethers';
 import MarketABI from '../../abi/market.json'; // Ensure this path is correct
 import { useWallet } from '../../hooks/useWallet';
+import {
+    useToast
+} from '@chakra-ui/react';
 
 const CancelBidModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
     const marketplaceAddress = process.env.REACT_APP_MARKETPLACE_ADDRESS;
     const { library } = useWallet();
-
-    const showToast = (message) => {
-        alert(message);
-    };
+    const toast = useToast();
+    const [isLoading, setIsLoading] = useState(false);
 
     const cancelBid = async () => {
-        if (!library || !contractAddress || !tokenId) {
-            showToast('Please ensure you have selected a valid NFT to cancel the bid for.', 'error');
-            return;
-        }
+        setIsLoading(true);
+        return new Promise(async (resolve, reject) => {
+            if (!library || !contractAddress || !tokenId) {
+                reject('Invalid input data');
+                return;
+            }
 
-        try {
-            const marketContract = new ethers.Contract(marketplaceAddress, MarketABI, library.getSigner());
-            const tx = await marketContract.withdrawBidForToken(contractAddress, tokenId);
-            await tx.wait();
+            try {
+                const marketContract = new ethers.Contract(marketplaceAddress, MarketABI, library.getSigner());
+                const tx = await marketContract.withdrawBidForToken(contractAddress, tokenId);
+                await tx.wait();
 
-            showToast('Bid cancelled successfully!', 'success');
-            onClose(); // Close the modal after successful cancellation
-        } catch (error) {
-            console.error('Failed to cancel bid:', error);
-            showToast('Failed to cancel bid. See console for details.', 'error');
-        }
+                toast({
+                    title: 'Bid Cancelled',
+                    description: 'Bid cancelled successfully!',
+                    status: 'success',
+                    duration: 5000,
+                    isClosable: true,
+                });
+                setIsLoading(false);
+                onClose(); // Close the modal after successful cancellation
+                resolve();
+            } catch (error) {
+                console.error('Failed to cancel bid:', error);
+                toast({
+                    title: 'Cancellation Failed',
+                    description: 'Failed to Cancelled bid . Bid might have been expired.',
+                    status: 'error',
+                    duration: 9000,
+                    isClosable: true,
+                });
+                setIsLoading(false);
+                reject(error);
+            }
+        });
     };
 
     if (!isOpen) return null;
@@ -42,8 +62,8 @@ const CancelBidModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
                         <p className="text-sm text-black-400 dark:text-white">Are you sure you want to cancel your bid for this NFT?</p>
                     </div>
                     <div className="bg-gray-50 flex justify-end items-center gap-3">
-                        <button className="text-[12px] sm:px-6 py-1 sm:text-[10px] uppercase font-Kallisto text-white px-7 py-2 tracking-wider font-medium hover:bg-grey-100/85 dark:text-white bg-black-500 cursor-pointer hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-150 ease-in-out" onClick={cancelBid}>
-                            Confirm Cancel Bid
+                        <button className="text-[12px] sm:px-6 py-1 sm:text-[10px] uppercase font-Kallisto text-white px-7 py-2 tracking-wider font-medium hover:bg-grey-100/85 dark:text-white bg-black-500 cursor-pointer hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-150 ease-in-out" onClick={() => cancelBid().catch(console.error)}>
+                            {isLoading ? 'Canceling...' : 'Confirm Cancel Bid'}
                         </button>
                         <button className="text-[12px] sm:text-[10px] uppercase font-Kallisto text-white px-7 py-2 tracking-wider font-medium hover:bg-grey-100/85 dark:text-white bg-black-500 cursor-pointer hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-150 ease-in-out" onClick={onClose}>
                             Cancel

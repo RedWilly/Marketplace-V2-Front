@@ -4,7 +4,10 @@ import MarketABI from '../../abi/market.json';
 import WETHABI from '../../abi/erc20.json';
 import { useWallet } from '../../hooks/useWallet';
 
-// Include nft in the component props
+import {
+    useToast
+} from '@chakra-ui/react';
+
 const MakeOffer = ({ isOpen, onClose, erc721Address, tokenId, nft }) => {
     const { account, library } = useWallet();
     const marketplaceAddress = process.env.REACT_APP_MARKETPLACE_ADDRESS;
@@ -12,11 +15,9 @@ const MakeOffer = ({ isOpen, onClose, erc721Address, tokenId, nft }) => {
     const [value, setValue] = useState('');
     const [duration, setDuration] = useState('24h');
     const [isApproved, setIsApproved] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const toast = useToast();
 
-    // Function to display toast messages
-    const showToast = (message, status) => {
-        alert(`${status}: ${message}`);
-    };
 
     useEffect(() => {
         const checkAllowance = async () => {
@@ -28,6 +29,72 @@ const MakeOffer = ({ isOpen, onClose, erc721Address, tokenId, nft }) => {
         };
         checkAllowance();
     }, [account, library, value, WETHAddress, marketplaceAddress]);
+
+
+    const handleApprove = async () => {
+        setIsLoading(true);
+        try {
+            const signer = library.getSigner(account);
+            const WETHContract = new ethers.Contract(WETHAddress, WETHABI, signer);
+            const maxUint256 = ethers.constants.MaxUint256;
+            const tx = await WETHContract.approve(marketplaceAddress, maxUint256);
+            await tx.wait();
+            setIsApproved(true);
+            setIsLoading(false);
+            toast({
+                title: "Approval successful",
+                description: "You can now make an offer.",
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+            });
+        } catch (error) {
+            console.error('Approval failed:', error);
+            setIsLoading(false);
+            toast({
+                title: "Approval failed",
+                description: "See console for more details.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
+
+    const handleSubmitOffer = async () => {
+        setIsLoading(true);
+        try {
+            const signer = library.getSigner(account);
+            const marketContract = new ethers.Contract(marketplaceAddress, MarketABI, signer);
+            const expireTimestamp = calculateExpiryTimestamp();
+            const tx = await marketContract.enterBidForToken(
+                erc721Address,
+                tokenId,
+                ethers.utils.parseEther(value),
+                expireTimestamp
+            );
+            await tx.wait();
+            onClose(); // Close the modal
+            setIsLoading(false);
+            toast({
+                title: "Offer submitted successfully",
+                description: "Your offer has been placed.",
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+            });
+        } catch (error) {
+            console.error('Offer submission failed:', error);
+            setIsLoading(false);
+            toast({
+                title: "Offer failed",
+                description: "See console for more details.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
 
     const calculateExpiryTimestamp = () => {
         let secondsToAdd;
@@ -51,46 +118,6 @@ const MakeOffer = ({ isOpen, onClose, erc721Address, tokenId, nft }) => {
                 secondsToAdd = 24 * 60 * 60; // Default to 24 hours
         }
         return Math.floor(Date.now() / 1000) + secondsToAdd;
-    };
-
-    const handleApprove = async () => {
-        try {
-            const signer = library.getSigner(account);
-            const WETHContract = new ethers.Contract(WETHAddress, WETHABI, signer);
-            const maxUint256 = ethers.constants.MaxUint256;
-            const tx = await WETHContract.approve(marketplaceAddress, maxUint256);
-            await tx.wait();
-            setIsApproved(true);
-            showToast("Approval successful. You can now make an offer.", "success");
-        } catch (error) {
-            console.error('Approval failed:', error);
-            showToast("Approval failed. See console for more details.", "error");
-        }
-    };
-
-    const handleSubmitOffer = async () => {
-        if (!isApproved) {
-            showToast("Please approve before making an offer.", "warning");
-            return;
-        }
-
-        try {
-            const signer = library.getSigner(account);
-            const marketContract = new ethers.Contract(marketplaceAddress, MarketABI, signer);
-            const expireTimestamp = calculateExpiryTimestamp();
-            const tx = await marketContract.enterBidForToken(
-                erc721Address,
-                tokenId,
-                ethers.utils.parseEther(value),
-                expireTimestamp
-            );
-            await tx.wait();
-            onClose(); // Close the modal
-            showToast("Your offer has been placed successfully.", "success");
-        } catch (error) {
-            console.error('Offer submission failed:', error);
-            showToast("Offer submission failed. See console for more details.", "error");
-        }
     };
 
     if (!isOpen) return null;
@@ -129,21 +156,21 @@ const MakeOffer = ({ isOpen, onClose, erc721Address, tokenId, nft }) => {
                             onClick={handleApprove}
                             className='text-[12px] sm:text-[10px] uppercase font-Kallisto text-white px-7 py-2 tracking-wider font-medium hover:bg-grey-100/85 dark:text-white bg-black-500 cursor-pointer hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-150 ease-in-out'
                         >
-                            Approve
+                            {isLoading ? 'Loading...' : 'Approve'}
                         </button>
                     )}
                     <button
                         onClick={handleSubmitOffer}
                         className='text-[12px] sm:text-[10px] uppercase font-Kallisto text-white px-7 py-2 tracking-wider font-medium hover:bg-grey-100/85 dark:text-white bg-black-500 cursor-pointer hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-150 ease-in-out'
+                        disabled={isLoading || !isApproved} // Disable the button if loading or not approved
                     >
-                        Confirm Offer
+                        {isLoading ? 'Loading...' : 'Confirm Offer'}
                     </button>
                 </div>
-
-
             </div>
         </>
     );
 };
 
 export default MakeOffer;
+
