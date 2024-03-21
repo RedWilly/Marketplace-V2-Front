@@ -43,7 +43,8 @@ function Home() {
             image: nft.image(),
             //price: ethers.utils.formatEther(listing.price)
             displayPrice: ethers.utils.formatEther(listing.price), // Price for display
-            price: listing.price // Original price in wei for transactions
+            price: listing.price, // Original price in wei for transactions
+            expired: (Date.now() / 1000) > listing.expireTimestamp
           };
         }));
         setRecentListings(listingsWithMetadata);
@@ -67,7 +68,7 @@ function Home() {
         }));
         setRecentSales(salesWithMetadata);
       };
-      fetchSalesMetadata();
+      fetchSalesMetadata().then(() => {});
     }
   }, [recentSalesData]);
 
@@ -272,17 +273,18 @@ function Home() {
 
                   </div>
                 })} */}
-                {recentListings.slice(0, 5).map((recentListings, index) => {
+                {recentListings.slice(0, 5).map((recentListing, index) => {
+                  if(recentListing.expired) return
                   return (
                     <div key={index} className='flex justify-between py-4 px-2 sm:py-3 hover:bg-grey-100/10 rounded-md'>
                       <div className='flex justify-start items-center gap-3 sm:gap-2 w-[65%] sm:w-[60%]'>
                         <p className='text-[10px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left'>{index + 1}</p>
-                        <img className='w-[60px] h-[60px] sm:w-[40px] sm:h-[40px] rounded-lg object-cover' src={recentListings.image} alt={recentListings.name} />
+                        <img className='w-[60px] h-[60px] sm:w-[40px] sm:h-[40px] rounded-lg object-cover' src={recentListing.image} alt={recentListing.name} />
                         <div className='flex flex-col gap-2'>
-                          <p className='text-sm uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left sm:text-[12px]'>{recentListings.name}</p>
+                          <p className='text-sm uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left sm:text-[12px]'>{recentListing.name}</p>
                           <div className='text-[12px] uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left sm:text-[12px] flex gap-1 items-center'>
                             <img src={require('../assets/logo/eth.png')} className='w-5' alt="ETH Logo" />
-                            {recentListings.displayPrice}
+                            {recentListing.displayPrice}
                           </div>
                         </div>
                       </div>

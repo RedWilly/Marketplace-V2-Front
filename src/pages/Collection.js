@@ -71,39 +71,39 @@ function Collection() {
     }
   }, [contractAddress]);
 
-  //fetch all active listing image metadata using the util/nft
-  useEffect(() => {
+  const fetchListingsMetadata = async () => {
     const currentTimestamp = Math.floor(Date.now() / 1000);
     if (listingsData && listingsData.listings) {
       console.log("Processing listings data...");
-      const fetchListingsMetadata = async () => {
-        const updatedListings = await Promise.all(
+      const updatedListings = await Promise.all(
           listingsData.listings
-            .filter(listing => parseInt(listing.expireTimestamp) > currentTimestamp) // Filter out expired listings
-            .map(async (listing) => {
-              try {
-                const nft = new Nft(168587773, contractAddress, listing.tokenId)
-                const metadata = await nft.metadata();
-                console.log("Fetched Metadata: ", metadata);
-                return {
-                  ...listing,
-                  image: nft.image(),
-                  name: metadata.name,
-                };
-              } catch (error) {
-                console.error("Error fetching token URI for listing:", listing, error);
-                return null;
-              }
-            })
-        );
-        console.log("Updated Listings with Metadata:", updatedListings);
-        const validListings = updatedListings.filter(listing => listing !== null); // Filter out null values from failed metadata fetches
-        setListings(validListings);
-        setNftCount(validListings.length); // Update the count of NFTs
-      };
-
-      fetchListingsMetadata();
+              .filter(listing => parseInt(listing.expireTimestamp) > currentTimestamp) // Filter out expired listings
+              .map(async (listing) => {
+                try {
+                  const nft = new Nft(168587773, contractAddress, listing.tokenId)
+                  const metadata = await nft.metadata();
+                  console.log("Fetched Metadata: ", metadata);
+                  return {
+                    ...listing,
+                    image: nft.image(),
+                    name: metadata.name,
+                  };
+                } catch (error) {
+                  console.error("Error fetching token URI for listing:", listing, error);
+                  return null;
+                }
+              })
+      );
+      console.log("Updated Listings with Metadata:", updatedListings);
+      const validListings = updatedListings.filter(listing => listing !== null); // Filter out null values from failed metadata fetches
+      setListings(validListings);
+      setNftCount(validListings.length); // Update the count of NFTs
     }
+  };
+
+  //fetch all active listing image metadata using the util/nft
+  useEffect(() => {
+    fetchListingsMetadata().then(() => {})
   }, [listingsData, contractAddress]);
 
   return (
@@ -291,6 +291,9 @@ function Collection() {
                               tokenId={listing.tokenId}
                               price={listing.price}
                               className='text-sm font-Kallisto font-medium uppercase text-center text-white/75 tracking-wider bg-blue-100 w-full py-2 absolute div -bottom-20 cursor-pointer transition-all ease-linear duration-250'
+                              onSuccess={() => {
+                                fetchListingsMetadata().then(() => {})
+                              }}
                             />
                           </div>
                         );

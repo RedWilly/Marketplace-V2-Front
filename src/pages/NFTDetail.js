@@ -46,15 +46,15 @@ function NFTDetail() {
 
 
   //subgraph and data fetching
-  const { data, loading: isListingLoading } = useQuery(GET_ACTIVE_LISTING_BY_NFT, {
+  const { data, refetch: refetchActiveListings, loading: isListingLoading } = useQuery(GET_ACTIVE_LISTING_BY_NFT, {
     variables: { erc721Address: contractAddress, tokenId },
   });
 
-  const { data: bidsData } = useQuery(GET_ACTIVE_BIDS_FOR_NFT, {
+  const { data: bidsData, refetch: refetchActiveBids } = useQuery(GET_ACTIVE_BIDS_FOR_NFT, {
     variables: { erc721Address: contractAddress, tokenId },
   });
 
-  const { data: salesData } = useQuery(GET_ALL_SOLD_FOR_NFT, {
+  const { data: salesData, refetch: refetchSalesData } = useQuery(GET_ALL_SOLD_FOR_NFT, {
     variables: { erc721Address: contractAddress, tokenId },
   });
 
@@ -149,7 +149,6 @@ function NFTDetail() {
           image: nft.image(),
           price,
         });
-        console.log(nft.image())
       } catch (error) {
         console.error("Failed to fetch NFT details", error);
       }
@@ -158,6 +157,13 @@ function NFTDetail() {
     fetchNFTDetails();
   }, [contractAddress, tokenId, data, isListed, active, account]);
 
+  const nftStateUpdated = async function () {
+    console.log('Nft state updated')
+    // Refetch Graph data
+    refetchSalesData().then(() => {})
+    refetchActiveListings().then(() => {})
+    refetchActiveBids().then(() => {})
+  }
 
   return (
     <div className='flex justify-between items-start gap-8 sm:gap-5 py-20 sm:py-16 px-28 sm:px-5 sm:pb-10 sm:flex-col-reverse'>
@@ -240,6 +246,11 @@ function NFTDetail() {
               tokenId={tokenId}
               price={ethers.utils.parseUnits(nftDetails.price, 'ether')}
               className='mt-3 sm:mt-1 sm:text-[10px] bg-black px-11 py-[10px] bg-black-400 dark:bg-black-500 rounded-[4px] text-[12px] uppercase font-Kallisto font-medium tracking-widest text-white cursor-pointer outline-none hover:text-black-400 hover:bg-grey-100/20 hover:text-black transition-all ease-linear duration-150 dark:hover:text-white dark:hover:bg-grey-100'
+              onSuccess={() => {
+                setTimeout( () => {
+                  nftStateUpdated().then(() => {})
+                }, 500);
+              }}
             />
           )}
           {/* Make an Offer Button */}
@@ -269,7 +280,12 @@ function NFTDetail() {
           )}
           <DeListNFTModal
             isOpen={isCancelBidModalOpen}
-            onClose={() => setIsCancelBidModalOpen(false)}
+            onClose={() => {
+              setIsCancelBidModalOpen(false)
+              setTimeout( () => {
+                nftStateUpdated().then(() => { })
+              }, 500)
+            }}
             contractAddress={contractAddress}
             tokenId={tokenId}
           />
@@ -284,7 +300,12 @@ function NFTDetail() {
           )}
           <ListNFTModal
             isOpen={isListModalOpen}
-            onClose={() => setIsListModalOpen(false)}
+            onClose={() => {
+              setIsListModalOpen(false)
+              setTimeout( () => {
+                nftStateUpdated().then(() => {})
+              }, 500);
+            } }
             contractAddress={contractAddress}
             tokenId={tokenId}
           />
@@ -350,6 +371,11 @@ function NFTDetail() {
                           <AcceptOffer
                             isOpen={isAcceptOfferOpen}
                             onClose={onAcceptOfferClose}
+                            onAccepted={() => {
+                              setTimeout( () => {
+                                nftStateUpdated().then(() => { })
+                              }, 500)
+                            }}
                             erc721Address={selectedBid.erc721Address}
                             tokenId={tokenId}
                             bidder={selectedBid.bidder}

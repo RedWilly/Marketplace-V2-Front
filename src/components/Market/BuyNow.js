@@ -7,7 +7,7 @@ import {
     useToast
 } from '@chakra-ui/react';
 
-const BuyNow = ({ erc721Address, tokenId, price, className }) => {
+const BuyNow = ({ erc721Address, tokenId, price, className, onSuccess }) => {
     const { account, library } = useWallet();
     const marketplaceAddress = process.env.REACT_APP_MARKETPLACE_ADDRESS;
     const toast = useToast();
@@ -40,6 +40,9 @@ const BuyNow = ({ erc721Address, tokenId, price, className }) => {
                 duration: 5000,
                 isClosable: true,
             });
+            if(onSuccess) {
+                onSuccess()
+            }
         } catch (error) {
             console.error('Transaction failed:', error);
             toast({

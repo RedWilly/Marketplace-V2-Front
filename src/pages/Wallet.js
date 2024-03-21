@@ -19,9 +19,6 @@ import CancelBidModal from '../components/Market/CancelBidModel';
 import DeListNFTModal from '../components/Market/DeListNFTModal';
 import AcceptOffer from '../components/Market/AcceptOffer';
 
-
-
-
 function Wallet() {
     const [state, setState] = useState(0)
     const { account, library } = useWallet();
@@ -39,9 +36,6 @@ function Wallet() {
     const [selectedNFTForBidCancel, setSelectedNFTForBidCancel] = useState(null);
     const [selectedOffer, setSelectedOffer] = useState(null);
     const [isAcceptOfferModalOpen, setIsAcceptOfferModalOpen] = useState(false);
-
-
-
 
     // Fetching Listed NFTs for the connected wallet
     const { data, loading, error } = useQuery(GET_LISTED_NFTS_FOR_ADDRESS, {
@@ -96,74 +90,74 @@ function Wallet() {
         fetchNFTMetadataAndImage();
     }, [ownedNFTsData, ownedNFTsLoading, ownedNFTsError]);
 
+    const fetchListingMetadataAndImage = async () => {
+        if (data && data.listings) {
+            // Process each listed NFT
+            const promises = data.listings.map(async (listing) => {
+                const nftInstance = new Nft(168587773, listing.erc721Address, listing.tokenId);
+                try {
+                    const metadata = await nftInstance.metadata();
+                    const image = nftInstance.image();
+                    return {
+                        contractAddress: listing.erc721Address,
+                        tokenId: listing.tokenId,
+                        price: listing.price,
+                        expireTimestamp: listing.expireTimestamp,
+                        name: metadata.name,
+                        image
+                    };
+                } catch (error) {
+                    console.error('Error fetching listing data:', error);
+                    return null;
+                }
+            });
+
+            const results = await Promise.all(promises);
+            // Filter out any null results (failed fetches)
+            setListings(results.filter((listing) => listing !== null));
+        }
+    };
+
     //fetch listnft of the user
     useEffect(() => {
-        const fetchListingMetadataAndImage = async () => {
-            if (data && data.listings) {
-                // Process each listed NFT
-                const promises = data.listings.map(async (listing) => {
-                    const nftInstance = new Nft(168587773, listing.erc721Address, listing.tokenId);
-                    try {
-                        const metadata = await nftInstance.metadata();
-                        const image = nftInstance.image();
-                        return {
-                            contractAddress: listing.erc721Address,
-                            tokenId: listing.tokenId,
-                            price: listing.price,
-                            expireTimestamp: listing.expireTimestamp,
-                            name: metadata.name,
-                            image
-                        };
-                    } catch (error) {
-                        console.error('Error fetching listing data:', error);
-                        return null;
-                    }
-                });
-
-                const results = await Promise.all(promises);
-                // Filter out any null results (failed fetches)
-                setListings(results.filter((listing) => listing !== null));
-            }
-        };
-
-        fetchListingMetadataAndImage();
+        fetchListingMetadataAndImage().then(() => {});
     }, [data]);
+
+    const fetchBidMetadataAndImage = async () => {
+        if (bidsData && bidsData.bids) {
+            const currentTimestamp = Math.floor(Date.now() / 1000);
+            // Filter out expired bids
+            const activeBids = bidsData.bids.filter(bid => parseInt(bid.expireTimestamp) > currentTimestamp);
+
+            // Process each active bid
+            const promises = activeBids.map(async (bid) => {
+                const nftInstance = new Nft(168587773, bid.erc721Address, bid.tokenId);
+                try {
+                    const metadata = await nftInstance.metadata();
+                    const image = nftInstance.image();
+                    return {
+                        ...bid,
+                        price: bid.value, // bid amount by the user
+                        expireTimestamp: bid.expireTimestamp,
+                        name: metadata.name,
+                        image: image,
+                        contractAddress: bid.erc721Address,
+                    };
+                } catch (error) {
+                    console.error('Error fetching bid data:', error);
+                    return null;
+                }
+            });
+
+            const results = await Promise.all(promises);
+            // Filter out any null results (failed fetches)
+            setBids(results.filter(bid => bid !== null));
+        }
+    };
 
     //fetch nft bids by the user
     useEffect(() => {
-        const fetchBidMetadataAndImage = async () => {
-            if (bidsData && bidsData.bids) {
-                const currentTimestamp = Math.floor(Date.now() / 1000);
-                // Filter out expired bids
-                const activeBids = bidsData.bids.filter(bid => parseInt(bid.expireTimestamp) > currentTimestamp);
-
-                // Process each active bid
-                const promises = activeBids.map(async (bid) => {
-                    const nftInstance = new Nft(168587773, bid.erc721Address, bid.tokenId);
-                    try {
-                        const metadata = await nftInstance.metadata();
-                        const image = nftInstance.image();
-                        return {
-                            ...bid,
-                            price: bid.value, // bid amount by the user
-                            expireTimestamp: bid.expireTimestamp,
-                            name: metadata.name,
-                            image: image,
-                            contractAddress: bid.erc721Address,
-                        };
-                    } catch (error) {
-                        console.error('Error fetching bid data:', error);
-                        return null;
-                    }
-                });
-
-                const results = await Promise.all(promises);
-                // Filter out any null results (failed fetches)
-                setBids(results.filter(bid => bid !== null));
-            }
-        };
-
-        fetchBidMetadataAndImage();
+        fetchBidMetadataAndImage().then(() => {});
     }, [bidsData]);
 
     //for my bid section
@@ -276,7 +270,10 @@ function Wallet() {
                                 </div>
                                 <ListNFTModal
                                     isOpen={isListModalOpen}
-                                    onClose={() => setIsListModalOpen(false)}
+                                    onClose={() => {
+                                        setIsListModalOpen(false)
+                                        fetchListingMetadataAndImage().then(() => {})
+                                    }}
                                     contractAddress={selectedNFT?.contractAddress}
                                     tokenId={selectedNFT?.tokenId}
                                 />
@@ -308,7 +305,10 @@ function Wallet() {
                                 </div>
                                 <DeListNFTModal
                                     isOpen={isDeListModalOpen}
-                                    onClose={() => setIsDeListModalOpen(false)}
+                                    onClose={() => {
+                                        setIsDeListModalOpen(false)
+                                        fetchListingMetadataAndImage().then(() => {})
+                                    }}
                                     contractAddress={selectedNFT?.contractAddress}
                                     tokenId={selectedNFT?.tokenId}
                                 />
@@ -339,7 +339,10 @@ function Wallet() {
                                 </div>
                                 <CancelBidModal
                                     isOpen={isCancelBidModalOpen}
-                                    onClose={() => setIsCancelBidModalOpen(false)}
+                                    onClose={() => {
+                                        setIsCancelBidModalOpen(false)
+                                        fetchBidMetadataAndImage().then(() => {})
+                                    }}
                                     bid={selectedNFTForBidCancel}
                                     contractAddress={selectedNFTForBidCancel?.contractAddress}
                                     tokenId={selectedNFTForBidCancel?.tokenId}
@@ -377,6 +380,9 @@ function Wallet() {
                                     tokenId={selectedOffer?.tokenId}
                                     value={selectedOffer?.value}
                                     bidder={selectedOffer?.bidder}
+                                    onAccepted={() => {
+                                        fetchBidMetadataAndImage().then(() => {})
+                                    }}
                                 />
                                 <button onClick={() => handleAcceptOfferClick(offer)} className='bg-blue-100 w-full py-2 absolute div -bottom-20 cursor-pointer transition-all ease-linear duration-250'>
                                     <p className='text-sm font-Kallisto font-medium uppercase text-center text-white/75 tracking-wider'>{"Accept bid"}</p>

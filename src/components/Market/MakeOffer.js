@@ -8,7 +8,7 @@ import {
     useToast
 } from '@chakra-ui/react';
 
-const MakeOffer = ({ isOpen, onClose, erc721Address, tokenId, nft }) => {
+const MakeOffer = ({ isOpen, onClose, erc721Address, tokenId, nft, onOfferSubmitted }) => {
     const { account, library } = useWallet();
     const marketplaceAddress = process.env.REACT_APP_MARKETPLACE_ADDRESS;
     const WETHAddress = process.env.REACT_APP_WETH_ADDRESS;
@@ -83,6 +83,9 @@ const MakeOffer = ({ isOpen, onClose, erc721Address, tokenId, nft }) => {
                 duration: 5000,
                 isClosable: true,
             });
+            if(onOfferSubmitted) {
+                onOfferSubmitted();
+            }
         } catch (error) {
             console.error('Offer submission failed:', error);
             setIsLoading(false);

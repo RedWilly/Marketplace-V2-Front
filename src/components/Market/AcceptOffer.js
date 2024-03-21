@@ -8,7 +8,7 @@ import {
     useToast
 } from '@chakra-ui/react';
 
-const AcceptOffer = ({ isOpen, onClose, erc721Address, tokenId, bidder, value }) => {
+const AcceptOffer = ({ isOpen, onClose, erc721Address, tokenId, bidder, value, onAccepted }) => {
     const { account, library } = useWallet();
     const [isApproved, setIsApproved] = useState(false);
     const marketplaceAddress = process.env.REACT_APP_MARKETPLACE_ADDRESS;
@@ -94,6 +94,9 @@ const AcceptOffer = ({ isOpen, onClose, erc721Address, tokenId, bidder, value })
                 duration: 5000,
                 isClosable: true,
             });
+            if(onAccepted) {
+                onAccepted()
+            }
         } catch (error) {
             toast({
                 title: 'Accept offer failed',
