@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, NavLink, Navigate, Route, Routes } from 'react-router-dom'
-import Assets from '../components/Assets'
-import Listings from '../components/Listings'
-import Bids from '../components/Bids'
+import { Link } from 'react-router-dom'
 import { GoCheckCircleFill } from 'react-icons/go'
 
 import { ethers } from 'ethers';
@@ -11,7 +8,6 @@ import { useWallet } from '../hooks/useWallet';
 import { useQuery } from '@apollo/client';
 import { GET_LISTED_NFTS_FOR_ADDRESS, GET_BIDS_BY_ADDRESS, GET_ALL_NFTS_OWNED_BY_USER, GET_ALL_ACTIVE_BIDS } from '../graphql/Queries';
 import Nft from "../utils/Nft";
-import useDisclosure from '../hooks/useDisclosure';
 
 
 import ListNFTModal from '../components/Market/ListNFTModal';
@@ -21,14 +17,13 @@ import AcceptOffer from '../components/Market/AcceptOffer';
 
 function Wallet() {
     const [state, setState] = useState(0)
-    const { account, library } = useWallet();
+    const { account } = useWallet();
     //const [nfts, setNfts] = useState([1, 2, 3, 4, 5, 6, 7]) chnage
     const [nfts, setNfts] = useState([]);
     const [listings, setListings] = useState([]);
     const [bids, setBids] = useState([]);
     const [Offers, setOffers] = useState([]);
 
-    const [activeListings, setActiveListings] = useState([]);
     const [isListModalOpen, setIsListModalOpen] = useState(false);
     const [selectedNFT, setSelectedNFT] = useState({});
     const [isDeListModalOpen, setIsDeListModalOpen] = useState(false);
@@ -120,7 +115,7 @@ function Wallet() {
 
     //fetch listnft of the user
     useEffect(() => {
-        fetchListingMetadataAndImage().then(() => {});
+        fetchListingMetadataAndImage().then(() => { });
     }, [data]);
 
     const fetchBidMetadataAndImage = async () => {
@@ -157,7 +152,7 @@ function Wallet() {
 
     //fetch nft bids by the user
     useEffect(() => {
-        fetchBidMetadataAndImage().then(() => {});
+        fetchBidMetadataAndImage().then(() => { });
     }, [bidsData]);
 
     //for my bid section
@@ -272,7 +267,7 @@ function Wallet() {
                                     isOpen={isListModalOpen}
                                     onClose={() => {
                                         setIsListModalOpen(false)
-                                        fetchListingMetadataAndImage().then(() => {})
+                                        fetchListingMetadataAndImage().then(() => { })
                                     }}
                                     contractAddress={selectedNFT?.contractAddress}
                                     tokenId={selectedNFT?.tokenId}
@@ -307,7 +302,7 @@ function Wallet() {
                                     isOpen={isDeListModalOpen}
                                     onClose={() => {
                                         setIsDeListModalOpen(false)
-                                        fetchListingMetadataAndImage().then(() => {})
+                                        fetchListingMetadataAndImage().then(() => { })
                                     }}
                                     contractAddress={selectedNFT?.contractAddress}
                                     tokenId={selectedNFT?.tokenId}
@@ -341,7 +336,7 @@ function Wallet() {
                                     isOpen={isCancelBidModalOpen}
                                     onClose={() => {
                                         setIsCancelBidModalOpen(false)
-                                        fetchBidMetadataAndImage().then(() => {})
+                                        fetchBidMetadataAndImage().then(() => { })
                                     }}
                                     bid={selectedNFTForBidCancel}
                                     contractAddress={selectedNFTForBidCancel?.contractAddress}
@@ -381,7 +376,7 @@ function Wallet() {
                                     value={selectedOffer?.value}
                                     bidder={selectedOffer?.bidder}
                                     onAccepted={() => {
-                                        fetchBidMetadataAndImage().then(() => {})
+                                        fetchBidMetadataAndImage().then(() => { })
                                     }}
                                 />
                                 <button onClick={() => handleAcceptOfferClick(offer)} className='bg-blue-100 w-full py-2 absolute div -bottom-20 cursor-pointer transition-all ease-linear duration-250'>

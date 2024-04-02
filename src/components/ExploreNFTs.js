@@ -6,26 +6,36 @@ import { RxCross2 } from 'react-icons/rx'
 import { GoCheckCircleFill } from 'react-icons/go'
 import { Link } from 'react-router-dom'
 
-//subgraph
+//Backend
 import { ethers } from 'ethers';
-import { useQuery } from '@apollo/client';
-import { GET_ALL_LISTED_NFTS } from '../graphql/Queries';
 import ExploreNFThelper from './ExploreNFThelper';
+import MarketplaceApi from "../utils/MarketplaceApi"; // Ensure this is imported
+
 
 function ExploreNFTs() {
   const [sidebar, setSideBar] = useState(window.innerWidth < 768 ? false : true)
-  const { loading, error, data: AllListing } = useQuery(GET_ALL_LISTED_NFTS);
-  console.log("Listings Data:", AllListing);
   const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchMetadata = async () => {
-      const updatedListings = await ExploreNFThelper(AllListing);
-      setListings(updatedListings);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const AllListingResponse = await MarketplaceApi.fetchActiveListings(); // Fetch data from the API
+        // Adjusted to directly pass the response since it's already an array
+        const updatedListings = await ExploreNFThelper({ listings: AllListingResponse });
+        setListings(updatedListings);
+        setLoading(false);
+      } catch (err) {
+        setError(err);
+        setLoading(false);
+      }
     };
 
-    fetchMetadata();
-  }, [AllListing]);
+    fetchData();
+  }, []);
+
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
@@ -118,7 +128,7 @@ function ExploreNFTs() {
             <div className='flex justify-center'>
               <div className={`flex justify-start items-stretch gap-9 sm:gap-2 flex-wrap mt-9 sm:mt-4`}>
                 {listings.map((listing, index) => {
-                  return <div className={`rounded-lg overflow-hidden card w-[285px] sm:w-[48%] flex flex-col bg-white dark:bg-black-500 shadow-md relative`}>
+                  return <div key={index} className={`rounded-lg overflow-hidden card w-[285px] sm:w-[48%] flex flex-col bg-white dark:bg-black-500 shadow-md relative`}>
                     <Link to={`/collection/${listing.erc721Address}/${listing.tokenId}`} className='h-[300px] sm:h-[150px] overflow-hidden'>
                       <img src={listing.image} className='w-full h-full object-cover transition-all ease-linear saturate-100' />
                     </Link>
@@ -126,7 +136,7 @@ function ExploreNFTs() {
                       <h1 className='flex justify-start items-center gap-2 text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>{listing.name}
                         <GoCheckCircleFill className='text-blue-200 text-base sm:text-sm dark:bg-white rounded-full border-blue-200 dark:border-[1px]' />
                       </h1>
-                      <p className='text-xl font-Kallisto font-bold mt-2 sm:mt-1 dark:text-white sm:text-sm'>{ethers.utils.formatEther(listing.price)} ETH</p>
+                      <p className='text-xl font-Kallisto font-bold mt-2 sm:mt-1 dark:text-white sm:text-sm'>{ethers.utils.formatEther(String(listing.price))} ETH</p>
                       <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:tex-[10px]'>Last Sale $ 80</p>
                     </div>
                     <button className='bg-blue-100 w-full py-2 absolute div -bottom-20 cursor-pointer transition-all ease-linear duration-250'>

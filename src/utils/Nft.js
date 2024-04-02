@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const middlewareBaseURL = 'https://rooni.site'; // Replace with your middleware's base URL this is a running on render free for testing
+const middlewareBaseURL = 'http://localhost:9001'; // Replace with your middleware's base URL this is a running on render free for testing
 
 class Nft {
     constructor(chain, collection, id) {
@@ -28,6 +28,14 @@ class Nft {
             throw new Error('Failed to fetch metadata from middleware');
         }
         return metadataResponse.data.owner;
+    }
+
+    async collectionName() {
+        const nameResponse = await axios.get(`${middlewareBaseURL}/name/${this.chain}/${this.collection}`);
+        if (nameResponse.status !== 200 || !nameResponse.data) {
+            throw new Error('Failed to fetch collection name from middleware');
+        }
+        return nameResponse.data.name;
     }
 }
 

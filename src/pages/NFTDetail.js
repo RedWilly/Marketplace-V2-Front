@@ -2,18 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { GoCheckCircleFill } from 'react-icons/go'
 import { Link, useParams } from 'react-router-dom'
 import { FiRefreshCcw } from "react-icons/fi";
-import { CiFlag1, CiShare2 } from 'react-icons/ci';
-import { PiTriangleLight } from "react-icons/pi";
+import { CiShare2 } from 'react-icons/ci';
 import Card from '../components/Card';
 import { BsArrowsAngleExpand } from "react-icons/bs";
 import useDisclosure from '../hooks/useDisclosure';
 
 // web3 - subgraph
 import Nft from "../utils/Nft";
+import MarketplaceApi from "../utils/MarketplaceApi"; // Ensure this is imported
+
 import { ethers } from 'ethers';
-import { useQuery } from '@apollo/client';
 import { useWallet } from '../hooks/useWallet';
-import { GET_ACTIVE_LISTING_BY_NFT, GET_ACTIVE_BIDS_FOR_NFT, GET_ALL_SOLD_FOR_NFT } from '../graphql/Queries';
 //marketplace
 import BuyNow from '../components/Market/BuyNow';
 import MakeOffer from '../components/Market/MakeOffer';
@@ -43,26 +42,60 @@ function NFTDetail() {
   const [isListModalOpen, setIsListModalOpen] = useState(false);
   const [isCancelBidModalOpen, setIsCancelBidModalOpen] = useState(false);
 
+  const [listingData, setListingData] = useState(null);
+  const [bidsData, setBidsData] = useState([]);
+  const [salesData, setSalesData] = useState([]);
 
 
-  //subgraph and data fetching
-  const { data, refetch: refetchActiveListings, loading: isListingLoading } = useQuery(GET_ACTIVE_LISTING_BY_NFT, {
-    variables: { erc721Address: contractAddress, tokenId },
-  });
+  const fetchActiveListing = async () => {
+    try {
+      const checksumAddress = ethers.utils.getAddress(contractAddress);
+      const listing = await MarketplaceApi.fetchActiveListingForNFT(checksumAddress, tokenId);
+      setListingData(listing);
+    } catch (error) {
+      //console.error("Failed to fetch active listing:", error);
+    }
+  };
 
-  const { data: bidsData, refetch: refetchActiveBids } = useQuery(GET_ACTIVE_BIDS_FOR_NFT, {
-    variables: { erc721Address: contractAddress, tokenId },
-  });
+  const fetchActiveBids = async () => {
+    try {
+      const checksumAddress = ethers.utils.getAddress(contractAddress);
+      const bids = await MarketplaceApi.fetchActiveBidsForNFT(checksumAddress, tokenId);
+      setBidsData(bids);
+    } catch (error) {
+      //console.error("Failed to fetch active bids:", error);
+      setBidsData([]); // Consider clearing the bids data or handling errors differently as per your needs
+    }
+  };
 
-  const { data: salesData, refetch: refetchSalesData } = useQuery(GET_ALL_SOLD_FOR_NFT, {
-    variables: { erc721Address: contractAddress, tokenId },
-  });
+
+  const fetchSalesData = async () => {
+    try {
+      const checksumAddress = ethers.utils.getAddress(contractAddress);
+      const sales = await MarketplaceApi.fetchNFTSales(checksumAddress, tokenId);
+      setSalesData(sales);
+    } catch (error) {
+      //console.error("Failed to fetch sales data:", error);
+      // Handle the error as needed, e.g., by setting sales data to an empty array or showing an error message
+      setSalesData([]);
+    }
+  };
+
+  useEffect(() => {
+    if (contractAddress && tokenId) {
+      fetchSalesData();
+      fetchActiveListing();
+      fetchActiveBids();
+    }
+  }, [contractAddress, tokenId]);
+
+
 
 
   // Utility function to format the timestamp
   const formatDate = (timestamp) => {
     const now = new Date();
-    const eventDate = new Date(timestamp * 1000);
+    const eventDate = new Date(timestamp)
     const diffInSeconds = Math.floor((now - eventDate) / 1000);
 
     const minute = 60;
@@ -116,15 +149,26 @@ function NFTDetail() {
     return "Expired";
   };
 
+  // useEffect(() => {
+  //   if (data && data.listings && data.listings.length > 0) {
+  //     setIsListed(true);
+  //     setIsSeller(account && data.listings[0].seller.toLowerCase() === account.toLowerCase());
+  //   } else {
+  //     setIsListed(false);
+  //     setIsSeller(false); // Ensure isSeller is reset if there's no listing
+  //   }
+  // }, [data, account]);
   useEffect(() => {
-    if (data && data.listings && data.listings.length > 0) {
+    if (listingData) {
       setIsListed(true);
-      setIsSeller(account && data.listings[0].seller.toLowerCase() === account.toLowerCase());
+      setIsSeller(account && listingData.seller.toLowerCase() === account.toLowerCase());
+      // Update NFT details state as needed, particularly if you were extracting price or other listing details from the data
     } else {
       setIsListed(false);
-      setIsSeller(false); // Ensure isSeller is reset if there's no listing
+      setIsSeller(false); // Reset isSeller if there's no active listing
     }
-  }, [data, account]);
+  }, [listingData, account]);
+
 
 
   useEffect(() => {
@@ -135,7 +179,8 @@ function NFTDetail() {
         const nft = new Nft(168587773, contractAddress, tokenId);
         const metadata = await nft.metadata();
 
-        const price = isListed && data.listings[0] ? ethers.utils.formatUnits(data.listings[0].price, 'ether') : null;
+        // Adjust price extraction logic based on the new listingData state
+        const price = listingData ? ethers.utils.formatUnits(String(listingData.price, 'ether')) : null; //{ethers.utils.formatEther(String(bid.value))}
 
         let owner = null;
         if (active) { // Only attempt to fetch owner if wallet is connected
@@ -155,15 +200,29 @@ function NFTDetail() {
     };
 
     fetchNFTDetails();
-  }, [contractAddress, tokenId, data, isListed, active, account]);
+  }, [contractAddress, tokenId, listingData, active, account]);
+
+
+
+  // const nftStateUpdated = async () => {
+  //   console.log('Nft state updated');
+  //   fetchActiveListing().then(() => {
+  //     console.log('Listing data refetched');
+  //   });
+  //   await fetchActiveBids(); // Add this line to fetch bids data again
+  //   console.log('Bids data refetched');
+  //   //refetchSalesData().then(() => { })
+  //   await fetchSalesData();
+  // };
 
   const nftStateUpdated = async function () {
     console.log('Nft state updated')
     // Refetch Graph data
-    refetchSalesData().then(() => {})
-    refetchActiveListings().then(() => {})
-    refetchActiveBids().then(() => {})
+    fetchActiveListing().then(() => { })
+    fetchActiveBids().then(() => { })
+    fetchSalesData().then(() => { })
   }
+
 
   return (
     <div className='flex justify-between items-start gap-8 sm:gap-5 py-20 sm:py-16 px-28 sm:px-5 sm:pb-10 sm:flex-col-reverse'>
@@ -213,10 +272,12 @@ function NFTDetail() {
         <div className='flex justify-between items-center relative'>
           <h1 className='text-black-400 font-Kallisto text-2xl font-semibold dark:text-white uppercase sm:text-base'>{nftDetails.name}</h1>
           <div className='flex justify-end items-center gap-3 sm:absolute sm:right-0 -top-7 sm:gap-1'>
-            <FiRefreshCcw className='cursor-pointer text-lg sm:text-sm text-black-50 dark:text-grey-100' />
+            {/* <FiRefreshCcw className='cursor-pointer text-lg sm:text-sm text-black-50 dark:text-grey-100' /> */}
+            <FiRefreshCcw
+              className='cursor-pointer text-lg sm:text-sm text-black-50 dark:text-grey-100'
+              onClick={nftStateUpdated} // Call nftStateUpdated when the icon is clicked
+            />
             <CiShare2 className='cursor-pointer text-2xl sm:text-lg text-black-50 dark:text-grey-100' />
-            <CiFlag1 className='cursor-pointer text-2xl  sm:text-lg text-black-50 dark:text-grey-100' />
-            <PiTriangleLight className='cursor-pointer text-2xl  sm:text-lg text-black-50 dark:text-grey-100' />
           </div>
         </div>
 
@@ -240,15 +301,16 @@ function NFTDetail() {
               </h1>
             )}
           </div>
-          {active && nftDetails.price && isListed && !isSeller && (
+          {/* {active && nftDetails.price && isListed && !isSeller && ( */}
+          {nftDetails.price && isListed && !isSeller && (
             <BuyNow
               erc721Address={contractAddress}
               tokenId={tokenId}
               price={ethers.utils.parseUnits(nftDetails.price, 'ether')}
               className='mt-3 sm:mt-1 sm:text-[10px] bg-black px-11 py-[10px] bg-black-400 dark:bg-black-500 rounded-[4px] text-[12px] uppercase font-Kallisto font-medium tracking-widest text-white cursor-pointer outline-none hover:text-black-400 hover:bg-grey-100/20 hover:text-black transition-all ease-linear duration-150 dark:hover:text-white dark:hover:bg-grey-100'
               onSuccess={() => {
-                setTimeout( () => {
-                  nftStateUpdated().then(() => {})
+                setTimeout(() => {
+                  nftStateUpdated().then(() => { })
                 }, 500);
               }}
             />
@@ -282,7 +344,7 @@ function NFTDetail() {
             isOpen={isCancelBidModalOpen}
             onClose={() => {
               setIsCancelBidModalOpen(false)
-              setTimeout( () => {
+              setTimeout(() => {
                 nftStateUpdated().then(() => { })
               }, 500)
             }}
@@ -302,10 +364,10 @@ function NFTDetail() {
             isOpen={isListModalOpen}
             onClose={() => {
               setIsListModalOpen(false)
-              setTimeout( () => {
-                nftStateUpdated().then(() => {})
+              setTimeout(() => {
+                nftStateUpdated().then(() => { })
               }, 500);
-            } }
+            }}
             contractAddress={contractAddress}
             tokenId={tokenId}
           />
@@ -352,9 +414,9 @@ function NFTDetail() {
                   </tr>
                 </thead>
                 <tbody className=''>
-                  {bidsData?.bids.map((bid, index) => (
+                  {bidsData.map((bid, index) => (
                     <tr className='flex' key={index}>
-                      <td className='py-1 text-[12px] sm:text-[10px] uppercase font-Kallisto font-semibold text-black-400 dark:text-white min-w-[120px]'>{ethers.utils.formatEther(bid.value)} ETH</td>
+                      <td className='py-1 text-[12px] sm:text-[10px] uppercase font-Kallisto font-semibold text-black-400 dark:text-white min-w-[120px]'>{ethers.utils.formatEther(String(bid.value))} ETH</td>
                       <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white min-w-[120px]'>{formatExpiration(bid.expireTimestamp)}</td>
                       <td className='text-[12px] sm:text-[10px] font-Kallisto font-normal text-black-400 dark:text-white uppercase min-w-[120px]'>{formatAddress(bid.bidder)}</td>
                       {/* <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white min-w-[120px]'>ACCEPT OFFER</td> */}
@@ -372,7 +434,7 @@ function NFTDetail() {
                             isOpen={isAcceptOfferOpen}
                             onClose={onAcceptOfferClose}
                             onAccepted={() => {
-                              setTimeout( () => {
+                              setTimeout(() => {
                                 nftStateUpdated().then(() => { })
                               }, 500)
                             }}
@@ -404,12 +466,12 @@ function NFTDetail() {
                   </tr>
                 </thead>
                 <tbody className=''>
-                  {salesData?.sales.map((sale, index) => (
+                  {salesData.map((sale, index) => (
                     <tr className='flex' key={index}>
                       <td className='py-1 text-[12px] sm:text-[10px] uppercase font-Kallisto font-semibold text-black-400 dark:text-white min-w-[100px]'>
-                        <a href={`https://sepolia.blastscan.io/tx/${sale.id.split('-')[0]}`} target="_blank" rel="noopener noreferrer">View</a>
+                        <a href={`https://sepolia.blastscan.io/tx/${sale.txid}`} target="_blank" rel="noopener noreferrer">View</a>
                       </td>
-                      <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white  min-w-[80px]'>{ethers.utils.formatEther(sale.price)} ETH</td>
+                      <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white  min-w-[80px]'>{ethers.utils.formatEther(String(sale.price))} ETH</td>
                       <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white  min-w-[120px]'>{formatAddressSOLD(sale.seller)}</td>
                       <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white  min-w-[120px]'>{formatAddressSOLD(sale.buyer)}</td>
                       <td className='text-[12px] sm:text-[10px] font-Kallisto font-normal text-black-400 dark:text-white uppercase  min-w-[100px]'>{formatDate(sale.timestamp)}</td>

@@ -1,76 +1,79 @@
-import { AnimatePresence, motion } from 'framer-motion'
 import React, { useEffect, useState } from 'react'
 import { IoDiamond, IoStatsChart } from 'react-icons/io5';
 import { RxCross2 } from "react-icons/rx";
-import { TbAntennaBars5 } from "react-icons/tb";
 import { FaCrown, FaUser } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 import Dropdown from '../components/Dropdown';
-import HomeCollection from '../components/HomeCollection';
-import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import Slides from '../components/Slides';
-import { FaMeta } from 'react-icons/fa6';
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 
-//subgraph -- = ethers
+// Marketplace Backend -- = ethers
 import Nft from "../utils/Nft";
-import { useQuery } from '@apollo/client';
-import { GET_MOST_RECENT_LISTING, GET_MOST_RECENT_SOLD } from '../graphql/Queries';
 import { ethers } from 'ethers';
 import whitelist from '../components/whitelist';
+import MarketplaceApi from "../utils/MarketplaceApi";
+
 
 
 function Home() {
 
-  //subgraph sold and listed
-  const { data: recentListingsData } = useQuery(GET_MOST_RECENT_LISTING);
-  const { data: recentSalesData } = useQuery(GET_MOST_RECENT_SOLD);
+  //Marketplace sold and listed
 
   const [recentListings, setRecentListings] = useState([]);
   const [recentSales, setRecentSales] = useState([]);
 
+  const [floorPrices, setFloorPrices] = useState({});
+
+
+  //fetching recent listings
   useEffect(() => {
-    if (recentListingsData && recentListingsData.listings) {
-      const fetchListingsMetadata = async () => {
-        const listingsWithMetadata = await Promise.all(recentListingsData.listings.map(async (listing) => {
+    const fetchRecentListings = async () => {
+      try {
+        const listingsData = await MarketplaceApi.fetchActiveListings();
+        // Assume listingsData is an array of listing objects
+        const listingsWithMetadata = await Promise.all(listingsData.map(async (listing) => {
           const nft = new Nft(168587773, listing.erc721Address, listing.tokenId);
           const metadata = await nft.metadata();
           return {
             ...listing,
             name: metadata.name,
             image: nft.image(),
-            //price: ethers.utils.formatEther(listing.price)
-            displayPrice: ethers.utils.formatEther(listing.price), // Price for display
-            price: listing.price, // Original price in wei for transactions
+            displayPrice: ethers.utils.formatEther(String(listing.price)),
+            price: listing.price,
             expired: (Date.now() / 1000) > listing.expireTimestamp
           };
         }));
         setRecentListings(listingsWithMetadata);
-      };
-      fetchListingsMetadata();
-    }
-  }, [recentListingsData]);
+      } catch (error) {
+        console.error('Failed to fetch recent listings:', error);
+      }
+    };
+    fetchRecentListings();
+  }, []);
 
+  //fetching recent sales
   useEffect(() => {
-    if (recentSalesData && recentSalesData.sales) {
-      const fetchSalesMetadata = async () => {
-        const salesWithMetadata = await Promise.all(recentSalesData.sales.map(async (sale) => {
+    const fetchRecentSales = async () => {
+      try {
+        const salesData = await MarketplaceApi.fetchSoldNFTs();
+        const salesWithMetadata = await Promise.all(salesData.map(async (sale) => {
           const nft = new Nft(168587773, sale.erc721Address, sale.tokenId);
           const metadata = await nft.metadata();
           return {
             ...sale,
             name: metadata.name,
             image: nft.image(),
-            price: ethers.utils.formatEther(sale.price)
+            price: ethers.utils.formatEther(String(sale.price))
           };
         }));
         setRecentSales(salesWithMetadata);
-      };
-      fetchSalesMetadata().then(() => {});
-    }
-  }, [recentSalesData]);
+      } catch (error) {
+        console.error('Failed to fetch recent sales:', error);
+      }
+    };
+    fetchRecentSales();
+  }, []);
 
   // Convert whitelist object to array and map to include name and index
   const collectionsArray = Object.entries(whitelist).map(([name, details], index) => ({
@@ -101,11 +104,33 @@ function Home() {
   else
     settings.slidesToShow = 3
 
+
+  // Function to fetch floor price for a single collection
+  useEffect(() => {
+    const fetchAndSetFloorPrices = async (collections) => {
+      const floorPricesUpdates = {};
+      for (const collection of collections) {
+        try {
+          const stats = await MarketplaceApi.fetchCollectionStats(collection.address);
+          floorPricesUpdates[collection.address] = stats.floorPrice; // Assuming stats object contains a floorPrice
+        } catch (error) {
+          console.error(`Failed to fetch floor price for collection ${collection.address}:`, error);
+          floorPricesUpdates[collection.address] = '0'; // Use 'N/A' or similar on failure
+        }
+      }
+      setFloorPrices(prevPrices => ({ ...prevPrices, ...floorPricesUpdates }));
+    };
+
+    // Combine your collections into one array before passing to the fetching function
+    const allCollections = [...firstHalfCollections, ...secondHalfCollections];
+    fetchAndSetFloorPrices(allCollections);
+  }, []);
+
   return (
     <div className='flex justify-center items-center flex-col w-full py-20 px-20 sm:px-4 sm:pb-10'>
       <div className='w-[1257px] sm:w-[95%]'>
 
-        <h1 className='text-black-400 font-Kallisto font-semibold text-[40px] text-center dark:text-black-50 tracking-wider sm:text-sm'>The Leading NFT Marketplace</h1>
+        <h1 className='text-black-400 font-Kallisto font-semibold text-[40px] text-center dark:text-black-50 tracking-wider sm:text-sm'>A Fully Decentralized Bittorent Chain Marketplace</h1>
         <h1 className='text-black-50 font-Kallisto font-medium text-xl text-center dark:text-white sm:text-[12px]'>Buy, Sell, Mint and Trade Non-Fungible Digital Assets</h1>
 
         {/* <Slides /> */}
@@ -208,6 +233,9 @@ function Home() {
                 </div>
 
                 {firstHalfCollections?.map((collection, index) => {
+                  // Use collection.address to get the floor price from the floorPrices state
+                  const checksumAddress = ethers.utils.getAddress(collection.address);
+                  const floorPrice = floorPrices[checksumAddress];
                   return <Link to={`/collection/${collection.address}`} key={index} className='flex justify-between py-4 px-2 sm:py-3 hover:bg-grey-100/10 rounded-md'>
                     <div className='flex justify-start items-center gap-3 sm:gap-2 w-[65%]  sm:w-[60%]'>
                       <p className='text-[10px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left'>{collection.index}</p>
@@ -215,8 +243,10 @@ function Home() {
                       <p className='text-sm uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left sm:text-[12px]'>{collection.name}</p>
                     </div>
                     <div className='flex justify-start gap-10 items-center w-[30%] sm:w-[35%] sm:gap-8'>
-                      {/* <p className='text-sm sm:text-[10px] uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left'>$ {collection.floor || 'N/A'}</p> */}
-                      <p className='text-sm sm:text-[10px] uppercase font-Kallisto font-semibold text-black-400 dark:text-grey-100 text-left'>$ {collection.volume || 'N/A'}</p>
+                      <p className='text-sm sm:text-[10px] uppercase font-Kallisto font-semibold text-black-400 dark:text-grey-100 text-left flex items-center'>
+                        <img src={require('../assets/logo/bttc.png')} className='w-5 mr-1' alt="BTTC Logo" />
+                        {parseFloat(ethers.utils.formatEther(String(floorPrice || '0'))).toFixed(5)}
+                      </p>
                     </div>
                   </Link>
                 })}
@@ -232,6 +262,9 @@ function Home() {
                 </div>
 
                 {secondHalfCollections?.map((collection, index) => {
+                  // Use collection.address to get the floor price from the floorPrices state
+                  const checksumAddress = ethers.utils.getAddress(collection.address);
+                  const floorPrice = floorPrices[checksumAddress];
                   return <Link to={`/collection/${collection.address}`} key={index} className='flex justify-between py-4 px-2 sm:py-3 hover:bg-grey-100/10 rounded-md'>
                     <div className='flex justify-start items-center gap-3 sm:gap-2 w-[65%]  sm:w-[60%]'>
                       <p className='text-[10px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left'>{collection.index}</p>
@@ -239,8 +272,10 @@ function Home() {
                       <p className='text-sm uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left sm:text-[12px]'>{collection.name}</p>
                     </div>
                     <div className='flex justify-start gap-10 items-center w-[30%] sm:w-[35%] sm:gap-8'>
-                      {/* <p className='text-sm sm:text-[10px] uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left'>$ 320</p> */}
-                      <p className='text-sm sm:text-[10px] uppercase font-Kallisto font-semibold text-black-400 dark:text-grey-100 text-left'>$ 3410</p>
+                      <p className='text-sm sm:text-[10px] uppercase font-Kallisto font-semibold text-black-400 dark:text-grey-100 text-left flex items-center'>
+                        <img src={require('../assets/logo/bttc.png')} className='w-5 mr-1' alt="BTTC Logo" />
+                        {parseFloat(ethers.utils.formatEther(String(floorPrice || '0'))).toFixed(5)}
+                      </p>
                     </div>
                   </Link>
                 })}
@@ -257,33 +292,19 @@ function Home() {
                 <div className='flex justify-between items-center gap-20 mb-2'>
                   <p className='text-black-400 font-Kallisto font-semibold text-2xl text-left dark:text-white tracking-wider sm:text-base'>Recent Listings</p>
                 </div>
-
-                {/* {recentListings.slice(0, 5).map((recentListings, index) => {
-                  return <div key={index} className='flex justify-between py-4 px-2 sm:py-3 hover:bg-grey-100/10 rounded-md'>
-                    <div className='flex justify-start items-center gap-3 sm:gap-2 w-[65%]  sm:w-[60%]'>
-                      <p className='text-[10px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left'>{index + 1}</p>
-                      <img className='w-[60px] h-[60px] sm:w-[40px] sm:h-[40px] rounded-lg object-cover' src={recentListings.image} alt={recentListings.name} />
-                      <div className='flex flex-col gap-2'>
-                        <p className='text-sm uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left sm:text-[12px]'>{recentListings.name}</p>
-                        <p className='text-[12px] uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left sm:text-[12px] flex gap-1 items-center'>{recentListings.displayPrice}
-                          <img src={require('../assets/logo/eth.png')} className='w-5' />
-                        </p>
-                      </div>
-                    </div>
-
-                  </div>
-                })} */}
                 {recentListings.slice(0, 5).map((recentListing, index) => {
-                  if(recentListing.expired) return
+                  if (recentListing.expired) return
                   return (
                     <div key={index} className='flex justify-between py-4 px-2 sm:py-3 hover:bg-grey-100/10 rounded-md'>
                       <div className='flex justify-start items-center gap-3 sm:gap-2 w-[65%] sm:w-[60%]'>
                         <p className='text-[10px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left'>{index + 1}</p>
-                        <img className='w-[60px] h-[60px] sm:w-[40px] sm:h-[40px] rounded-lg object-cover' src={recentListing.image} alt={recentListing.name} />
+                        <Link to={`/nft/${recentListing.erc721Address}/${recentListing.tokenId}`} className="flex items-center gap-3 sm:gap-2">
+                          <img className='w-[60px] h-[60px] sm:w-[40px] sm:h-[40px] rounded-lg object-cover' src={recentListing.image} alt={recentListing.name} />
+                        </Link>
                         <div className='flex flex-col gap-2'>
                           <p className='text-sm uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left sm:text-[12px]'>{recentListing.name}</p>
                           <div className='text-[12px] uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left sm:text-[12px] flex gap-1 items-center'>
-                            <img src={require('../assets/logo/eth.png')} className='w-5' alt="ETH Logo" />
+                            <img src={require('../assets/logo/bttc.png')} className='w-5' alt="BTTC Logo" />
                             {recentListing.displayPrice}
                           </div>
                         </div>
@@ -306,11 +327,13 @@ function Home() {
                   return <div key={index} className='flex justify-between py-4 px-2 sm:py-3 hover:bg-grey-100/10 rounded-md'>
                     <div className='flex justify-start items-center gap-3 sm:gap-2 w-[65%]  sm:w-[60%]'>
                       <p className='text-[10px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left'>{index + 1}</p>
-                      <img className='w-[60px] h-[60px] sm:w-[40px] sm:h-[40px] rounded-lg object-cover' src={recentSales.image} alt={recentSales.name} />
+                      <Link to={`/nft/${recentSales.erc721Address}/${recentSales.tokenId}`} className="flex items-center gap-3 sm:gap-2">
+                        <img className='w-[60px] h-[60px] sm:w-[40px] sm:h-[40px] rounded-lg object-cover' src={recentSales.image} alt={recentSales.name} />
+                      </Link>
                       <div className='flex flex-col gap-2'>
                         <p className='text-sm uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left sm:text-[12px]'>{recentSales.name}</p>
                         <p className='text-[12px] uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left sm:text-[12px] flex gap-1 items-center'>
-                          <img src={require('../assets/logo/eth.png')} className='w-5' />
+                          <img src={require('../assets/logo/bttc.png')} className='w-5' />
                           {recentSales.price}
                         </p>
                       </div>

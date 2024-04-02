@@ -1,12 +1,40 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import CollectionCard from './CollectionCard';
 import Dropdown from './Dropdown';
-import whitelist from '../components/whitelist'; // Ensure this is correctly imported
+import { ethers } from 'ethers';
+import whitelist from '../components/whitelist';
+import MarketplaceApi from "../utils/MarketplaceApi"; // Make sure to import MarketplaceApi
+
 
 
 function Collections() {
-  // Convert whitelist object keys into an array to map over
   const collectionNames = Object.keys(whitelist);
+  const [collectionStats, setCollectionStats] = useState({});
+
+  useEffect(() => {
+    const fetchCollectionStats = async () => {
+      const stats = {};
+
+      for (const name of Object.keys(whitelist)) {
+        const { address } = whitelist[name];
+        try {
+          const checksumAddress = ethers.utils.getAddress(address);
+          const collectionStats = await MarketplaceApi.fetchCollectionStats(checksumAddress);
+          stats[name] = {
+            floorPrice: collectionStats.floorPrice,
+            totalVolume: collectionStats.totalVolumeTraded
+          };
+        } catch (error) {
+          console.error(`Failed to fetch stats for collection ${name}:`, error);
+          stats[name] = { floorPrice: '0', totalVolume: '0' };
+        }
+      }
+
+      setCollectionStats(stats);
+    };
+
+    fetchCollectionStats();
+  }, []);
 
   return (
     <div className='mt-6'>
@@ -20,16 +48,17 @@ function Collections() {
       </div>
 
       <div className='flex justify-start items-start gap-9 flex-wrap mt-9 sm:mt-3 sm:gap-3'>
-        {collectionNames.map((name, index) => {
-          // Use the name to get the corresponding image
+        {Object.keys(whitelist).map((name, index) => {
           const { image } = whitelist[name];
+          const { floorPrice, totalVolume } = collectionStats[name] || {};
+
           return (
             <CollectionCard
               key={index}
               image={image}
               name={name}
-              floor_price={20} // Keeping the floor price constant will change that later on 
-              volume={'305K'} // same here
+              floor_price={floorPrice} // Now dynamically fetched
+              volume={totalVolume} // Now dynamically fetched
             />
           );
         })}

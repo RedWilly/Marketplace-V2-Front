@@ -5,7 +5,7 @@ const whitelist = {
         address: "0xdcb5bE2582A7B10ECF07B5A56c1bED524B7d90d0",
         image: require("../assets/IMG/nuggets.png"),
         coverImage: require("../assets/IMG/nuggets_cover.png"),
-        description: `Nuggets are 10000 of the hottest Fusion of Cackles and Mutants on the Blast each having it's own unique properties.`,
+        description: `Nuggets are 10000 of the hottest Fusion of Cackles and Mutants on the  BitTorrent each having it's own unique properties.`,
         twitter: "https://x.com/",
         telegram: "https://t.me/",
         discord: "https://discord.com/",

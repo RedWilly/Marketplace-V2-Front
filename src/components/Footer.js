@@ -11,9 +11,9 @@ function Footer() {
                     <span>
                         <Link to='/' className='flex gap-4 items-center'>
                             <img src={require('../assets/logo.034ef726.png')} className='w-9 sm:w-7' />
-                            <h1 className='font-medium font-Kallisto text-black-400 uppercase tracking-widest sm:text-sm text-2xl dark:text-white'>Marketplace</h1>
+                            <h1 className='font-medium font-Kallisto text-black-400 uppercase tracking-widest sm:text-sm text-2xl dark:text-white'>Rooni</h1>
                         </Link>
-                        <p className='mt-4 w-[420px] sm:mt-4 text-[11px] tracking-widest font-Kallisto font-medium text-black-400/75 dark:text-grey-100 sm:text-[9px] sm:w-full'>The XRP Ledgers's leading Non-Fungible Token (NFT) Marketplace & Minting Platform. Buy, Sell, Trade, Mint and Create exclusive Non-Fungible Digital Assets & Collectibles on the XRP Ledger.</p>
+                        <p className='mt-4 w-[420px] sm:mt-4 text-[11px] tracking-widest font-Kallisto font-medium text-black-400/75 dark:text-grey-100 sm:text-[9px] sm:w-full'>The Very First Non-Fungible Token (NFT) Marketplace on Bittorrent Chain. Buy, Sell, Trade, Mint and Create exclusive Non-Fungible Digital Assets & Collectibles.</p>
                     </span>
 
                     <div className='border-[1px] rounded-md border-grey-50 overflow-hidden dark:border-white/50 flex items-center sm:rounded-lg sm:w-full'>
@@ -28,17 +28,16 @@ function Footer() {
                     <div className='flex flex-col gap-4'>
                         <h1 className='font-medium font-Kallisto text-black-400/80 uppercase tracking-widest text-[15px] dark:text-white sm:text-[12px]'>Marketplace</h1>
                         <nav className='flex flex-col gap-1'>
-                            <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>ALL XRPL NFTS</Link>
+                            <Link to='/explore/nfts' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>ALL NFTS</Link>
                             <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>STATISTICS</Link>
-                            <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>ART</Link>
-                            <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>COLLECTIBLES</Link>
+                            <Link to='/explore/collections' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>COLLECTIBLES</Link>
                         </nav>
                     </div>
                     <div className='flex flex-col gap-4'>
                         <h1 className='font-medium font-Kallisto text-black-400/80 uppercase tracking-widest text-[15px] dark:text-white sm:text-[12px]'>LAUNCHPAD</h1>
                         <nav className='flex flex-col gap-1'>
                             <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>APPLY FOR LAUNCHPAD</Link>
-                            <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>XRP NFT LAUNCHES</Link>
+                            <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>NFT LAUNCHES</Link>
                         </nav>
                     </div>
                     <div className='flex flex-col gap-4'>
@@ -46,30 +45,27 @@ function Footer() {
                         <nav className='flex flex-col gap-1'>
                             <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>FAQ</Link>
                             <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>GETTING STARTED</Link>
-                            <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>BUYING XRP NFTS</Link>
-                            <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>SELLING XRP NFTS</Link>
                         </nav>
                     </div>
                     <div className='flex flex-col gap-4'>
                         <h1 className='font-medium font-Kallisto text-black-400/80 uppercase tracking-widest text-[15px] dark:text-white sm:text-[12px]'>RESOURCES</h1>
+                        {/* <nav className='flex flex-col gap-1'>
+                            <Link to='https://wallet.bittorrentchain.io/bridge' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>BRIDGE TO BTTC</Link>
+                        </nav> */}
                         <nav className='flex flex-col gap-1'>
-                            <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>DISCOVER XRP</Link>
-                            <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>WHAT IS XUMM?</Link>
-                            <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>XRPL - THE XRP LEDGER</Link>
-                            <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>WHAT IS THE XLS-20D?</Link>
-                            <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>WHAT IS THE UNL?</Link>
+                            <a href='https://wallet.bittorrentchain.io/bridge' target="_blank" rel="noopener noreferrer" className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>BRIDGE TO BTTC</a>
                         </nav>
                     </div>
                 </div>
 
                 <div className='flex justify-between items-center sm:flex-col'>
-                    <p className='mt-4 w-[420px] sm:mt-4 text-[11px] tracking-widest sm:w-full sm:text-center  font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[9px]'>Market place @ {new Date().getFullYear()} ALL RIGHTS RESERVED</p>
+                    <p className='mt-4 w-[420px] sm:mt-4 text-[11px] tracking-widest sm:w-full sm:text-center  font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[9px]'>Rooni @ {new Date().getFullYear()} ALL RIGHTS RESERVED</p>
                     <div className="flex justify-end sm:flex-col items-center gap-2">
                         <p className='flex sm:flex-col mt-4 sm:mt-4 text-[11px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[9px]'>TERMS AND CONDITIONS PRIVACY POLICY</p>
-                            <span className='flex gap-2'>
-                        <PiYoutubeLogoLight className='cursor-pointer -mb-2 text-2xl text-black-400 dark:text-grey-100' />
-                        <CiTwitter className='cursor-pointer text-2xl  -mb-2 text-black-400 dark:text-grey-100' />
-                            </span>
+                        <span className='flex gap-2'>
+                            <PiYoutubeLogoLight className='cursor-pointer -mb-2 text-2xl text-black-400 dark:text-grey-100' />
+                            <CiTwitter className='cursor-pointer text-2xl  -mb-2 text-black-400 dark:text-grey-100' />
+                        </span>
                     </div>
                 </div>
             </div>
