@@ -49,9 +49,6 @@ function Footer() {
                     </div>
                     <div className='flex flex-col gap-4'>
                         <h1 className='font-medium font-Kallisto text-black-400/80 uppercase tracking-widest text-[15px] dark:text-white sm:text-[12px]'>RESOURCES</h1>
-                        {/* <nav className='flex flex-col gap-1'>
-                            <Link to='https://wallet.bittorrentchain.io/bridge' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>BRIDGE TO BTTC</Link>
-                        </nav> */}
                         <nav className='flex flex-col gap-1'>
                             <a href='https://wallet.bittorrentchain.io/bridge' target="_blank" rel="noopener noreferrer" className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>BRIDGE TO BTTC</a>
                         </nav>

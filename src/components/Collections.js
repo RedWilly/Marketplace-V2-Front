@@ -8,7 +8,6 @@ import MarketplaceApi from "../utils/MarketplaceApi"; // Make sure to import Mar
 
 
 function Collections() {
-  const collectionNames = Object.keys(whitelist);
   const [collectionStats, setCollectionStats] = useState({});
 
   useEffect(() => {
