@@ -298,7 +298,7 @@ function Home() {
                     <div key={index} className='flex justify-between py-4 px-2 sm:py-3 hover:bg-grey-100/10 rounded-md'>
                       <div className='flex justify-start items-center gap-3 sm:gap-2 w-[65%] sm:w-[60%]'>
                         <p className='text-[10px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left'>{index + 1}</p>
-                        <Link to={`/nft/${recentListing.erc721Address}/${recentListing.tokenId}`} className="flex items-center gap-3 sm:gap-2">
+                        <Link to={`/collection/${recentListing.erc721Address}/${recentListing.tokenId}`} className="flex items-center gap-3 sm:gap-2">
                           <img className='w-[60px] h-[60px] sm:w-[40px] sm:h-[40px] rounded-lg object-cover' src={recentListing.image} alt={recentListing.name} />
                         </Link>
                         <div className='flex flex-col gap-2'>
@@ -327,7 +327,7 @@ function Home() {
                   return <div key={index} className='flex justify-between py-4 px-2 sm:py-3 hover:bg-grey-100/10 rounded-md'>
                     <div className='flex justify-start items-center gap-3 sm:gap-2 w-[65%]  sm:w-[60%]'>
                       <p className='text-[10px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left'>{index + 1}</p>
-                      <Link to={`/nft/${recentSales.erc721Address}/${recentSales.tokenId}`} className="flex items-center gap-3 sm:gap-2">
+                      <Link to={`/collection/${recentSales.erc721Address}/${recentSales.tokenId}`} className="flex items-center gap-3 sm:gap-2">
                         <img className='w-[60px] h-[60px] sm:w-[40px] sm:h-[40px] rounded-lg object-cover' src={recentSales.image} alt={recentSales.name} />
                       </Link>
                       <div className='flex flex-col gap-2'>
