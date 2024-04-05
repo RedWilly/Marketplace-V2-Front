@@ -5,9 +5,9 @@ module.exports = {
   ],
   darkMode: "class",
   theme: {
-    screens: { lg:{max: "1500px"},  md: { max: "1250px" }, sm: { max: "782px" } },
+    screens: { lg: { max: "1500px" }, md: { max: "1250px" }, sm: { max: "782px" } },
     fontFamily: {
-      'Kallisto' : 'Kallisto',
+      'Kallisto': 'Kallisto',
     },
     colors: {
       'black': {
@@ -16,14 +16,14 @@ module.exports = {
         500: '#2a2c30',
         600: '#1c1e20',
       },
-      'grey':{
+      'grey': {
         10: '#FFFAFA',
         50: 'hsl(240deg 6% 60% / 20%)',
         100: '#9494a0'
       },
       "purple": '#a100b8',
       'white': '#fff',
-      'blue': { 
+      'blue': {
         100: '#8585ff',
         200: "#0401f6"
       },

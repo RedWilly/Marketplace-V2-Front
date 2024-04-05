@@ -3,24 +3,30 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { CiCircleInfo, CiTwitter } from 'react-icons/ci'
 import { GoCheckCircleFill } from 'react-icons/go'
 import { IoIosArrowDown } from 'react-icons/io'
-import { PiDiscordLogoLight, PiTelegramLogoFill, PiYoutubeLogoLight } from 'react-icons/pi'
+import { PiDiscordLogoLight, PiTelegramLogoFill, PiYoutubeLogoLight, PiRocketLaunchThin } from 'react-icons/pi'
 import { Link } from 'react-router-dom'
 import Dropdown from '../components/Dropdown'
 import Card2 from '../components/Card2'
 import { RxCross2 } from 'react-icons/rx'
 
 import { ethers } from 'ethers';
+import { useWallet } from '../hooks/useWallet';
+import ERC721ABI from '../abi/erc721.json';
+
 import Nft from "../utils/Nft"; //middleware api for getting nft img, metadata and owner
 import MarketplaceApi from "../utils/MarketplaceApi"; //middleware api for getting nft details and collection stats
 import whitelist from '../components/whitelist';
 
 import BuyNow from '../components/Market/BuyNow';
+import ListNFTModal from '../components/Market/ListNFTModal';
 
 
 
 function Collection() {
   const [showLess, setShowLess] = useState(true)
   const [sidebar, setSideBar] = useState(window.innerWidth < 768 ? false : true)
+
+  const { account } = useWallet();
 
   let { contractAddress } = useParams();
   contractAddress = contractAddress.toLowerCase();
@@ -30,6 +36,17 @@ function Collection() {
 
   const [collectionDetails, setCollectionDetails] = useState({});
   const [nftCount, setNftCount] = useState(0); //updates Listings count to display :)
+  const [currentSection, setCurrentSection] = useState('sales'); // New state for toggling sections
+
+  //states for owned NFTs
+  const [ownedNfts, setOwnedNfts] = useState([]);
+  const [fetchingOwnedNfts, setFetchingOwnedNfts] = useState(false);
+
+  //listing nft
+  const [isListModalOpen, setIsListModalOpen] = useState(false);
+  const [selectedNFT, setSelectedNFT] = useState({});
+
+
 
   const metadataCache = {};
   const imageCache = {};
@@ -91,37 +108,7 @@ function Collection() {
   }, [contractAddress]);
 
 
-  // const fetchListingsMetadata = async () => {
-  //   const currentTimestamp = Math.floor(Date.now() / 1000); // Get the current timestamp in seconds
-  //   if (listingsData && listingsData.listings) {
-  //     console.log("Processing listings data...");
-  //     const updatedListings = await Promise.all(
-  //       listingsData.listings
-  //         // each listing has an 'expireTimestamp' that you can compare
-  //         .filter(listing => parseInt(listing.expireTimestamp) > currentTimestamp) // Keep only listings that haven't expired
-  //         .map(async (listing) => {
-  //           try {
-  //             const nft = new Nft(168587773, contractAddress, listing.tokenId); // Use the actual chain ID
-  //             const metadata = await nft.metadata();
-  //             console.log("Fetched Metadata: ", metadata);
-  //             return {
-  //               ...listing,
-  //               image: nft.image(),
-  //               name: metadata.name,
-  //             };
-  //           } catch (error) {
-  //             console.error("Error fetching token URI for listing:", listing, error);
-  //             return null; // Return null for listings that encounter an error
-  //           }
-  //         })
-  //     );
-  //     console.log("Updated Listings with Metadata:", updatedListings);
-  //     const validListings = updatedListings.filter(listing => listing !== null); // Filter out any null values from errors
-  //     setListings(validListings);
-  //     setNftCount(validListings.length); // Update the listings count
-  //   }
-  // };
-
+  //fetch listing metadata
   const fetchListingsMetadata = async () => {
     const currentTimestamp = Math.floor(Date.now() / 1000);
     if (listingsData && listingsData.listings) {
@@ -184,6 +171,72 @@ function Collection() {
     fetchListingsMetadata().then(() => { })
   }, [listingsData, contractAddress]);
 
+  // fetch owned NFT & metadata
+  const fetchOwnedMetadata = async () => {
+    if (!account) return; // Make sure the user's wallet is connected
+
+    setFetchingOwnedNfts(true);
+    try {
+      const contract = new ethers.Contract(contractAddress, ERC721ABI, new ethers.providers.Web3Provider(window.ethereum));
+      const balance = await contract.balanceOf(account);
+      console.log(`Balance for account: ${balance.toNumber()}`);
+
+      if (balance.toNumber() === 0) {
+        setFetchingOwnedNfts(false);
+        return; // The user does not own any NFTs in this collection
+      }
+
+      const tokenIdsPromises = [];
+      for (let i = 0; i < balance.toNumber(); i++) {
+        tokenIdsPromises.push(contract.tokenOfOwnerByIndex(account, i));
+      }
+      const tokenIds = await Promise.all(tokenIdsPromises);
+
+      const ownedNftsMetadata = await Promise.all(
+        tokenIds.map(async (tokenId) => {
+          try {
+            const nftInstance = new Nft(168587773, contractAddress, tokenId.toString());
+            const metadata = await nftInstance.metadata();
+            const image = nftInstance.image();
+            return {
+              contractAddress,
+              tokenId: tokenId.toString(),
+              image,
+              name: metadata.name,
+            };
+          } catch (error) {
+            console.error("Error fetching NFT metadata:", error);
+            return null;
+          }
+        })
+      );
+
+      setOwnedNfts(ownedNftsMetadata.filter(nft => nft !== null)); // Filter out any failed fetches
+      console.log('Owned NFTs:', ownedNftsMetadata.filter(nft => nft !== null));
+    } catch (error) {
+      console.error("Failed to fetch owned NFTs:", error);
+    } finally {
+      setFetchingOwnedNfts(false);
+    }
+  };
+
+  useEffect(() => {
+    if (account && currentSection === 'mynft') {
+      fetchOwnedMetadata();
+    }
+  }, [account, currentSection]);
+
+
+  const handleSectionChange = (section) => {
+    setCurrentSection(section);
+  };
+
+  const handleListForSaleClick = (nft) => {
+    console.log("Listing NFT:", nft);
+    setSelectedNFT(nft);
+    setIsListModalOpen(true);
+  };
+
   return (
     <div className='pt-[75px]'>
       <img className='w-full h-[400px] sm:h-[250px] object-cover z-0' src={collectionDetails?.coverImage} alt="Collection Cover" />
@@ -228,12 +281,12 @@ function Collection() {
             {collectionDetails?.description || "This collection has no description yet. Contact the owner of this collection to get whitelisted."}        </p>}
           <p onClick={() => setShowLess(s => !s)} className='text-[14px] cursor-pointer text-right tracking-wide font-Kallisto font-medium sm:text-[12px] text-blue-200 dark:text-blue-100 flex gap-2 justify-end items-center'>{showLess ? 'show less' : 'show more'} <IoIosArrowDown className={showLess && 'rotate-180'} /></p>
 
-
-          {/* <div className='flex justify-start items-center gap-7 relative mt-10 sm:flex-col sm:justify-center sm:gap-2 sm:mt-5'>
+          {/* 
+          <div className='flex justify-start items-center gap-7 relative mt-10 sm:flex-col sm:justify-center sm:gap-2 sm:mt-5'>
             <span className='border-[1px] p-[2px] py-[3px] border-blue-100/90 hover:border-blue-100 sm:w-full'>
-              <button className='bg-blue-100/90 text-white font-Kallisto uppercase font-normal text-[11px] sm:w-full tracking-wider hover:bg-blue-100 py-2 w-[300px] flex justify-center items-center gap-1'><PiRocketLaunchThin className="text-sm"/> Boost</button>
+              <button className='bg-blue-100/90 text-white font-Kallisto uppercase font-normal text-[11px] sm:w-full tracking-wider hover:bg-blue-100 py-2 w-[300px] flex justify-center items-center gap-1'><PiRocketLaunchThin className="text-sm" /> Boost</button>
             </span>
-            <CiCircleInfo className='cursor-pointer text-[16px] text-blue-100 info'/>
+            <CiCircleInfo className='cursor-pointer text-[16px] text-blue-100 info' />
             <div className='opacity-0 border-grey-50 border-[1px] px-3 py-3 bg-white dark:bg-black-500 absolute -top-20 left-[200px] w-[280px] shadow-lg rounded-md sm:left-[30px] sm:-top-9'>
               <p className='text-[12px] tracking-wide font-Kallisto font-medium text-black-400 dark:text-white uppercase sm:text-[11px]'>Each boost is availbe for one month to give every collection a fair price</p>
             </div>
@@ -260,6 +313,23 @@ function Collection() {
             <p className='text-xl tracking-wide font-Kallisto font-semibold text-black-400 dark:text-white sm:text-base'>7589</p>
             <p className='text-[12px] tracking-wide font-Kallisto font-normal text-black-50 dark:text-white sm:text-[10px]'>Total Volume</p>
           </span> */}
+          </div>
+
+          {/* state for sales and mynft */}
+          {/* <div className='flex justify-center items-center mt-4 mb-4'> */}
+          <div className='flex justify-start items-center mt-4 mb-4'>
+            <button
+              className={`px-3 py-1 text-lg font-Kallisto font-bold tracking-wide transition duration-300 ${currentSection === 'sales' ? 'text-blue-200 dark:text-blue-100 border-b-4 border-blue-200 dark:border-blue-100' : 'text-grey-100 dark:text-black-50'}`}
+              onClick={() => handleSectionChange('sales')}
+            >
+              SALES
+            </button>
+            <button
+              className={`px-3 py-1 text-lg font-Kallisto font-bold tracking-wide transition duration-300 ${currentSection === 'mynft' ? 'text-blue-200 dark:text-blue-100 border-b-4 border-blue-200 dark:border-blue-100' : 'text-grey-100 dark:text-black-50'}`}
+              onClick={() => handleSectionChange('mynft')}
+            >
+              MY NFTs
+            </button>
           </div>
 
 
@@ -304,10 +374,6 @@ function Collection() {
                         </div>
                       </div>
                     </span>}
-                    {/* <span className={`rounded-md border-grey-50 py-1.5 px-2 gap-3 bg-white border-[1px] sm:w-full w-[610px] flex justify-start items-center dark:bg-black-600`}>
-              <CiSearch className='text-black-50 text-2xl' />
-              <input type='text' className='outline-none text-black-50 bg-transparent w-[100%]  font-Kallisto text-sm font-normal tracking-wider' placeholder='Search by Name' />
-            </span> */}
                     <span className={`w-[282px] sm:hidden`}>
                       <Dropdown transparent={true} placeHolder={"Filter"} options={[{ id: 'Trending', value: 'Price low to hight' }, { id: 'Top', value: 'price high to low' }]} selectedOption={() => { }} />
                     </span>
@@ -326,9 +392,10 @@ function Collection() {
                     </div>
                   </div>
 
+                  {/* SHOW LISTED NFT/ ON SALES NFT */}
                   <div className='flex justify-start mb-20'>
                     <div className={`flex justify-start items-stretch gap-9 sm:gap-2 flex-wrap mt-9 sm:mt-4`}>
-                      {listings.map((listing, index) => {
+                      {currentSection === 'sales' && listings.map((listing, index) => {
                         return (
                           <div key={index} className={`rounded-lg overflow-hidden card w-[285px] sm:w-[48%] flex flex-col bg-white dark:bg-black-500 shadow-md relative`}>
                             <Link to={`/collection/${contractAddress}/${listing.tokenId}`} className='h-[300px] sm:h-[150px] overflow-hidden'>
@@ -338,11 +405,12 @@ function Collection() {
                               <h1 className='flex justify-start items-center gap-2 text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>{listing.name}
                                 <GoCheckCircleFill className='text-blue-200 text-base sm:text-sm dark:bg-white rounded-full border-blue-200 dark:border-[1px]' />
                               </h1>
-                              <p className='text-xl font-Kallisto font-bold mt-2 sm:mt-1 dark:text-white sm:text-sm flex items-center gap-1'>
+                              <p className='text-xl font-Kallisto font-bold mt-2 sm:mt-1 text-grey-100 dark:text-white sm:text-sm flex items-center gap-1'>
                                 <img src={require('../assets/logo/bttc.png')} alt="BTTC Logo" className='w-5 h-5' />
                                 {ethers.utils.formatEther(String(listing.price))} BTTC
                               </p>
                               <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:text-[10px]'>Last Sale $ 80</p>
+
                             </div>
                             <BuyNow
                               erc721Address={contractAddress}
@@ -353,6 +421,43 @@ function Collection() {
                                 fetchListingsMetadata().then(() => { })
                               }}
                             />
+                          </div>
+                        );
+                      })}
+
+                    </div>
+                  </div>
+
+                  {/* SHOW NFT IN WALLET */}
+                  <div className='flex justify-start mb-0'>
+                    <div className={`flex justify-start items-stretch gap-9 sm:gap-2 flex-wrap mt-1 sm:mt-4`}>
+                      {currentSection === 'mynft' && ownedNfts.map((nft, index) => {
+                        return (
+                          <div key={index} className={`rounded-lg overflow-hidden card w-[285px] sm:w-[48%] flex flex-col bg-white dark:bg-black-500 shadow-md relative`}>
+                            <Link to={`/collection/${contractAddress}/${nft.tokenId}`} className='h-[250px] sm:h-[100px] overflow-hidden'>
+                              <img src={nft.image} alt={nft.name} className='w-full h-full object-cover transition-all ease-linear saturate-100' />
+                            </Link>
+                            <div className='px-6 py-4 sm:px-3 sm:py-22'>
+                              <h1 className='flex justify-start items-center gap-2 text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>{nft.name}
+                                <GoCheckCircleFill className='text-blue-200 text-base sm:text-sm dark:bg-white rounded-full border-blue-200 dark:border-[1px]' />
+                              </h1>
+                              <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:text-[10px]'>Last Sale $ 80</p>
+
+                            </div>
+                            <ListNFTModal
+                              isOpen={isListModalOpen}
+                              onClose={() => {
+                                setIsListModalOpen(false)
+                                fetchOwnedMetadata().then(() => { });
+                              }}
+                              contractAddress={selectedNFT?.contractAddress}
+                              tokenId={selectedNFT?.tokenId}
+                            />
+                            <button onClick={() => handleListForSaleClick(nft)} className='bg-blue-100 w-full py-2 absolute div -bottom-20 cursor-pointer transition-all ease-linear duration-250'>
+                              <p className='text-sm font-Kallisto font-medium uppercase text-center text-white/75 tracking-wider'>
+                                {"List For Sale"}
+                              </p>
+                            </button>
                           </div>
                         );
                       })}
