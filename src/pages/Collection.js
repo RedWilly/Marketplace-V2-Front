@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CiCircleInfo, CiTwitter } from 'react-icons/ci'
 import { GoCheckCircleFill } from 'react-icons/go'
@@ -172,7 +172,7 @@ function Collection() {
   }, [listingsData, contractAddress]);
 
   // fetch owned NFT & metadata
-  const fetchOwnedMetadata = async () => {
+  const fetchOwnedMetadata = useCallback(async () => {
     if (!account) return; // Make sure the user's wallet is connected
 
     setFetchingOwnedNfts(true);
@@ -218,13 +218,15 @@ function Collection() {
     } finally {
       setFetchingOwnedNfts(false);
     }
-  };
+  }, [account, contractAddress]);
+
 
   useEffect(() => {
     if (account && currentSection === 'mynft') {
       fetchOwnedMetadata();
     }
-  }, [account, currentSection]);
+  }, [account, currentSection, fetchOwnedMetadata]);
+
 
 
   const handleSectionChange = (section) => {

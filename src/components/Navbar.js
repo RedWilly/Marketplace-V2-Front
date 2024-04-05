@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { IoMoon, IoSunny } from "react-icons/io5";
 import { CiSearch } from "react-icons/ci";
 import { HiMiniBars3CenterLeft } from "react-icons/hi2";
@@ -19,6 +19,16 @@ function Navbar() {
   const [theme, setTheme] = useState(null);
   const [drawer, setDrawer] = useState(false);
   const { connect, active, account, chainId } = useWallet();
+
+  const [searchAddress, setSearchAddress] = useState('');
+  const navigate = useNavigate();
+
+  // Function to handle search submission
+  const handleSearch = (e) => {
+    if (e.key === 'Enter') {
+      navigate(`/collection/${searchAddress}`);
+    }
+  };
 
   useEffect(() => {
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -51,7 +61,14 @@ function Navbar() {
 
           <span className='z-20 rounded-md border-grey-50 py-1 px-2 sm:gap-2 gap-3 bg-white border-[1px] flex justify-start items-center dark:bg-black-500'>
             <CiSearch className='text-black-50 text-2xl sm:text-lg' />
-            <input type='text' className='outline-none text-black-50 bg-transparent sm:text-[11px] w-[350px] sm:w-[150px] font-Kallisto text-sm font-medium tracking-wider' placeholder='NFTs, collections and users' />
+            <input
+              type='text'
+              className='outline-none text-black-50 bg-transparent sm:text-[11px] w-[350px] sm:w-[150px] font-Kallisto text-sm font-medium tracking-wider'
+              placeholder='Search by collection address...'
+              value={searchAddress}
+              onChange={(e) => setSearchAddress(e.target.value)}
+              onKeyDown={handleSearch}
+            />
           </span>
 
           <HiMiniBars3CenterLeft className='text-black-400 dark:text-white text-[30px] hidden sm:flex' onClick={() => setDrawer(true)} />
