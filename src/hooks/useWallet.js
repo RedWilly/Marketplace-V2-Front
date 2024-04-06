@@ -3,7 +3,7 @@ import { useWeb3React } from '@web3-react/core';
 import { InjectedConnector } from '@web3-react/injected-connector';
 import { ethers } from "ethers";
 
-export const injected = new InjectedConnector({ supportedChainIds: [1, 3, 4, 5, 42, 168587773] });
+export const injected = new InjectedConnector({ supportedChainIds: [199] });
 
 export function useWallet() {
   const { activate, deactivate, active, account, library, chainId } = useWeb3React();
