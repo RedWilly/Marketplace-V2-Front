@@ -297,7 +297,7 @@ function NFTDetail() {
             </h1>
             {isListed && (
               <h1 className='text-black-400 font-Kallisto text-base font-medium dark:text-white uppercase sm:text-[12px]'>
-                {nftDetails.price} ETH
+                {nftDetails.price} BTTC
               </h1>
             )}
           </div>

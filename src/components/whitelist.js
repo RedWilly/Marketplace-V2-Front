@@ -11,11 +11,11 @@ const whitelist = {
         discord: "https://discord.com/",
         youtube: "https://youtube.com/"
     },
-    "Blast Riders": {
-        address: "0x85668115c044e57a1d57e05eb2e2ec9983c0a566",
-        image: require("../assets/IMG/blast_riders.png"),
-        coverImage: "../assets/IMG/BlastRiders_cover.png",
-        description: `Space Pilots in the Blast Space.`
+    "BitTorrent Web3 Domain": {
+        address: "0xA1019535E6b364523949EaF45F4B17521c1cb074",
+        image: require("../assets/IMG/trx.png"),
+        coverImage: "../assets/IMG/nuggets_cover.png",
+        description: `BitTorrent Web3 Domains. Your Perfect Multi-chain Identity.`
     },
     "Ape": {
         address: "0x6a7a53fa2c37a86be698f5c905aca5f114348dbe",
