@@ -33,7 +33,7 @@ function Home() {
         const listingsData = await MarketplaceApi.fetchActiveListings();
         // Assume listingsData is an array of listing objects
         const listingsWithMetadata = await Promise.all(listingsData.map(async (listing) => {
-          const nft = new Nft(168587773, listing.erc721Address, listing.tokenId);
+          const nft = new Nft(199, listing.erc721Address, listing.tokenId);
           const metadata = await nft.metadata();
           return {
             ...listing,
@@ -58,7 +58,7 @@ function Home() {
       try {
         const salesData = await MarketplaceApi.fetchSoldNFTs();
         const salesWithMetadata = await Promise.all(salesData.map(async (sale) => {
-          const nft = new Nft(168587773, sale.erc721Address, sale.tokenId);
+          const nft = new Nft(199, sale.erc721Address, sale.tokenId);
           const metadata = await nft.metadata();
           return {
             ...sale,

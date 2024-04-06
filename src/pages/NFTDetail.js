@@ -176,7 +176,7 @@ function NFTDetail() {
       if (!contractAddress || !tokenId) return;
 
       try {
-        const nft = new Nft(168587773, contractAddress, tokenId);
+        const nft = new Nft(199, contractAddress, tokenId);
         const metadata = await nft.metadata();
 
         // Adjust price extraction logic based on the new listingData state

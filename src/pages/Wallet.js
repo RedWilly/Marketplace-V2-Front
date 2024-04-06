@@ -59,7 +59,7 @@ function Wallet() {
             if (ownedNFTsData && !ownedNFTsLoading && !ownedNFTsError) {
                 // Process each NFT
                 const promises = ownedNFTsData.erc721S.map(async (nft) => {
-                    const nftInstance = new Nft(168587773, nft.address, nft.tokenId);
+                    const nftInstance = new Nft(199, nft.address, nft.tokenId);
                     try {
                         const metadata = await nftInstance.metadata();
                         const image = nftInstance.image();
@@ -89,7 +89,7 @@ function Wallet() {
         if (data && data.listings) {
             // Process each listed NFT
             const promises = data.listings.map(async (listing) => {
-                const nftInstance = new Nft(168587773, listing.erc721Address, listing.tokenId);
+                const nftInstance = new Nft(199, listing.erc721Address, listing.tokenId);
                 try {
                     const metadata = await nftInstance.metadata();
                     const image = nftInstance.image();
@@ -126,7 +126,7 @@ function Wallet() {
 
             // Process each active bid
             const promises = activeBids.map(async (bid) => {
-                const nftInstance = new Nft(168587773, bid.erc721Address, bid.tokenId);
+                const nftInstance = new Nft(199, bid.erc721Address, bid.tokenId);
                 try {
                     const metadata = await nftInstance.metadata();
                     const image = nftInstance.image();
@@ -168,7 +168,7 @@ function Wallet() {
                     const ownedNFT = ownedNFTsData.erc721S.find(nft => nft.tokenId === bid.tokenId && nft.address === bid.erc721Address);
                     if (ownedNFT) {
                         // The user owns the NFT for which there's an active bid
-                        const nftInstance = new Nft(168587773, bid.erc721Address, bid.tokenId);
+                        const nftInstance = new Nft(199, bid.erc721Address, bid.tokenId);
                         try {
                             const metadata = await nftInstance.metadata();
                             const image = nftInstance.image();

@@ -83,7 +83,7 @@ function Collection() {
 
     async function loadCollectionName() {
       try {
-        const nftInstance = new Nft(168587773, contractAddress);
+        const nftInstance = new Nft(199, contractAddress);
         const name = await nftInstance.collectionName();
         console.log("Collection Name:", name);
         setCollectionName(name);
@@ -124,7 +124,7 @@ function Collection() {
               // Store the fetch promise itself in the cache
               const fetchPromise = (async () => {
                 try {
-                  const nft = new Nft(168587773, contractAddress, listing.tokenId);
+                  const nft = new Nft(199, contractAddress, listing.tokenId);
                   const metadata = await nft.metadata();
                   const image = nft.image();
                   console.log("Metadata retrieved:", uniqueId);
@@ -195,7 +195,7 @@ function Collection() {
       const ownedNftsMetadata = await Promise.all(
         tokenIds.map(async (tokenId) => {
           try {
-            const nftInstance = new Nft(168587773, contractAddress, tokenId.toString());
+            const nftInstance = new Nft(199, contractAddress, tokenId.toString());
             const metadata = await nftInstance.metadata();
             const image = nftInstance.image();
             return {

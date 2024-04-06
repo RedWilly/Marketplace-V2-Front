@@ -10,7 +10,7 @@ const ExploreNFThelper = async (AllListing) => {
                 .map(async (listing) => {
                     try {
                         // Fix the typo here from listing.erc721ddress to listing.erc721Address
-                        const nft = new Nft(168587773, listing.erc721Address, listing.tokenId); // Fixed typo
+                        const nft = new Nft(199, listing.erc721Address, listing.tokenId); // Fixed typo
                         const metadata = await nft.metadata();
                         console.log("Fetched Metadata: ", metadata);
                         return {
