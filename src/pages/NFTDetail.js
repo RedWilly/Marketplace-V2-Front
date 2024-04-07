@@ -223,6 +223,21 @@ function NFTDetail() {
     fetchSalesData().then(() => { })
   }
 
+  //fomart M,K,T
+  const formatPrice = (value) => {
+    const num = Number(value);
+
+    if (num >= 1e9) { // For billions
+      return (num / 1e9).toFixed(2) + 'B';
+    } else if (num >= 1e6) { // For millions
+      return (num / 1e6).toFixed(2) + 'M';
+    } else if (num >= 1e3) { // For thousands
+      return (num / 1e3).toFixed(2) + 'K';
+    } else { // For numbers less than 1000
+      return num.toString();
+    }
+  };
+
 
   return (
     <div className='flex justify-between items-start gap-8 sm:gap-5 py-20 sm:py-16 px-28 sm:px-5 sm:pb-10 sm:flex-col-reverse'>
@@ -297,7 +312,7 @@ function NFTDetail() {
             </h1>
             {isListed && (
               <h1 className='text-black-400 font-Kallisto text-base font-medium dark:text-white uppercase sm:text-[12px]'>
-                {nftDetails.price} BTTC
+                {formatPrice(nftDetails.price)} BTTC
               </h1>
             )}
           </div>
@@ -416,7 +431,7 @@ function NFTDetail() {
                 <tbody className=''>
                   {bidsData.map((bid, index) => (
                     <tr className='flex' key={index}>
-                      <td className='py-1 text-[12px] sm:text-[10px] uppercase font-Kallisto font-semibold text-black-400 dark:text-white min-w-[120px]'>{ethers.utils.formatEther(String(bid.value))} ETH</td>
+                      <td className='py-1 text-[12px] sm:text-[10px] uppercase font-Kallisto font-semibold text-black-400 dark:text-white min-w-[120px]'>{formatPrice(ethers.utils.formatEther(String(bid.value)))} WBTTC</td>
                       <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white min-w-[120px]'>{formatExpiration(bid.expireTimestamp)}</td>
                       <td className='text-[12px] sm:text-[10px] font-Kallisto font-normal text-black-400 dark:text-white uppercase min-w-[120px]'>{formatAddress(bid.bidder)}</td>
                       {/* <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white min-w-[120px]'>ACCEPT OFFER</td> */}
@@ -471,7 +486,7 @@ function NFTDetail() {
                       <td className='py-1 text-[12px] sm:text-[10px] uppercase font-Kallisto font-semibold text-black-400 dark:text-white min-w-[100px]'>
                         <a href={`https://sepolia.blastscan.io/tx/${sale.txid}`} target="_blank" rel="noopener noreferrer">View</a>
                       </td>
-                      <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white  min-w-[80px]'>{ethers.utils.formatEther(String(sale.price))} ETH</td>
+                      <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white  min-w-[80px]'>{formatPrice(ethers.utils.formatEther(String(sale.price)))} ETH</td>
                       <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white  min-w-[120px]'>{formatAddressSOLD(sale.seller)}</td>
                       <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white  min-w-[120px]'>{formatAddressSOLD(sale.buyer)}</td>
                       <td className='text-[12px] sm:text-[10px] font-Kallisto font-normal text-black-400 dark:text-white uppercase  min-w-[100px]'>{formatDate(sale.timestamp)}</td>

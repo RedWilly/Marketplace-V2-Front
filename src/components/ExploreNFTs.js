@@ -36,6 +36,21 @@ function ExploreNFTs() {
     fetchData();
   }, []);
 
+  //fomart M,K,T
+  const formatPrice = (value) => {
+    const num = Number(value);
+
+    if (num >= 1e9) { // For billions
+      return (num / 1e9).toFixed(2) + 'B';
+    } else if (num >= 1e6) { // For millions
+      return (num / 1e6).toFixed(2) + 'M';
+    } else if (num >= 1e3) { // For thousands
+      return (num / 1e3).toFixed(2) + 'K';
+    } else { // For numbers less than 1000
+      return num.toString();
+    }
+  };
+
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
@@ -137,7 +152,7 @@ function ExploreNFTs() {
                         <GoCheckCircleFill className='text-blue-200 text-base sm:text-sm dark:bg-white rounded-full border-blue-200 dark:border-[1px]' />
                       </h1>
                       <p className='text-xl font-Kallisto font-bold mt-2 sm:mt-1 text-grey-100 dark:text-white sm:text-sm'>
-                        {ethers.utils.formatEther(String(listing.price))} BTTC
+                        {formatPrice(ethers.utils.formatEther(String(listing.price)))} BTTC
                       </p>
                       <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:tex-[10px]'>Last Sale $ 80</p>
                     </div>

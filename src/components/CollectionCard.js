@@ -9,6 +9,21 @@ import { ethers } from 'ethers';
 function CollectionCard({ name, floor_price, volume }) {
     const { address, image } = whitelist[name];
 
+    //fomart M,K,T
+    const formatPrice = (value) => {
+        const num = Number(value);
+
+        if (num >= 1e9) { // For billions
+            return (num / 1e9).toFixed(2) + 'B';
+        } else if (num >= 1e6) { // For millions
+            return (num / 1e6).toFixed(2) + 'M';
+        } else if (num >= 1e3) { // For thousands
+            return (num / 1e3).toFixed(2) + 'K';
+        } else { // For numbers less than 1000
+            return num.toString();
+        }
+    };
+
     // Ensure that floor_price and volume are not undefined before formatting
     const formattedFloorPrice = floor_price ? ethers.utils.formatEther(String(floor_price)) : 'N/A';
     const formattedVolume = volume ? ethers.utils.formatEther(String(volume)) : 'N/A';
@@ -25,7 +40,7 @@ function CollectionCard({ name, floor_price, volume }) {
                         <p className='text-black-50 text-[12px] font-Kallisto font-medium uppercase dark:text-grey-100 sm:text-[10px]'>Floor</p>
                         <div className='flex items-center'>
                             <img src={require('../assets/logo/bttc.png')} className='w-4 h-4 mr-1' alt="BTTC Logo" />
-                            <p className='text-black-400 text-sm font-Kallisto font-medium uppercase dark:text-white sm:text-[12px]'>{formattedFloorPrice}</p>
+                            <p className='text-black-400 text-sm font-Kallisto font-medium uppercase dark:text-white sm:text-[12px]'>{formatPrice(formattedFloorPrice)}</p>
                         </div>
                     </div>
                     <div className='w-[50%]'>

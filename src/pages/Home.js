@@ -126,6 +126,21 @@ function Home() {
     fetchAndSetFloorPrices(allCollections);
   }, []);
 
+  //fomart M,K,T
+  const formatPrice = (value) => {
+    const num = Number(value);
+
+    if (num >= 1e9) { // For billions
+      return (num / 1e9).toFixed(2) + 'B';
+    } else if (num >= 1e6) { // For millions
+      return (num / 1e6).toFixed(2) + 'M';
+    } else if (num >= 1e3) { // For thousands
+      return (num / 1e3).toFixed(2) + 'K';
+    } else { // For numbers less than 1000
+      return num.toString();
+    }
+  };
+
   return (
     <div className='flex justify-center items-center flex-col w-full py-20 px-20 sm:px-4 sm:pb-10'>
       <div className='w-[1257px] sm:w-[95%]'>
@@ -228,7 +243,7 @@ function Home() {
                   <p className='text-[11px] sm:text-[10px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left w-[65%] sm:w-[55%]'>COLLECTION</p>
                   <div className='flex justify-start gap-10 items-center w-[35%] sm:w-[45%] sm:gap-7'>
                     {/* <p className='text-[11px] sm:text-[10px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left'>FLOOR</p> */}
-                    <p className='text-[11px] sm:text-[10px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left'>VOLUME</p>
+                    <p className='text-[11px] sm:text-[10px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left'>FLOOR</p>
                   </div>
                 </div>
 
@@ -245,7 +260,7 @@ function Home() {
                     <div className='flex justify-start gap-10 items-center w-[30%] sm:w-[35%] sm:gap-8'>
                       <p className='text-sm sm:text-[10px] uppercase font-Kallisto font-semibold text-black-400 dark:text-grey-100 text-left flex items-center'>
                         <img src={require('../assets/logo/bttc.png')} className='w-5 mr-1' alt="BTTC Logo" />
-                        {parseFloat(ethers.utils.formatEther(String(floorPrice || '0'))).toFixed(5)}
+                        {formatPrice(parseFloat(ethers.utils.formatEther(String(floorPrice || '0'))).toFixed(5))}
                       </p>
                     </div>
                   </Link>

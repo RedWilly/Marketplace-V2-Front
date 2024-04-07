@@ -239,6 +239,22 @@ function Collection() {
     setIsListModalOpen(true);
   };
 
+  //fomart M,K,T
+  const formatPrice = (value) => {
+    const num = Number(value);
+
+    if (num >= 1e9) { // For billions
+      return (num / 1e9).toFixed(2) + 'B';
+    } else if (num >= 1e6) { // For millions
+      return (num / 1e6).toFixed(2) + 'M';
+    } else if (num >= 1e3) { // For thousands
+      return (num / 1e3).toFixed(2) + 'K';
+    } else { // For numbers less than 1000
+      return num.toString();
+    }
+  };
+
+
   return (
     <div className='pt-[75px]'>
       <img className='w-full h-[400px] sm:h-[250px] object-cover z-0' src={collectionDetails?.coverImage} alt="Collection Cover" />
@@ -296,15 +312,15 @@ function Collection() {
 
           <div className='flex justify-start items-center gap-14 my-6 sm:flex-wrap sm:gap-7'>
             <span className='flex flex-col gap-2'>
-              <p className='text-xl tracking-wide font-Kallisto font-semibold text-black-400 dark:text-white sm:text-base'> {parseFloat(ethers.utils.formatEther(String(collectionStats.totalVolumeTraded || "0"))).toFixed(5)} BTTC</p>
+              <p className='text-xl tracking-wide font-Kallisto font-semibold text-black-400 dark:text-white sm:text-base'> {formatPrice(parseFloat(ethers.utils.formatEther(String(collectionStats.totalVolumeTraded || "0"))).toFixed(2))} BTTC</p>
               <p className='text-[12px] tracking-wide font-Kallisto font-normal text-black-50 dark:text-white sm:text-[10px]'>TOTAL VOLUME</p>
             </span>
             <span className='flex flex-col gap-2'>
-              <p className='text-xl tracking-wide font-Kallisto font-semibold text-black-400 dark:text-white sm:text-base'> {parseFloat(ethers.utils.formatEther(String(collectionStats.floorPrice || "0"))).toFixed(5)}</p>
+              <p className='text-xl tracking-wide font-Kallisto font-semibold text-black-400 dark:text-white sm:text-base'> {formatPrice(parseFloat(ethers.utils.formatEther(String(collectionStats.floorPrice || "0"))).toFixed(2))}</p>
               <p className='text-[12px] tracking-wide font-Kallisto font-normal text-black-50 dark:text-white sm:text-[10px]'>FLOOR PRICE</p>
             </span>
             <span className='flex flex-col gap-2'>
-              <p className='text-xl tracking-wide font-Kallisto font-semibold text-black-400 dark:text-white sm:text-base'>{parseFloat(ethers.utils.formatEther(String(collectionStats.totalVolumeTradedWETH || "0"))).toFixed(5)}</p>
+              <p className='text-xl tracking-wide font-Kallisto font-semibold text-black-400 dark:text-white sm:text-base'>{formatPrice(parseFloat(ethers.utils.formatEther(String(collectionStats.totalVolumeTradedWETH || "0"))).toFixed(2))}</p>
               <p className='text-[12px] tracking-wide font-Kallisto font-normal text-black-50 dark:text-white sm:text-[10px]'>WBTTC VOLUME</p>
             </span>
             <span className='flex flex-col gap-2'>
@@ -409,7 +425,8 @@ function Collection() {
                               </h1>
                               <p className='text-xl font-Kallisto font-bold mt-2 sm:mt-1 text-grey-100 dark:text-white sm:text-sm flex items-center gap-1'>
                                 <img src={require('../assets/logo/bttc.png')} alt="BTTC Logo" className='w-5 h-5' />
-                                {ethers.utils.formatEther(String(listing.price))} BTTC
+                                {/* {ethers.utils.formatEther(String(listing.price))}  */}
+                                {formatPrice(parseFloat(ethers.utils.formatEther(String(listing.price))).toFixed(2))} BTTC
                               </p>
                               <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:text-[10px]'>Last Sale $ 80</p>
 
