@@ -83,7 +83,7 @@ const MakeOffer = ({ isOpen, onClose, erc721Address, tokenId, nft, onOfferSubmit
                 duration: 5000,
                 isClosable: true,
             });
-            if(onOfferSubmitted) {
+            if (onOfferSubmitted) {
                 onOfferSubmitted();
             }
         } catch (error) {
@@ -139,8 +139,8 @@ const MakeOffer = ({ isOpen, onClose, erc721Address, tokenId, nft, onOfferSubmit
                 </div>
                 <div className='flex gap-4'>
                     <div className='flex flex-col gap-1 w-[50%]'>
-                        <label className="block text-sm text-black-50 font-Kallisto dark:text-grey-100" htmlFor="amount">Amount in WETH</label>
-                        <input className="w-full p-2 mb-3 text-sm bg-transparent border-[1px] border-black-50 rounded-md outline-none text-black-50 font-Kallisto dark:text-grey-100" type="text" id="amount" value={value} onChange={(e) => setValue(e.target.value)} placeholder="Enter amount in WETH" />
+                        <label className="block text-sm text-black-50 font-Kallisto dark:text-grey-100" htmlFor="amount">Amount in WBTT</label>
+                        <input className="w-full p-2 mb-3 text-sm bg-transparent border-[1px] border-black-50 rounded-md outline-none text-black-50 font-Kallisto dark:text-grey-100" type="text" id="amount" value={value} onChange={(e) => setValue(e.target.value)} placeholder="Enter amount in WBTT" />
                     </div>
                     <div className='flex flex-col gap-1 w-[50%]'>
                         <label className="block text-sm text-black-50 font-Kallisto dark:text-grey-100" htmlFor="duration">Duration</label>

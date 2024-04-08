@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const apiBaseURL = 'https://rooni.site/market/api'; //http://localhost:3002/api
+// const apiBaseURL = 'https://rooni.site/market/api'; //http://localhost:3002/api
+const apiBaseURL = process.env.REACT_APP_API_BASE_URL;
 
 class MarketplaceApi {
     constructor() {

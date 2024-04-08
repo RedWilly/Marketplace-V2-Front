@@ -77,7 +77,7 @@ const ListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
             console.error('Failed to list NFT:', error);
             toast({
                 title: 'Listing Failed',
-                description: 'Failed to list NFT. Please check the console for details.',
+                description: 'Failed to list NFT. You might not be the owner of this asset.',
                 status: 'error',
                 duration: 5000,
                 isClosable: true,
@@ -101,8 +101,8 @@ const ListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
                 </div>
                 <div className='flex gap-4'>
                     <div className="mb-4 w-[50%] flex-col flex gap-1">
-                        <label htmlFor="price" className="text-sm text-black-50 font-Kallisto dark:text-grey-100">Price in ETH</label>
-                        <input type="text" id="price" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full p-2 mb-3 text-sm bg-transparent border-[1px] border-black-50 rounded-md outline-none text-black-50 font-Kallisto dark:text-grey-100" placeholder="Enter price in ETH" />
+                        <label htmlFor="price" className="text-sm text-black-50 font-Kallisto dark:text-grey-100">Price in BTTC</label>
+                        <input type="text" id="price" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full p-2 mb-3 text-sm bg-transparent border-[1px] border-black-50 rounded-md outline-none text-black-50 font-Kallisto dark:text-grey-100" placeholder="Enter price in BTTC" />
                     </div>
                     <div className="mb-4 w-[50%] flex-col flex gap-1">
                         <label htmlFor="duration" className="text-sm text-black-50 font-Kallisto dark:text-grey-100">Duration</label>
