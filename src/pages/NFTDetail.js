@@ -238,6 +238,20 @@ function NFTDetail() {
     }
   };
 
+  //format large tokenid like domain names
+  const formatTokenId = (tokenId) => {
+    const tokenIdStr = tokenId.toString();
+    const maxLength = 9;
+
+    if (tokenIdStr.length <= maxLength) {
+      return tokenIdStr;
+    }
+
+    const start = tokenIdStr.substring(0, 5);
+    const end = tokenIdStr.substring(tokenIdStr.length - 1, tokenIdStr.length);
+    return `${start}...${end}`;
+  };
+
 
   return (
     <div className='flex justify-between items-start gap-8 sm:gap-5 py-20 sm:py-16 px-28 sm:px-5 sm:pb-10 sm:flex-col-reverse'>
@@ -394,7 +408,7 @@ function NFTDetail() {
             <div className='mt-2 flex flex-col gap-2'>
               <div className='flex justify-between items-center'>
                 <p className='text-[12px] text-black-50 dark:text-grey-100 font-Kallisto font-medium'>Token ID</p>
-                <p className='text-[12px] text-black-400 cursor-pointer font-semibold dark:text-white font-Kallisto underline hover:no-underline'>{tokenId}</p>
+                <p className='text-[12px] text-black-400 cursor-pointer font-semibold dark:text-white font-Kallisto underline hover:no-underline'>{formatTokenId(tokenId)}</p>
               </div>
               <div className='flex justify-between items-center'>
                 <p className='text-[12px] text-black-50 dark:text-grey-100 font-Kallisto font-medium'>Token standard</p>
