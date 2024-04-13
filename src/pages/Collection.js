@@ -482,8 +482,13 @@ function Collection() {
                               tokenId={listing.tokenId}
                               price={listing.price}
                               className='text-sm font-Kallisto font-medium uppercase text-center text-white/75 tracking-wider bg-blue-100 w-full py-2 absolute div -bottom-20 cursor-pointer transition-all ease-linear duration-250'
+                              // onSuccess={() => {
+                              //   nftStateUpdated().then(() => { })
+                              // }}
                               onSuccess={() => {
-                                fetchListingsMetadata().then(() => { })
+                                setTimeout(() => {
+                                  nftStateUpdated().then(() => { })
+                                }, 500);
                               }}
                             />
                           </div>
