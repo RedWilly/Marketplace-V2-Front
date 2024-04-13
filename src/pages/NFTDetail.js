@@ -10,6 +10,8 @@ import useDisclosure from '../hooks/useDisclosure';
 // web3 - subgraph
 import Nft from "../utils/Nft";
 import MarketplaceApi from "../utils/MarketplaceApi"; // Ensure this is imported
+import whitelist from '../components/whitelist';
+
 
 import { ethers } from 'ethers';
 import { useWallet } from '../hooks/useWallet';
@@ -94,10 +96,16 @@ function NFTDetail() {
 
   // Utility function to format the timestamp
   const formatDate = (timestamp) => {
-    const now = new Date();
-    const eventDate = new Date(timestamp)
-    const diffInSeconds = Math.floor((now - eventDate) / 1000);
+    // convert from string to number if necessary.
+    const dateInput = typeof timestamp === 'string' ? parseInt(timestamp, 10) : timestamp;
 
+    const now = new Date();
+    const eventDate = new Date(dateInput);
+    if (isNaN(eventDate.getTime())) {
+      return "Invalid date";
+    }
+
+    const diffInSeconds = Math.floor((now - eventDate) / 1000);
     const minute = 60;
     const hour = minute * 60;
     const day = hour * 24;
@@ -217,7 +225,7 @@ function NFTDetail() {
 
   const nftStateUpdated = async function () {
     console.log('Nft state updated')
-    // Refetch Graph data
+    // Refetch  data
     fetchActiveListing().then(() => { })
     fetchActiveBids().then(() => { })
     fetchSalesData().then(() => { })
@@ -295,7 +303,10 @@ function NFTDetail() {
         <Link to={`/collection/${contractAddress}`} className='text-[12px] sm:text-[10px] text-blue-200 dark:text-blue-100 capitalize font-Kallisto font-medium underline flex items-center gap-2'>
           {/* using {nftDetails.name} to get the collection name while remove the part after and including the "#" character. */}
           {nftDetails.name ? nftDetails.name.split(" #")[0] : "Loading..."}
-          <GoCheckCircleFill className='text-blue-200 text-sm dark:bg-white rounded-full border-blue-200 dark:border-[1px]' />
+          {/* Conditionally render GoCheckCircleFill if the contract address is in the whitelist */}
+          {Object.values(whitelist).some(entry => entry.address.toLowerCase() === contractAddress) && (
+            <GoCheckCircleFill className='text-blue-200 text-sm dark:bg-white rounded-full border-blue-200 dark:border-[1px]' />
+          )}
         </Link>
 
         <div className='flex justify-between items-center relative'>
@@ -498,9 +509,9 @@ function NFTDetail() {
                   {salesData.map((sale, index) => (
                     <tr className='flex' key={index}>
                       <td className='py-1 text-[12px] sm:text-[10px] uppercase font-Kallisto font-semibold text-black-400 dark:text-white min-w-[100px]'>
-                        <a href={`https://sepolia.blastscan.io/tx/${sale.txid}`} target="_blank" rel="noopener noreferrer">View</a>
+                        <a href={`https://bttcscan.com/tx/${sale.txid}`} target="_blank" rel="noopener noreferrer">View</a>
                       </td>
-                      <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white  min-w-[80px]'>{formatPrice(ethers.utils.formatEther(String(sale.price)))} ETH</td>
+                      <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white  min-w-[80px]'>{formatPrice(ethers.utils.formatEther(String(sale.price)))} BTT</td>
                       <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white  min-w-[120px]'>{formatAddressSOLD(sale.seller)}</td>
                       <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white  min-w-[120px]'>{formatAddressSOLD(sale.buyer)}</td>
                       <td className='text-[12px] sm:text-[10px] font-Kallisto font-normal text-black-400 dark:text-white uppercase  min-w-[100px]'>{formatDate(sale.timestamp)}</td>

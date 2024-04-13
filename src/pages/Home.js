@@ -202,7 +202,7 @@ function Home() {
               <span className='text-[12px] text-black-50 capitalize font-medium dark:text-[#babac9] whitespace-nowrap'>Total Royalties</span>
             </p>
           </div>
-          <div className='flex justify-start items-center gap-3'>
+          {/* <div className='flex justify-start items-center gap-3'>
             <span className='bg-grey-100 rounded-full p-[3px] sm:p-[2px] flex justify-center items-center'>
               <FaUser className='text-white text-lg' />
             </span>
@@ -210,7 +210,7 @@ function Home() {
               950
               <span className='text-[12px] text-black-50 capitalize font-medium dark:text-[#babac9] whitespace-nowrap'>Unique Wallet</span>
             </p>
-          </div>
+          </div> */}
           <div className='flex justify-start items-center gap-3'>
             <span className='bg-grey-100 rounded-full p-[3px] sm:p-[2px] flex justify-center items-center'>
               <FaCrown className='text-white text-lg' />
@@ -225,7 +225,7 @@ function Home() {
         <div className='flex flex-col justify-start items-start mt-12 w-full'>
           <div className='flex justify-between items-center w-full relative'>
             <div className='flex justify-start gap-2 items-center sm:flex-col sm:flex-wrap sm:items-start sm:w-full'>
-              <h1 className='text-black-400 font-Kallisto font-semibold text-2xl text-left dark:text-white tracking-wider sm:text-base'>XRPL NFT Collections</h1>
+              <h1 className='text-black-400 font-Kallisto font-semibold text-2xl text-left dark:text-white tracking-wider sm:text-base'>BTTC NFT Collections</h1>
               <div className='ml-4 sm:ml-0 flex justify-start sm:w-full gap-4'>
                 <span className='w-[150px] sm:w-[50%]'>
                   <Dropdown options={[{ id: 'Trending', value: 'Trending' }, { id: 'Top', value: 'Top' }]} selectedOption={() => { }} />

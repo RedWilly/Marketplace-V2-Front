@@ -4,24 +4,27 @@ const whitelist = {
     "Nuggets": {
         address: "0xb9eE65be6b413fcB711ced63cCA8EFFB3AE445e7",
         image: require("../assets/IMG/nuggets.png"),
-        coverImage: require("../assets/IMG/nuggets_cover.png"),
+        coverImage: require("../assets/IMG/nugget_cover1.jpg"),
         description: `Nuggets are 10000 of the hottest Fusion of Cackles and Mutants on the  BitTorrent each having it's own unique properties.`,
-        twitter: "https://x.com/",
-        telegram: "https://t.me/",
-        discord: "https://discord.com/",
-        youtube: "https://youtube.com/"
+        website: "https://nuggets.cfd/",
+        // twitter: "https://x.com/",
+        // telegram: "https://t.me/",
+        // discord: "https://discord.com/",
+        // youtube: "https://youtube.com/"
     },
     "BitTorrent Web3 Domain": {
         address: "0xA1019535E6b364523949EaF45F4B17521c1cb074",
         image: require("../assets/IMG/trx.png"),
-        coverImage: "../assets/IMG/nuggets_cover.png",
-        description: `BitTorrent Web3 Domains. Your Perfect Multi-chain Identity.`
+        coverImage: require("../assets/IMG/btt_cover.png"),
+        description: `BitTorrent Web3 Domains. Your Perfect Multi-chain Identity.`,
+        website: "https://trxdomains.xyz/bttc",
+        twitter: "https://twitter.com/TrxDomains"
     },
-    "Ape": {
-        address: "0x6a7a53fa2c37a86be698f5c905aca5f114348dbe",
-        image: require("../assets/IMG/ape.png"),
-        coverImage: "../assets/IMG/Ape_cover.png",
-        description: `This is a token with "Turkis" as Background.`
+    "Ohayo": {
+        address: "0xA27A2A0F6A60574A6084A9a1A894c173237cED24",
+        image: require("../assets/IMG/ohayo.png"),
+        coverImage: "../assets/IMG/nuggets_cover.png",
+        description: `This is a collection with "Turkis" as Background.`
     },
     "zkOkayDog": {
         address: "0xf1b2fe759e3cccf89e16497d5b3f8a9db6cfba76",

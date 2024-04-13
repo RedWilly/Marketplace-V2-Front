@@ -48,6 +48,23 @@ class MarketplaceApi {
         }
     }
 
+    // Fetches the last sale for a specific NFT
+    async fetchLastSaleForNFT(erc721Address, tokenId) {
+        try {
+            const response = await axios.get(`${this.apiBaseURL}/nfts/${erc721Address}/${tokenId}/last-sale`);
+            if (response.data && response.data.price) {
+                return response.data;
+            } else {
+                console.log('No last sale data found for:', erc721Address, tokenId);
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching the last sale for NFT:', erc721Address, tokenId, error);
+            return null;
+        }
+    }
+
+
     // -- LISTING SECTION ---
     // fetch active listings
     async fetchActiveListings() {

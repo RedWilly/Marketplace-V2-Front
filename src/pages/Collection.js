@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { CiCircleInfo, CiTwitter } from 'react-icons/ci'
 import { GoCheckCircleFill } from 'react-icons/go'
 import { IoIosArrowDown } from 'react-icons/io'
-import { PiDiscordLogoLight, PiTelegramLogoFill, PiYoutubeLogoLight, PiRocketLaunchThin } from 'react-icons/pi'
+import { PiDiscordLogoLight, PiTelegramLogoFill, PiYoutubeLogoLight, PiGlobe, PiRocketLaunchThin } from 'react-icons/pi'
 import { Link } from 'react-router-dom'
 import Dropdown from '../components/Dropdown'
 import Card2 from '../components/Card2'
@@ -19,6 +19,7 @@ import whitelist from '../components/whitelist';
 
 import BuyNow from '../components/Market/BuyNow';
 import ListNFTModal from '../components/Market/ListNFTModal';
+import DeListNFTModal from '../components/Market/DeListNFTModal';
 
 
 
@@ -26,13 +27,15 @@ function Collection() {
   const [showLess, setShowLess] = useState(true)
   const [sidebar, setSideBar] = useState(window.innerWidth < 768 ? false : true)
 
-  const { account } = useWallet();
+  const { active, account } = useWallet();
 
   let { contractAddress } = useParams();
   contractAddress = contractAddress.toLowerCase();
   const [collectionName, setCollectionName] = useState('');
   const [listings, setListings] = useState([]);
   const [listingsData, setListingsData] = useState({ listings: [] });
+  const [isSeller, setIsSeller] = useState(false);
+
 
   const [collectionDetails, setCollectionDetails] = useState({});
   const [nftCount, setNftCount] = useState(0); //updates Listings count to display :)
@@ -45,6 +48,10 @@ function Collection() {
   //listing nft
   const [isListModalOpen, setIsListModalOpen] = useState(false);
   const [selectedNFT, setSelectedNFT] = useState({});
+
+  //cancel lising
+  const [isCancelBidModalOpen, setIsCancelBidModalOpen] = useState(false);
+
 
 
 
@@ -113,11 +120,18 @@ function Collection() {
     const currentTimestamp = Math.floor(Date.now() / 1000);
     if (listingsData && listingsData.listings) {
       console.log("Processing listings data...");
+      let sellerIsCurrentUser = false;  // Flag to check if the current user is the seller
+
       const updatedListings = await Promise.all(
         listingsData.listings
           .filter(listing => parseInt(listing.expireTimestamp) > currentTimestamp)
           .map(async (listing) => {
             const uniqueId = `${contractAddress}-${listing.tokenId}`;
+
+            // Check if the current user is the seller
+            if (account && listing.seller && listing.seller.toLowerCase() === account.toLowerCase()) {
+              sellerIsCurrentUser = true;
+            }
 
             // Start fetch or await existing fetch
             if (!metadataCache[uniqueId]) {
@@ -128,6 +142,9 @@ function Collection() {
                   const metadata = await nft.metadata();
                   const image = nft.image();
                   console.log("Metadata retrieved:", uniqueId);
+                  const checksumAddress = ethers.utils.getAddress(contractAddress);
+                  const lastSale = await MarketplaceApi.fetchLastSaleForNFT(checksumAddress, listing.tokenId);
+                  // console.log('API call returned for Last Sale:', lastSale);
 
                   // Once the data is fetched, replace the promise with actual data
                   metadataCache[uniqueId] = metadata;
@@ -137,6 +154,7 @@ function Collection() {
                     ...listing,
                     image: image,
                     name: metadata.name,
+                    lastSale: lastSale ? lastSale.price : null
                   };
                 } catch (error) {
                   console.error("Error fetching token URI for listing:", listing, error);
@@ -160,9 +178,12 @@ function Collection() {
       );
 
       console.log("Updated Listings with Metadata:", updatedListings);
+      console.log("Is current user the seller? ", sellerIsCurrentUser);  // Log the status of the current user being a seller
+
       const validListings = updatedListings.filter(listing => listing !== null);
       setListings(validListings);
       setNftCount(validListings.length);
+      setIsSeller(sellerIsCurrentUser);
     }
   };
 
@@ -198,11 +219,15 @@ function Collection() {
             const nftInstance = new Nft(199, contractAddress, tokenId.toString());
             const metadata = await nftInstance.metadata();
             const image = nftInstance.image();
+            const checksumAddress = ethers.utils.getAddress(contractAddress);
+            const lastSale = await MarketplaceApi.fetchLastSaleForNFT(checksumAddress, tokenId.toString());
+
             return {
               contractAddress,
               tokenId: tokenId.toString(),
               image,
               name: metadata.name,
+              lastSale: lastSale ? lastSale.price : null
             };
           } catch (error) {
             console.error("Error fetching NFT metadata:", error);
@@ -254,6 +279,13 @@ function Collection() {
     }
   };
 
+  const nftStateUpdated = async function () {
+    console.log('Nft state updated')
+    // Refetch  data
+    fetchOwnedMetadata().then(() => { })
+    fetchListingsMetadata().then(() => { })
+  }
+
 
   return (
     <div className='pt-[75px]'>
@@ -266,11 +298,24 @@ function Collection() {
             <img className='w-full h-full object-cover rounded-lg' src={collectionDetails?.image || require("../assets/IMG/pfp_not_found.png")} alt="Profile PFP" />
           </div>
           <div className='flex justify-between items-center mt-10 sm:mt-5'>
-            <h1 className='flex justify-start items-center gap-4 text-black-400 font-Kallisto font-semibold text-[30px] dark:text-white uppercas sm:text-2xl'>{collectionName}
+            {/* <h1 className='flex justify-start items-center gap-4 text-black-400 font-Kallisto font-semibold text-[30px] dark:text-white uppercas sm:text-2xl'>{collectionName}
               <GoCheckCircleFill className='text-purple text-xl dark:bg-white rounded-full border-purple dark:border-[1px]' />
+            </h1> */}
+            <h1 className='flex justify-start items-center gap-4 text-black-400 font-Kallisto font-semibold text-[30px] dark:text-white uppercas sm:text-2xl'>
+              {collectionName}
+              {/* Conditionally render GoCheckCircleFill if the contract address is in the whitelist */}
+              {Object.values(whitelist).some(entry => entry.address.toLowerCase() === contractAddress) && (
+                <GoCheckCircleFill className='text-purple text-xl dark:bg-white rounded-full border-purple dark:border-[1px]' />
+              )}
             </h1>
 
+
             <div className='flex justify-end items-center gap-3 sm:gap-1 sm:-mt-[120px]'>
+              {collectionDetails.website && (
+                <a href={collectionDetails.website} target="_blank" rel="noopener noreferrer">
+                  <PiGlobe className='cursor-pointer text-2xl text-black-400 dark:text-grey-100' />
+                </a>
+              )}
               {collectionDetails.twitter && (
                 <a href={collectionDetails.twitter} target="_blank" rel="noopener noreferrer">
                   <CiTwitter className='cursor-pointer text-2xl text-black-400 dark:text-grey-100' />
@@ -428,8 +473,9 @@ function Collection() {
                                 {/* {ethers.utils.formatEther(String(listing.price))}  */}
                                 {formatPrice(parseFloat(ethers.utils.formatEther(String(listing.price))).toFixed(2))} BTTC
                               </p>
-                              <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:text-[10px]'>Last Sale $ 80</p>
-
+                              <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:text-[10px]'>
+                                {listing.lastSale ? `Last Sale ${parseFloat(ethers.utils.formatEther(String(listing.lastSale))).toFixed(2)}` : "No sales yet"}
+                              </p>
                             </div>
                             <BuyNow
                               erc721Address={contractAddress}
@@ -460,8 +506,9 @@ function Collection() {
                               <h1 className='flex justify-start items-center gap-2 text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>{nft.name}
                                 <GoCheckCircleFill className='text-blue-200 text-base sm:text-sm dark:bg-white rounded-full border-blue-200 dark:border-[1px]' />
                               </h1>
-                              <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:text-[10px]'>Last Sale $ 80</p>
-
+                              <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:text-[10px]'>
+                                {nft.lastSale ? `Last Sale ${parseFloat(ethers.utils.formatEther(String(nft.lastSale))).toFixed(2)}` : "No sales yet"}
+                              </p>
                             </div>
                             <ListNFTModal
                               isOpen={isListModalOpen}
