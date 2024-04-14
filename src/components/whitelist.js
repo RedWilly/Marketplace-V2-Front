@@ -23,7 +23,7 @@ const whitelist = {
     "Ohayo": {
         address: "0xA27A2A0F6A60574A6084A9a1A894c173237cED24",
         image: require("../assets/IMG/ohayo.png"),
-        coverImage: "../assets/IMG/cover.png",
+        coverImage: require("../assets/IMG/cover.png"),
         description: `This is a collection with "Turkis" as Background.`
     },
     "zkOkayDog": {
