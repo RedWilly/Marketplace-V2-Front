@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom'
 import { GoCheckCircleFill } from 'react-icons/go'
 
 import { ethers } from 'ethers';
-// import ERC721ABI from '../abi/erc721.json';
 import { useWallet } from '../hooks/useWallet';
-import { useQuery } from '@apollo/client';
-import { GET_LISTED_NFTS_FOR_ADDRESS, GET_BIDS_BY_ADDRESS, GET_ALL_NFTS_OWNED_BY_USER, GET_ALL_ACTIVE_BIDS } from '../graphql/Queries';
-import Nft from "../utils/Nft";
 
+import Nft from "../utils/Nft";
+import whitelist from '../components/whitelist';
+import MarketplaceApi from "../utils/MarketplaceApi"; //middleware api for getting nft details and collection stats
+import ERC721ABI from '../abi/erc721.json';
 
 import ListNFTModal from '../components/Market/ListNFTModal';
 import CancelBidModal from '../components/Market/CancelBidModel';
@@ -19,7 +19,8 @@ function Wallet() {
     const [state, setState] = useState(0)
     const { account } = useWallet();
     //const [nfts, setNfts] = useState([1, 2, 3, 4, 5, 6, 7]) chnage
-    const [nfts, setNfts] = useState([]);
+    const [unfilteredNfts, setUnfilteredNfts] = useState([]); // store all owned NFTs
+    const [nfts, setNfts] = useState([]); //store all owned nft filtered against listed 
     const [listings, setListings] = useState([]);
     const [bids, setBids] = useState([]);
     const [Offers, setOffers] = useState([]);
@@ -32,97 +33,173 @@ function Wallet() {
     const [selectedOffer, setSelectedOffer] = useState(null);
     const [isAcceptOfferModalOpen, setIsAcceptOfferModalOpen] = useState(false);
 
-    // Fetching Listed NFTs for the connected wallet
-    const { data, loading, error } = useQuery(GET_LISTED_NFTS_FOR_ADDRESS, {
-        variables: { seller: account?.toLowerCase() },
-        skip: !account, // Skip this query if account is not available
-    });
+    // //fetch nft for owned(assets)
+    // useEffect(() => {
+    //     const fetchNFTs = async () => {
+    //         if (!account) return;
 
-    // Fetching Active Bids for the connected wallet
-    const { data: bidsData } = useQuery(GET_BIDS_BY_ADDRESS, {
-        variables: { bidder: account?.toLowerCase() },
-        skip: !account, // Skip this query if account is not available
-    });
+    //         const provider = new ethers.providers.Web3Provider(window.ethereum);
+    //         let ownedNfts = [];
 
-    // Use the useQuery hook to fetch NFTs owned by the user with skip option
-    const { data: ownedNFTsData, loading: ownedNFTsLoading, error: ownedNFTsError } = useQuery(GET_ALL_NFTS_OWNED_BY_USER, {
-        variables: { owner: account?.toLowerCase() },
-        skip: !account, // Skip this query if account is not available
-    });
+    //         for (let key of Object.keys(whitelist)) {
+    //             const collection = whitelist[key];
+    //             const contract = new ethers.Contract(collection.address, ERC721ABI, provider);
 
-    //get all active bids
-    const { data: allbids } = useQuery(GET_ALL_ACTIVE_BIDS);
+    //             try {
+    //                 const balance = await contract.balanceOf(account);
+    //                 if (balance.isZero()) continue;
 
-    //fetch nft for owned(assets)
-    useEffect(() => {
-        const fetchNFTMetadataAndImage = async () => {
-            if (ownedNFTsData && !ownedNFTsLoading && !ownedNFTsError) {
-                // Process each NFT
-                const promises = ownedNFTsData.erc721S.map(async (nft) => {
-                    const nftInstance = new Nft(199, nft.address, nft.tokenId);
-                    try {
-                        const metadata = await nftInstance.metadata();
-                        const image = nftInstance.image();
-                        // Assuming you need both the name from the metadata and the image URL
-                        return {
-                            name: metadata.name,
-                            image,
-                            tokenId: nft.tokenId,
-                            contractAddress: nft.address
-                        };
-                    } catch (error) {
-                        console.error('Error fetching NFT data:', error);
-                        return null;
-                    }
-                });
+    //                 for (let i = 0; i < balance.toNumber(); i++) {
+    //                     const tokenId = await contract.tokenOfOwnerByIndex(account, i);
+    //                     const nftInstance = new Nft(199, collection.address, tokenId.toString());
+    //                     const metadata = await nftInstance.metadata();
+    //                     const image = nftInstance.image();
 
-                const results = await Promise.all(promises);
-                // Filter out any null results (failed fetches)
-                setNfts(results.filter((nft) => nft !== null));
-            }
-        };
+    //                     ownedNfts.push({
+    //                         name: metadata.name,
+    //                         image: image,
+    //                         tokenId: tokenId.toString(),
+    //                         contractAddress: collection.address
+    //                     });
+    //                 }
+    //             } catch (error) {
+    //                 console.error(`Error fetching NFTs from ${collection.address}:`, error);
+    //             }
+    //         }
 
-        fetchNFTMetadataAndImage();
-    }, [ownedNFTsData, ownedNFTsLoading, ownedNFTsError]);
+    //         setNfts(ownedNfts);
+    //     };
 
-    const fetchListingMetadataAndImage = async () => {
-        if (data && data.listings) {
-            // Process each listed NFT
-            const promises = data.listings.map(async (listing) => {
+    //     fetchNFTs();
+    // }, [account]);
+
+
+    // const fetchListings = async () => {
+    //     if (!account) return;
+
+    //     try {
+    //         // Fetch listings by seller address
+    //         const fetchedListings = await MarketplaceApi.fetchListingsBySeller(account);
+
+    //         // Process each listed NFT
+    //         const promises = fetchedListings.map(async (listing) => {
+    //             const nftInstance = new Nft(199, listing.erc721Address, listing.tokenId);
+    //             try {
+    //                 const metadata = await nftInstance.metadata();
+    //                 const image = nftInstance.image();
+    //                 return {
+    //                     contractAddress: listing.erc721Address,
+    //                     tokenId: listing.tokenId,
+    //                     price: listing.price,
+    //                     expireTimestamp: listing.expireTimestamp,
+    //                     name: metadata.name,
+    //                     image
+    //                 };
+    //             } catch (error) {
+    //                 console.error('Error fetching listing data:', error);
+    //                 return null;
+    //             }
+    //         });
+
+    //         const results = await Promise.all(promises);
+    //         // Filter out any null results (failed fetches)
+    //         setListings(results.filter((listing) => listing !== null));
+    //     } catch (error) {
+    //         console.error('Error fetching listings:', error);
+    //     }
+    // };
+    // useEffect(() => {
+
+    //     fetchListings();
+    // }, [account]);
+
+
+    async function fetchData() {
+        if (!account) return;
+
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        let allNfts = [];
+        let listedTokenIds = new Set(); // Use a Set to store listed token IDs for quick lookup
+
+        // Fetch listings by seller address
+        try {
+            const fetchedListings = await MarketplaceApi.fetchListingsBySeller(account);
+            const listingPromises = fetchedListings.map(async (listing) => {
                 const nftInstance = new Nft(199, listing.erc721Address, listing.tokenId);
                 try {
                     const metadata = await nftInstance.metadata();
                     const image = nftInstance.image();
+                    listedTokenIds.add(listing.tokenId + listing.erc721Address); // Add to set for quick reference
                     return {
-                        contractAddress: listing.erc721Address,
-                        tokenId: listing.tokenId,
-                        price: listing.price,
-                        expireTimestamp: listing.expireTimestamp,
+                        ...listing,
                         name: metadata.name,
-                        image
+                        image: image
                     };
                 } catch (error) {
-                    console.error('Error fetching listing data:', error);
+                    console.error('Error fetching listing data for token ID:', listing.tokenId, error);
                     return null;
                 }
             });
 
-            const results = await Promise.all(promises);
-            // Filter out any null results (failed fetches)
-            setListings(results.filter((listing) => listing !== null));
+            const listedNfts = (await Promise.all(listingPromises)).filter(nft => nft !== null);
+            setListings(listedNfts);
+        } catch (error) {
+            console.error('Error fetching listings:', error);
         }
-    };
 
-    //fetch listnft of the user
+        // Fetch NFTs owned by the user across all whitelisted collections
+        for (let key of Object.keys(whitelist)) {
+            const collection = whitelist[key];
+            const contract = new ethers.Contract(collection.address, ERC721ABI, provider);
+
+            try {
+                const balance = await contract.balanceOf(account);
+                if (balance.isZero()) continue;
+
+                for (let i = 0; i < balance.toNumber(); i++) {
+                    const tokenId = await contract.tokenOfOwnerByIndex(account, i);
+                    const uniqueTokenId = tokenId.toString() + collection.address;
+
+                    const nftInstance = new Nft(199, collection.address, tokenId.toString());
+                    const metadata = await nftInstance.metadata();
+                    const image = nftInstance.image();
+
+                    let nftData = {
+                        name: metadata.name,
+                        image: image,
+                        tokenId: tokenId.toString(),
+                        contractAddress: collection.address
+                    };
+
+                    allNfts.push(nftData);
+                    if (!listedTokenIds.has(uniqueTokenId)) {
+                        // Only add to assets if not listed
+                        nfts.push(nftData);
+                    }
+                }
+            } catch (error) {
+                console.error(`Error fetching NFTs from ${collection.address}:`, error);
+            }
+        }
+
+        setNfts(nfts); // Set filtered NFTs to display in Assets
+        setUnfilteredNfts(allNfts); // Set all fetched NFTs whether listed or not
+    }
+
     useEffect(() => {
-        fetchListingMetadataAndImage().then(() => { });
-    }, [data]);
 
-    const fetchBidMetadataAndImage = async () => {
-        if (bidsData && bidsData.bids) {
+        fetchData();
+    }, [account]);
+
+
+    const fetchBids = async () => {
+        if (!account) return;
+
+        try {
+            const fetchedBids = await MarketplaceApi.fetchBidsByBidder(account);
             const currentTimestamp = Math.floor(Date.now() / 1000);
             // Filter out expired bids
-            const activeBids = bidsData.bids.filter(bid => parseInt(bid.expireTimestamp) > currentTimestamp);
+            const activeBids = fetchedBids.filter(bid => parseInt(bid.expireTimestamp) > currentTimestamp);
 
             // Process each active bid
             const promises = activeBids.map(async (bid) => {
@@ -132,7 +209,7 @@ function Wallet() {
                     const image = nftInstance.image();
                     return {
                         ...bid,
-                        price: bid.value, // bid amount by the user
+                        price: bid.value,
                         expireTimestamp: bid.expireTimestamp,
                         name: metadata.name,
                         image: image,
@@ -147,56 +224,57 @@ function Wallet() {
             const results = await Promise.all(promises);
             // Filter out any null results (failed fetches)
             setBids(results.filter(bid => bid !== null));
+        } catch (error) {
+            console.error('Error fetching bids:', error);
+        }
+    };
+    useEffect(() => {
+
+        fetchBids();
+    }, [account]);
+
+    //for my bid section
+    const fetchOffers = async () => {
+        if (!account || unfilteredNfts.length === 0) return;
+
+        try {
+            // Fetch all active bids from the marketplace
+            const allBids = await MarketplaceApi.fetchActiveBids();
+            const currentTimestamp = Math.floor(Date.now() / 1000);
+
+            // Filter and process bids that match owned NFTs
+            const matchedBidsPromises = allBids.filter(bid => parseInt(bid.expireTimestamp) > currentTimestamp)
+                .filter(bid => unfilteredNfts.some(nft => nft.tokenId === bid.tokenId && nft.contractAddress === bid.erc721Address))
+                .map(async (bid) => {
+                    const nftInstance = new Nft(199, bid.erc721Address, bid.tokenId);
+                    try {
+                        const metadata = await nftInstance.metadata();
+                        const image = nftInstance.image();
+                        return {
+                            ...bid,
+                            price: bid.value,
+                            name: metadata.name,
+                            image,
+                            contractAddress: bid.erc721Address,
+                        };
+                    } catch (error) {
+                        console.error('Error fetching bid data:', error);
+                        return null;
+                    }
+                });
+
+            const matchedBids = await Promise.all(matchedBidsPromises);
+            console.log("Matched Bids Set for Offers:", matchedBids.filter(offer => offer !== null)); // Log the matched bids
+            setOffers(matchedBids.filter(offer => offer !== null));
+        } catch (error) {
+            console.error('Error fetching offers:', error);
         }
     };
 
-    //fetch nft bids by the user
     useEffect(() => {
-        fetchBidMetadataAndImage().then(() => { });
-    }, [bidsData]);
 
-    //for my bid section
-    useEffect(() => {
-        const fetchOffersForOwnedNFTs = async () => {
-            // Check if we have the necessary data: owned NFTs and bids
-            if (ownedNFTsData && !ownedNFTsLoading && !ownedNFTsError && allbids && allbids.bids) {
-                const currentTimestamp = Math.floor(Date.now() / 1000);
-                // Filter bids for those that are active and match an NFT the user owns
-                const activesBids = allbids.bids.filter(bid => parseInt(bid.expireTimestamp) > currentTimestamp);
-
-                const matchedBidsPromises = activesBids.map(async (bid) => {
-                    const ownedNFT = ownedNFTsData.erc721S.find(nft => nft.tokenId === bid.tokenId && nft.address === bid.erc721Address);
-                    if (ownedNFT) {
-                        // The user owns the NFT for which there's an active bid
-                        const nftInstance = new Nft(199, bid.erc721Address, bid.tokenId);
-                        try {
-                            const metadata = await nftInstance.metadata();
-                            const image = nftInstance.image();
-                            return {
-                                ...bid,
-                                price: bid.value, // bid amount by the user
-                                expireTimestamp: bid.expireTimestamp,
-                                name: metadata.name,
-                                image: image,
-                                contractAddress: bid.erc721Address,
-                            };
-                        } catch (error) {
-                            console.error('Error fetching offer data:', error);
-                            return null;
-                        }
-                    }
-                    return null;
-                });
-
-                const matchedBids = await Promise.all(matchedBidsPromises);
-                // Filter out any null results (failed fetches or unmatched bids)
-                setOffers(matchedBids.filter(offer => offer !== null));
-            }
-        };
-
-        fetchOffersForOwnedNFTs();
-    }, [ownedNFTsData, ownedNFTsLoading, ownedNFTsError, allbids]);
-
+        fetchOffers();
+    }, [account, unfilteredNfts]);
 
 
     const formatExpiration = (expireTimestamp) => {
@@ -267,7 +345,7 @@ function Wallet() {
                                     isOpen={isListModalOpen}
                                     onClose={() => {
                                         setIsListModalOpen(false)
-                                        fetchListingMetadataAndImage().then(() => { })
+                                        fetchData().then(() => { })
                                     }}
                                     contractAddress={selectedNFT?.contractAddress}
                                     tokenId={selectedNFT?.tokenId}
@@ -293,7 +371,7 @@ function Wallet() {
                                         <GoCheckCircleFill className='text-blue-200 text-base sm:text-sm dark:bg-white rounded-full border-blue-200 dark:border-[1px]' />
                                     </h1>
                                     <p className='text-xl font-Kallisto font-bold mt-2 sm:mt-1 dark:text-white sm:text-sm'>
-                                        <img src={require('../assets/logo/eth.png')} alt="ETH Logo" className='w-5 h-5 inline-block' />
+                                        <img src={require('../assets/logo/bttc.png')} alt="BTTC Logo" className='w-5 h-5 inline-block' />
                                         <span className='inline-block ml-1'>{ethers.utils.formatEther(listing.price)}</span>
                                     </p>
                                     <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:tex-[10px]'>expires in {formatExpiration(listing.expireTimestamp)}</p>
@@ -302,7 +380,7 @@ function Wallet() {
                                     isOpen={isDeListModalOpen}
                                     onClose={() => {
                                         setIsDeListModalOpen(false)
-                                        fetchListingMetadataAndImage().then(() => { })
+                                        fetchData().then(() => { })
                                     }}
                                     contractAddress={selectedNFT?.contractAddress}
                                     tokenId={selectedNFT?.tokenId}
@@ -327,7 +405,7 @@ function Wallet() {
                                         {/* <GoCheckCircleFill className='text-blue-200 text-base sm:text-sm dark:bg-white rounded-full border-blue-200 dark:border-[1px]' /> */}
                                     </h1>
                                     <p className='text-xl font-Kallisto font-bold mt-2 sm:mt-1 dark:text-white sm:text-sm'>
-                                        <img src={require('../assets/logo/eth.png')} alt="ETH Logo" className='w-5 h-5 inline-block' />
+                                        <img src={require('../assets/logo/bttc.png')} alt="BTTC Logo" className='w-5 h-5 inline-block' />
                                         <span className='inline-block ml-1'>{ethers.utils.formatEther(bid.value)}</span>
                                     </p>
                                     <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:tex-[10px]'>expires in {formatExpiration(bid.expireTimestamp)}</p>
@@ -336,7 +414,7 @@ function Wallet() {
                                     isOpen={isCancelBidModalOpen}
                                     onClose={() => {
                                         setIsCancelBidModalOpen(false)
-                                        fetchBidMetadataAndImage().then(() => { })
+                                        fetchBids().then(() => { })
                                     }}
                                     bid={selectedNFTForBidCancel}
                                     contractAddress={selectedNFTForBidCancel?.contractAddress}
@@ -362,7 +440,7 @@ function Wallet() {
                                         {/* <GoCheckCircleFill className='text-blue-200 text-base sm:text-sm dark:bg-white rounded-full border-blue-200 dark:border-[1px]' /> */}
                                     </h1>
                                     <p className='text-xl font-Kallisto font-bold mt-2 sm:mt-1 dark:text-white sm:text-sm'>
-                                        <img src={require('../assets/logo/eth.png')} alt="ETH Logo" className='w-5 h-5 inline-block' />
+                                        <img src={require('../assets/logo/bttc.png')} alt="BTTC Logo" className='w-5 h-5 inline-block' />
                                         <span className='inline-block ml-1'>{ethers.utils.formatEther(offer.value)}</span>
                                     </p>
                                     <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:tex-[10px]'>expires in {formatExpiration(offer.expireTimestamp)}</p>
@@ -376,7 +454,7 @@ function Wallet() {
                                     value={selectedOffer?.value}
                                     bidder={selectedOffer?.bidder}
                                     onAccepted={() => {
-                                        fetchBidMetadataAndImage().then(() => { })
+                                        fetchBids().then(() => { })
                                     }}
                                 />
                                 <button onClick={() => handleAcceptOfferClick(offer)} className='bg-blue-100 w-full py-2 absolute div -bottom-20 cursor-pointer transition-all ease-linear duration-250'>

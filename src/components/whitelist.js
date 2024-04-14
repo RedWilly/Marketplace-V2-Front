@@ -1,5 +1,3 @@
-//have added a social link so on the collection page if exist show else dont show any socials
-
 const whitelist = {
     "Nuggets": {
         address: "0xb9eE65be6b413fcB711ced63cCA8EFFB3AE445e7",
@@ -26,24 +24,6 @@ const whitelist = {
         coverImage: require("../assets/IMG/cover.png"),
         description: `This is a collection with "Turkis" as Background.`
     },
-    "zkOkayDog": {
-        address: "0xf1b2fe759e3cccf89e16497d5b3f8a9db6cfba76",
-        image: require("../assets/IMG/zkokaydog.png"),
-        coverImage: "../assets/IMG/zkOkayDog_cover.png",
-        description: `10000 zkOkayDog on zkSync Era`
-    },
-    "Blast Knives": {
-        address: "0xf6c766e43c69a25f4e225a4f7e606f9fdb1d94a0",
-        image: require("../assets/IMG/blast_knives.png"),
-        coverImage: "../assets/IMG/BlastKnives_cover.png",
-        description: `A collection of 3333 hand drawn NFTs, coming back to life in the upcoming BLAST network.`
-    },
-    "EasyX": {
-        address: "0xb8A7c8A971ce18E2B4751b54af3d57562dc4D77B",
-        image: require("../assets/IMG/easyx.png"),
-        coverImage: "../assets/IMG/BlastKnives_cover.png",
-        description: `Minted by Galxe Campaign: EasyX - The Easiest Drop, ever.`
-    }
 };
 
 export default whitelist;

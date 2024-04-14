@@ -19,7 +19,6 @@ import whitelist from '../components/whitelist';
 
 import BuyNow from '../components/Market/BuyNow';
 import ListNFTModal from '../components/Market/ListNFTModal';
-import DeListNFTModal from '../components/Market/DeListNFTModal';
 
 
 
@@ -34,7 +33,7 @@ function Collection() {
   const [collectionName, setCollectionName] = useState('');
   const [listings, setListings] = useState([]);
   const [listingsData, setListingsData] = useState({ listings: [] });
-  const [isSeller, setIsSeller] = useState(false);
+  // const [isSeller, setIsSeller] = useState(false);
 
 
   const [collectionDetails, setCollectionDetails] = useState({});
@@ -48,10 +47,6 @@ function Collection() {
   //listing nft
   const [isListModalOpen, setIsListModalOpen] = useState(false);
   const [selectedNFT, setSelectedNFT] = useState({});
-
-  //cancel lising
-  const [isCancelBidModalOpen, setIsCancelBidModalOpen] = useState(false);
-
 
 
 
@@ -120,7 +115,7 @@ function Collection() {
     const currentTimestamp = Math.floor(Date.now() / 1000);
     if (listingsData && listingsData.listings) {
       console.log("Processing listings data...");
-      let sellerIsCurrentUser = false;  // Flag to check if the current user is the seller
+      // let sellerIsCurrentUser = false;  // Flag to check if the current user is the seller
 
       const updatedListings = await Promise.all(
         listingsData.listings
@@ -129,9 +124,9 @@ function Collection() {
             const uniqueId = `${contractAddress}-${listing.tokenId}`;
 
             // Check if the current user is the seller
-            if (account && listing.seller && listing.seller.toLowerCase() === account.toLowerCase()) {
-              sellerIsCurrentUser = true;
-            }
+            // if (account && listing.seller && listing.seller.toLowerCase() === account.toLowerCase()) {
+            //   sellerIsCurrentUser = true;
+            // }
 
             // Start fetch or await existing fetch
             if (!metadataCache[uniqueId]) {
@@ -178,12 +173,12 @@ function Collection() {
       );
 
       console.log("Updated Listings with Metadata:", updatedListings);
-      console.log("Is current user the seller? ", sellerIsCurrentUser);  // Log the status of the current user being a seller
+      // console.log("Is current user the seller? ", sellerIsCurrentUser);  // Log the status of the current user being a seller
 
       const validListings = updatedListings.filter(listing => listing !== null);
       setListings(validListings);
       setNftCount(validListings.length);
-      setIsSeller(sellerIsCurrentUser);
+      // setIsSeller(sellerIsCurrentUser);
     }
   };
 
