@@ -17,6 +17,8 @@ function ExploreNFTs() {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [bttToUsdPrice, setBttToUsdPrice] = useState(null);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,6 +37,40 @@ function ExploreNFTs() {
 
     fetchData();
   }, []);
+
+  // fetch price
+  useEffect(() => {
+    const fetchBttPrice = async () => {
+      try {
+        const price = await MarketplaceApi.fetchCurrentPrice();
+        setBttToUsdPrice(price);
+      } catch (error) {
+        console.error("Failed to fetch BTT price", error);
+      }
+    };
+
+    fetchBttPrice();
+  }, []);
+
+  //format price
+  const formatPriceWithUSD = (bttAmount) => {
+    const num = parseFloat(ethers.utils.formatEther(String(bttAmount)));
+    const formattedBTT = formatPrice(num);
+
+    const priceInUSD = bttToUsdPrice ? (
+      <span style={{ fontSize: 'small', fontWeight: 'normal', color: '#6b7280' /* gray-500 */ }}>
+        (${(num * bttToUsdPrice).toFixed(3)})
+      </span>
+    ) : (
+      <span style={{ fontSize: 'small', fontWeight: 'normal', color: '#6b7280' }}>
+        (USD not available)
+      </span>
+    );
+
+    return (
+      <span>{formattedBTT} {priceInUSD}</span>
+    );
+  };
 
   //fomart M,K,T
   const formatPrice = (value) => {
@@ -153,9 +189,9 @@ function ExploreNFTs() {
                       </h1>
                       <p className='text-xl font-Kallisto font-bold mt-2 sm:mt-1 text-grey-100 dark:text-white sm:text-sm flex items-center'>
                         <img src={require('../assets/logo/bttc.png')} alt="BTTC Logo" className='w-5 h-5 mr-2' />
-                        {formatPrice(ethers.utils.formatEther(String(listing.price)))}
+                        {/* {formatPrice(ethers.utils.formatEther(String(listing.price)))} */}
+                        {formatPriceWithUSD(listing.price)}
                       </p>
-
                       <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:tex-[10px]'>
                         {listing.lastSale ? `Last Sale ${formatPrice(ethers.utils.formatEther(String(listing.lastSale)))}` : "No sales yet"}
                       </p>

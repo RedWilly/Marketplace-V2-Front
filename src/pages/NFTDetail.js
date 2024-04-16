@@ -48,6 +48,10 @@ function NFTDetail() {
   const [bidsData, setBidsData] = useState([]);
   const [salesData, setSalesData] = useState([]);
 
+  //usd price
+  const [bttToUsdPrice, setBttToUsdPrice] = useState(null);
+
+
 
   const fetchActiveListing = async () => {
     try {
@@ -91,6 +95,34 @@ function NFTDetail() {
     }
   }, [contractAddress, tokenId]);
 
+
+  //price section 
+  useEffect(() => {
+    const fetchBttPrice = async () => {
+      try {
+        const price = await MarketplaceApi.fetchCurrentPrice();
+        setBttToUsdPrice(price);
+      } catch (error) {
+        console.error("Failed to fetch BTT price", error);
+      }
+    };
+
+    fetchBttPrice();
+  }, []);
+
+  //price section - format to usd 
+  const formatPriceWithUSD = (bttAmount) => {
+    const num = parseFloat(bttAmount);
+    const formattedBTT = formatPrice(num);
+
+    const priceInUSD = bttToUsdPrice ? (
+      <span style={{ fontSize: 'small', fontWeight: 'normal', color: '#6b7280' }}>
+        (${(num * bttToUsdPrice).toFixed(3)})
+      </span>
+    ) : "(USD not available)";
+
+    return <span>{formattedBTT} {priceInUSD}</span>;
+  };
 
 
 
@@ -336,8 +368,10 @@ function NFTDetail() {
               {isListed ? "ON SALE FOR" : "NOT LISTED"}
             </h1>
             {isListed && (
-              <h1 className='text-black-400 font-Kallisto text-base font-medium dark:text-white uppercase sm:text-[12px]'>
-                {formatPrice(nftDetails.price)} BTTC
+              <h1 className='text-black-400 font-Kallisto text-base font-medium dark:text-white uppercase sm:text-[12px] flex items-center gap-1'>
+                <img src={require('../assets/logo/bttc.png')} alt="BTTC Logo" className='w-5 h-5' />
+                {/* {formatPrice(nftDetails.price)} BTTC */}
+                {formatPriceWithUSD(nftDetails.price)}
               </h1>
             )}
           </div>

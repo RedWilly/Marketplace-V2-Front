@@ -48,6 +48,9 @@ function Collection() {
   const [isListModalOpen, setIsListModalOpen] = useState(false);
   const [selectedNFT, setSelectedNFT] = useState({});
 
+  //price in usd
+  const [bttToUsdPrice, setBttToUsdPrice] = useState(null);
+
 
 
   const metadataCache = {};
@@ -59,6 +62,59 @@ function Collection() {
     totalVolumeTraded: 0,
     totalVolumeTradedWETH: 0,
   });
+
+
+  // fetch price
+  useEffect(() => {
+    const fetchBttPrice = async () => {
+      try {
+        const price = await MarketplaceApi.fetchCurrentPrice();
+        setBttToUsdPrice(price);
+      } catch (error) {
+        console.error("Failed to fetch BTT price", error);
+      }
+    };
+
+    fetchBttPrice();
+  }, []);
+
+
+  //format price
+  const formatPriceWithUSD = (bttAmount) => {
+    const num = parseFloat(ethers.utils.formatEther(bttAmount));
+    const formattedBTT = formatPrice(num);
+
+    const priceInUSD = bttToUsdPrice ? (
+      <span style={{ fontSize: 'small', fontWeight: 'normal', color: '#6b7280' /* gray-500 */ }}>
+        (${(num * bttToUsdPrice).toFixed(3)})
+      </span>
+    ) : (
+      <span style={{ fontSize: 'small', fontWeight: 'normal', color: '#6b7280' }}>
+        (USD not available)
+      </span>
+    );
+
+    return (
+      <span>{formattedBTT} {priceInUSD}</span>
+    );
+  };
+
+
+  //fomart M,K,T
+  const formatPrice = (value) => {
+    const num = Number(value);
+
+    if (num >= 1e9) { // For billions
+      return (num / 1e9).toFixed(2) + 'B';
+    } else if (num >= 1e6) { // For millions
+      return (num / 1e6).toFixed(2) + 'M';
+    } else if (num >= 1e3) { // For thousands
+      return (num / 1e3).toFixed(2) + 'K';
+    } else { // For numbers less than 1000
+      return num.toString();
+    }
+  };
+
 
   // collection stats & listing info & collection Name
   useEffect(() => {
@@ -259,20 +315,6 @@ function Collection() {
     setIsListModalOpen(true);
   };
 
-  //fomart M,K,T
-  const formatPrice = (value) => {
-    const num = Number(value);
-
-    if (num >= 1e9) { // For billions
-      return (num / 1e9).toFixed(2) + 'B';
-    } else if (num >= 1e6) { // For millions
-      return (num / 1e6).toFixed(2) + 'M';
-    } else if (num >= 1e3) { // For thousands
-      return (num / 1e3).toFixed(2) + 'K';
-    } else { // For numbers less than 1000
-      return num.toString();
-    }
-  };
 
   const nftStateUpdated = async function () {
     console.log('Nft state updated')
@@ -465,8 +507,9 @@ function Collection() {
                               </h1>
                               <p className='text-xl font-Kallisto font-bold mt-2 sm:mt-1 text-grey-100 dark:text-white sm:text-sm flex items-center gap-1'>
                                 <img src={require('../assets/logo/bttc.png')} alt="BTTC Logo" className='w-5 h-5' />
-                                {/* {ethers.utils.formatEther(String(listing.price))}  */}
-                                {formatPrice(parseFloat(ethers.utils.formatEther(String(listing.price))).toFixed(2))} BTTC
+                                {/* {ethers.utils.formatEther(String(listing.price))} 
+                                {formatPrice(parseFloat(ethers.utils.formatEther(String(listing.price))).toFixed(2))} BTTC */}
+                                {formatPriceWithUSD(listing.price)}
                               </p>
                               <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:text-[10px]'>
                                 {listing.lastSale ? `Last Sale ${parseFloat(ethers.utils.formatEther(String(listing.lastSale))).toFixed(2)}` : "No sales yet"}

@@ -8,6 +8,20 @@ class MarketplaceApi {
         this.apiBaseURL = apiBaseURL;
     }
 
+
+    // fetch the current price of BTT in USD
+    async fetchCurrentPrice() {
+        try {
+            const response = await axios.get(`${this.apiBaseURL}/price`);
+            return response.data.price;
+        } catch (error) {
+            if (error.response && error.response.status !== 404) {
+                console.error('Error fetching current BTT price:', error);
+            }
+            throw new Error('Failed to fetch current BTTUSD price from API');
+        }
+    }
+
     // --FLOORPRICE & TOTAL VOLUME SECTION --
     async fetchCollectionStats(erc721Address) {
         try {
