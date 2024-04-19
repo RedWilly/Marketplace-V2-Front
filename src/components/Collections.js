@@ -38,9 +38,9 @@ function Collections() {
   return (
     <div className='mt-6'>
       <div className='flex justify-between items-center sm:flex-col sm:gap-2'>
-        <span className='w-[350px] sm:w-full z-20'>
+        {/* <span className='w-[350px] sm:w-full z-20'>
           <Dropdown transparent={true} options={[{ id: 'Trending', value: 'New' }, { id: 'Top', value: 'Oldest to new' }]} placeHolder={"Category"} selectedOption={() => { }} />
-        </span>
+        </span> */}
         <span className='w-[350px] sm:w-full'>
           <Dropdown transparent={true} options={[{ id: 'Trending', value: 'New to Oldest' }, { id: 'Top', value: 'Oldest to new' }]} selectedOption={() => { }} />
         </span>
