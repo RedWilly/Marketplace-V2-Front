@@ -10,8 +10,6 @@ import Footer from './components/Footer';
 
 import { Web3ReactProvider } from '@web3-react/core';
 import { ethers } from 'ethers';
-import { ApolloProvider } from '@apollo/client';
-import client from './graphql/apollo-client';
 import { ChakraProvider } from '@chakra-ui/react';
 import Statstics from './pages/Statstics';
 
@@ -26,26 +24,24 @@ function getLibrary(provider) {
 function App() {
 
   return (
-    <ApolloProvider client={client}>
-      <Web3ReactProvider getLibrary={getLibrary}>
-        <ChakraProvider>
+    <Web3ReactProvider getLibrary={getLibrary}>
+      <ChakraProvider>
+        <div className='dark:bg-black-600 bg-grey-10'>
+          <Navbar />
           <div className='dark:bg-black-600 bg-grey-10'>
-            <Navbar />
-            <div className='dark:bg-black-600 bg-grey-10'>
-              <Routes>
-                <Route path='/' element={<Home />} />
-                <Route path='/explore/*' element={<Explore />} />
-                <Route path='/wallet/*' element={<Wallet />} />
-                <Route path='/statstics' element={<Statstics />} />
-                <Route path="/collection/:contractAddress/:tokenId" element={<NFTDetail />} />
-                <Route path="/collection/:contractAddress" element={<Collection />} />
-              </Routes>
-            </div>
-            <Footer />
+            <Routes>
+              <Route path='/' element={<Home />} />
+              <Route path='/explore/*' element={<Explore />} />
+              <Route path='/wallet/*' element={<Wallet />} />
+              <Route path='/statstics' element={<Statstics />} />
+              <Route path="/collection/:contractAddress/:tokenId" element={<NFTDetail />} />
+              <Route path="/collection/:contractAddress" element={<Collection />} />
+            </Routes>
           </div>
-        </ChakraProvider>
-      </Web3ReactProvider>
-    </ApolloProvider>
+          <Footer />
+        </div>
+      </ChakraProvider>
+    </Web3ReactProvider>
   )
 }
 

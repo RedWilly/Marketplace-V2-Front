@@ -35,6 +35,20 @@ class MarketplaceApi {
         }
     }
 
+    // Fetch all collection statistics
+    async fetchAllCollectionStats() {
+        try {
+            const response = await axios.get(`${this.apiBaseURL}/collection-stats`);
+            return response.data;
+        } catch (error) {
+            if (error.response && error.response.status !== 404) {
+                console.error('Error fetching all collection stats:', error);
+            }
+            throw new Error('Failed to fetch all collection stats from API');
+        }
+    }
+
+
     // --SALES SECTION --
     // retrieves most recently sold NFTs on the marketplace
     async fetchSoldNFTs() {

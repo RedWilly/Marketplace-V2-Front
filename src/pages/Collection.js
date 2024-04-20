@@ -20,6 +20,9 @@ import whitelist from '../components/whitelist';
 import BuyNow from '../components/Market/BuyNow';
 import ListNFTModal from '../components/Market/ListNFTModal';
 
+import LoadingNFT from '../components/LoadingNFT'
+
+
 
 
 function Collection() {
@@ -34,6 +37,10 @@ function Collection() {
   const [listings, setListings] = useState([]);
   const [listingsData, setListingsData] = useState({ listings: [] });
   // const [isSeller, setIsSeller] = useState(false);
+
+  const [loadingSales, setLoadingSales] = useState(true);  // State to manage loading of sales
+  const [loading, setLoading] = useState(true);
+
 
 
   const [collectionDetails, setCollectionDetails] = useState({});
@@ -129,6 +136,7 @@ function Collection() {
     }
 
     async function loadActiveListings() {
+      setLoadingSales(true);  // Set loading to true when the data fetch begins
       try {
         const checksumAddress = ethers.utils.getAddress(contractAddress);
         const activeListings = await MarketplaceApi.fetchActiveListingsForCollection(checksumAddress);
@@ -136,6 +144,8 @@ function Collection() {
         setListingsData({ listings: activeListings });
       } catch (error) {
         console.error("Error fetching active listings:", error);
+      } finally {
+        setLoadingSales(false);  // Set loading to false when the data fetch is complete
       }
     }
 
