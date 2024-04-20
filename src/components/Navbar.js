@@ -80,6 +80,10 @@ function Navbar() {
                 <MdOutlineExplore className='text-lg text-black-400 dark:text-white' />
                 EXPLORE
               </Link>
+              <Link to='/statstics' onClick={() => setDrawer(false)} className='flex items-center uppercase tracking-wider gap-4 p-2 px-1 hover:bg-grey-100/20 font-Kallisto text-[12px] text-black-400 dark:text-white'>
+                <MdOutlineExplore className='text-lg text-black-400 dark:text-white' />
+                STATSTICS
+              </Link>
               <Link to='/wallet' onClick={() => setDrawer(false)} className='flex items-center uppercase tracking-wider gap-4 p-2 px-1 hover:bg-grey-100/20 font-Kallisto text-[12px] text-black-400 dark:text-white'>
                 <PiWalletLight className='text-lg text-black-400 dark:text-white' />
                 Wallet
@@ -113,6 +117,7 @@ function Navbar() {
 
         <div className='flex justify-end items-center gap-10 sm:hidden'>
           <NavLink to='/explore' className='font-Kallisto text-black-400 font-medium dark:text-white text-sm uppercase tracking-wide'>Explore</NavLink>
+          <NavLink to='/statstics' className='font-Kallisto text-black-400 font-medium dark:text-white text-sm uppercase tracking-wide'>STATSTICS</NavLink>
           <NavLink to='/wallet' className='font-Kallisto text-black-400 dark:text-white font-medium text-sm uppercase tracking-wide'>Wallet</NavLink>
 
           <span className={`rounded-3xl w-[70px] p-1.5 bg-grey-50/35 cursor-pointer flex ${theme !== 'dark' ? 'justify-start' : 'justify-end'} dark:bg-black-500`} onClick={handleThemeSwitch}>

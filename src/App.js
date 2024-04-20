@@ -13,6 +13,7 @@ import { ethers } from 'ethers';
 import { ApolloProvider } from '@apollo/client';
 import client from './graphql/apollo-client';
 import { ChakraProvider } from '@chakra-ui/react';
+import Statstics from './pages/Statstics';
 
 
 
@@ -35,6 +36,7 @@ function App() {
                 <Route path='/' element={<Home />} />
                 <Route path='/explore/*' element={<Explore />} />
                 <Route path='/wallet/*' element={<Wallet />} />
+                <Route path='/statstics' element={<Statstics />} />
                 <Route path="/collection/:contractAddress/:tokenId" element={<NFTDetail />} />
                 <Route path="/collection/:contractAddress" element={<Collection />} />
               </Routes>
