@@ -21,6 +21,7 @@ import BuyNow from '../components/Market/BuyNow';
 import ListNFTModal from '../components/Market/ListNFTModal';
 
 import LoadingNFT from '../components/LoadingNFT'
+import LoadingCollection from '../components/LoadingCollection';
 
 
 
@@ -40,6 +41,7 @@ function Collection() {
 
   const [loadingSales, setLoadingSales] = useState(true);  // State to manage loading of sales
   const [loading, setLoading] = useState(true);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
 
 
@@ -172,6 +174,10 @@ function Collection() {
     const details = Object.values(whitelist).find(collection => collection.address.toLowerCase() === contractAddress);
     if (details) {
       setCollectionDetails(details);
+
+      setTimeout(()=>{
+        setDataLoaded(true)
+      }, 1000)
     }
   }, [contractAddress]);
 
@@ -335,8 +341,12 @@ function Collection() {
 
 
   return (
+    <>
+     {!dataLoaded?
+      <LoadingCollection />
+      :
     <div className='pt-[75px]'>
-      <img className='w-full h-[400px] sm:h-[250px] object-cover z-0' src={collectionDetails?.coverImage} alt="Collection Cover" />
+      <img className='w-full h-[400px] sm:h-[150px] object-cover sm:object-contain z-0' src={collectionDetails?.coverImage} alt="Collection Cover" />
       {/* <img className='w-full h-[400px] sm:h-[250px] object-cover z-0' src={collectionDetails?.coverImage || require("../assets/fallback_cover.png")} alt="Collection Cover" /> */}
 
       <div className='flex justify-center items-center -mt-20 z-30 relative sm:px-5 sm:-mt-14'>
@@ -503,7 +513,7 @@ function Collection() {
                   </div>
 
                   {/* SHOW LISTED NFT/ ON SALES NFT */}
-                  <div className='flex justify-start mb-20'>
+                  <div className='flex justify-start mb-0'>
                     <div className={`flex justify-start items-stretch gap-9 sm:gap-2 flex-wrap mt-4 sm:mt-4`}>
                       {currentSection === 'sales' && listings.map((listing, index) => {
                         return (
@@ -547,8 +557,8 @@ function Collection() {
                   </div>
 
                   {/* SHOW NFT IN WALLET */}
-                  <div className='flex justify-start mb-0'>
-                    <div className={`flex justify-start items-stretch gap-9 sm:gap-2 flex-wrap mt-1 sm:mt-4`}>
+                  <div className='flex justify-start mb-20'>
+                    <div className={`flex justify-start items-stretch gap-9 sm:gap-2 flex-wrap mt-1 sm:mt-0`}>
                       {currentSection === 'mynft' && ownedNfts.map((nft, index) => {
                         return (
                           <div key={index} className={`rounded-lg overflow-hidden card w-[285px] sm:w-[48%] flex flex-col bg-white dark:bg-black-500 shadow-md relative`}>
@@ -590,6 +600,8 @@ function Collection() {
         </div>
       </div>
     </div>
+}
+    </>
   )
 }
 
