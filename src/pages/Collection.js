@@ -40,7 +40,9 @@ function Collection() {
   // const [isSeller, setIsSeller] = useState(false);
 
   const [loadingSales, setLoadingSales] = useState(true);  // State to manage loading of sales
-  const [loading, setLoading] = useState(true);
+  const [ownedNftsLoaded, setOwnedNftsLoaded] = useState(false);
+
+  const [listedTokenIds, setListedTokenIds] = useState(new Set());
   const [dataLoaded, setDataLoaded] = useState(false);
 
 
@@ -175,9 +177,9 @@ function Collection() {
     if (details) {
       setCollectionDetails(details);
 
-      setTimeout(()=>{
+      setTimeout(() => {
         setDataLoaded(true)
-      }, 1000)
+      }, 3000)
     }
   }, [contractAddress]);
 
@@ -251,6 +253,10 @@ function Collection() {
       setListings(validListings);
       setNftCount(validListings.length);
       // setIsSeller(sellerIsCurrentUser);
+
+      // Update the set of listed token IDs
+      const newSet = new Set(validListings.map(listing => listing.tokenId));
+      setListedTokenIds(newSet);
     }
   };
 
@@ -263,6 +269,7 @@ function Collection() {
   const fetchOwnedMetadata = useCallback(async () => {
     if (!account) return; // Make sure the user's wallet is connected
 
+    setDataLoaded(false); // Show loading animation
     setFetchingOwnedNfts(true);
     try {
       const contract = new ethers.Contract(contractAddress, ERC721ABI, new ethers.providers.Web3Provider(window.ethereum));
@@ -271,6 +278,7 @@ function Collection() {
 
       if (balance.toNumber() === 0) {
         setFetchingOwnedNfts(false);
+        setDataLoaded(true); // Hide loading animation if no NFTs
         return; // The user does not own any NFTs in this collection
       }
 
@@ -309,15 +317,19 @@ function Collection() {
       console.error("Failed to fetch owned NFTs:", error);
     } finally {
       setFetchingOwnedNfts(false);
+      setDataLoaded(true); // Hide loading animation once fetch is complete
     }
   }, [account, contractAddress]);
 
-
   useEffect(() => {
-    if (account && currentSection === 'mynft') {
-      fetchOwnedMetadata();
+    if (!ownedNftsLoaded && currentSection === 'mynft' && account) {
+      console.log("Fetching data as ownedNftsLoaded was reset");
+      fetchOwnedMetadata().finally(() => {
+        setOwnedNftsLoaded(true);  // Ensure to set this to prevent further unnecessary fetches
+        setDataLoaded(true);  // Hide loading animation once fetch is complete
+      });
     }
-  }, [account, currentSection, fetchOwnedMetadata]);
+  }, [ownedNftsLoaded, currentSection, account, fetchOwnedMetadata]);
 
 
 
@@ -332,76 +344,82 @@ function Collection() {
   };
 
 
-  const nftStateUpdated = async function () {
-    console.log('Nft state updated')
-    // Refetch  data
-    fetchOwnedMetadata().then(() => { })
-    fetchListingsMetadata().then(() => { })
+  const nftStateUpdated = async () => {
+    console.log('NFT state updated');
+    setDataLoaded(false); // Set loading to false to show the loading animation
+    setOwnedNftsLoaded(false);
+    fetchOwnedMetadata().then(() => {
+      setOwnedNftsLoaded(true);
+      setDataLoaded(true); // Reset data loaded once the fetch is complete
+    });
+    fetchListingsMetadata().then(() => { });
   }
+
 
 
   return (
     <>
-     {!dataLoaded?
-      <LoadingCollection />
-      :
-    <div className='pt-[75px]'>
-      <img className='w-full h-[400px] sm:h-[150px] object-cover sm:object-contain z-0' src={collectionDetails?.coverImage} alt="Collection Cover" />
-      {/* <img className='w-full h-[400px] sm:h-[250px] object-cover z-0' src={collectionDetails?.coverImage || require("../assets/fallback_cover.png")} alt="Collection Cover" /> */}
+      {!dataLoaded ?
+        <LoadingCollection />
+        :
+        <div className='pt-[75px]'>
+          <img className='w-full h-[400px] sm:h-[150px] md:h-[300px] object-cover z-0' src={collectionDetails?.coverImage} alt="Collection Cover" />
+          {/* <img className='w-full h-[400px] sm:h-[150px] object-cover sm:object-contain z-0' src={collectionDetails?.coverImage} alt="Collection Cover" /> second version*/}
+          {/* <img className='w-full h-[400px] sm:h-[250px] object-cover z-0' src={collectionDetails?.coverImage || require("../assets/fallback_cover.png")} alt="Collection Cover" />  old first version*/}
 
-      <div className='flex justify-center items-center -mt-20 z-30 relative sm:px-5 sm:-mt-14'>
-        <div className='w-[1257px] sm:w-full md:w-[95%]'>
-          <div className='w-[160px] h-[160px] sm:w-[120px] sm:h-[120px] bg-white rounded-lg dark:bg-black-500 p-2 '>
-            <img className='w-full h-full object-cover rounded-lg' src={collectionDetails?.image || require("../assets/IMG/pfp_not_found.png")} alt="Profile PFP" />
-          </div>
-          <div className='flex justify-between items-center mt-10 sm:mt-5'>
-            {/* <h1 className='flex justify-start items-center gap-4 text-black-400 font-Kallisto font-semibold text-[30px] dark:text-white uppercas sm:text-2xl'>{collectionName}
+          <div className='flex justify-center items-center -mt-20 z-30 relative sm:px-5 sm:-mt-14'>
+            <div className='w-[1257px] sm:w-full md:w-[95%]'>
+              <div className='w-[160px] h-[160px] sm:w-[120px] sm:h-[120px] bg-white rounded-lg dark:bg-black-500 p-2 '>
+                <img className='w-full h-full object-cover rounded-lg' src={collectionDetails?.image || require("../assets/IMG/pfp_not_found.png")} alt="Profile PFP" />
+              </div>
+              <div className='flex justify-between items-center mt-10 sm:mt-5'>
+                {/* <h1 className='flex justify-start items-center gap-4 text-black-400 font-Kallisto font-semibold text-[30px] dark:text-white uppercas sm:text-2xl'>{collectionName}
               <GoCheckCircleFill className='text-purple text-xl dark:bg-white rounded-full border-purple dark:border-[1px]' />
             </h1> */}
-            <h1 className='flex justify-start items-center gap-4 text-black-400 font-Kallisto font-semibold text-[30px] dark:text-white uppercas sm:text-2xl'>
-              {collectionName}
-              {/* Conditionally render GoCheckCircleFill if the contract address is in the whitelist */}
-              {Object.values(whitelist).some(entry => entry.address.toLowerCase() === contractAddress) && (
-                <GoCheckCircleFill className='text-purple text-xl dark:bg-white rounded-full border-purple dark:border-[1px]' />
-              )}
-            </h1>
+                <h1 className='flex justify-start items-center gap-4 text-black-400 font-Kallisto font-semibold text-[30px] dark:text-white uppercas sm:text-2xl'>
+                  {collectionName}
+                  {/* Conditionally render GoCheckCircleFill if the contract address is in the whitelist */}
+                  {Object.values(whitelist).some(entry => entry.address.toLowerCase() === contractAddress) && (
+                    <GoCheckCircleFill className='text-purple text-xl dark:bg-white rounded-full border-purple dark:border-[1px]' />
+                  )}
+                </h1>
 
 
-            <div className='flex justify-end items-center gap-3 sm:gap-1 sm:-mt-[120px]'>
-              {collectionDetails.website && (
-                <a href={collectionDetails.website} target="_blank" rel="noopener noreferrer">
-                  <PiGlobe className='cursor-pointer text-2xl text-black-400 dark:text-grey-100' />
-                </a>
-              )}
-              {collectionDetails.twitter && (
-                <a href={collectionDetails.twitter} target="_blank" rel="noopener noreferrer">
-                  <CiTwitter className='cursor-pointer text-2xl text-black-400 dark:text-grey-100' />
-                </a>
-              )}
-              {collectionDetails.youtube && (
-                <a href={collectionDetails.youtube} target="_blank" rel="noopener noreferrer">
-                  <PiYoutubeLogoLight className='cursor-pointer text-2xl text-black-400 dark:text-grey-100' />
-                </a>
-              )}
-              {collectionDetails.discord && (
-                <a href={collectionDetails.discord} target="_blank" rel="noopener noreferrer">
-                  <PiDiscordLogoLight className='cursor-pointer text-2xl text-black-400 dark:text-grey-100' />
-                </a>
-              )}
-              {collectionDetails.telegram && (
-                <a href={collectionDetails.telegram} target="_blank" rel="noopener noreferrer">
-                  <PiTelegramLogoFill className='cursor-pointer text-2xl text-black-400 dark:text-grey-100' />
-                </a>
-              )}
-            </div>
-          </div>
+                <div className='flex justify-end items-center gap-3 sm:gap-1 sm:-mt-[120px]'>
+                  {collectionDetails.website && (
+                    <a href={collectionDetails.website} target="_blank" rel="noopener noreferrer">
+                      <PiGlobe className='cursor-pointer text-2xl text-black-400 dark:text-grey-100' />
+                    </a>
+                  )}
+                  {collectionDetails.twitter && (
+                    <a href={collectionDetails.twitter} target="_blank" rel="noopener noreferrer">
+                      <CiTwitter className='cursor-pointer text-2xl text-black-400 dark:text-grey-100' />
+                    </a>
+                  )}
+                  {collectionDetails.youtube && (
+                    <a href={collectionDetails.youtube} target="_blank" rel="noopener noreferrer">
+                      <PiYoutubeLogoLight className='cursor-pointer text-2xl text-black-400 dark:text-grey-100' />
+                    </a>
+                  )}
+                  {collectionDetails.discord && (
+                    <a href={collectionDetails.discord} target="_blank" rel="noopener noreferrer">
+                      <PiDiscordLogoLight className='cursor-pointer text-2xl text-black-400 dark:text-grey-100' />
+                    </a>
+                  )}
+                  {collectionDetails.telegram && (
+                    <a href={collectionDetails.telegram} target="_blank" rel="noopener noreferrer">
+                      <PiTelegramLogoFill className='cursor-pointer text-2xl text-black-400 dark:text-grey-100' />
+                    </a>
+                  )}
+                </div>
+              </div>
 
 
-          {showLess && <p className='mt-8 sm:mt-4 text-[15px] tracking-wide font-Kallisto font-medium text-black-400/75 dark:text-white sm:text-[12px]'>
-            {collectionDetails?.description || "This collection has no description yet. Contact the owner of this collection to get whitelisted."}        </p>}
-          <p onClick={() => setShowLess(s => !s)} className='text-[14px] cursor-pointer text-right tracking-wide font-Kallisto font-medium sm:text-[12px] text-blue-200 dark:text-blue-100 flex gap-2 justify-end items-center'>{showLess ? 'show less' : 'show more'} <IoIosArrowDown className={showLess && 'rotate-180'} /></p>
+              {showLess && <p className='mt-8 sm:mt-4 text-[15px] tracking-wide font-Kallisto font-medium text-black-400/75 dark:text-white sm:text-[12px]'>
+                {collectionDetails?.description || "This collection has no description yet. Contact the owner of this collection to get whitelisted."}        </p>}
+              <p onClick={() => setShowLess(s => !s)} className='text-[14px] cursor-pointer text-right tracking-wide font-Kallisto font-medium sm:text-[12px] text-blue-200 dark:text-blue-100 flex gap-2 justify-end items-center'>{showLess ? 'show less' : 'show more'} <IoIosArrowDown className={showLess && 'rotate-180'} /></p>
 
-          {/* 
+              {/* 
           <div className='flex justify-start items-center gap-7 relative mt-10 sm:flex-col sm:justify-center sm:gap-2 sm:mt-5'>
             <span className='border-[1px] p-[2px] py-[3px] border-blue-100/90 hover:border-blue-100 sm:w-full'>
               <button className='bg-blue-100/90 text-white font-Kallisto uppercase font-normal text-[11px] sm:w-full tracking-wider hover:bg-blue-100 py-2 w-[300px] flex justify-center items-center gap-1'><PiRocketLaunchThin className="text-sm" /> Boost</button>
@@ -412,51 +430,51 @@ function Collection() {
             </div>
           </div> */}
 
-          <div className='flex justify-start items-center gap-14 my-6 sm:flex-wrap sm:gap-7'>
-            <span className='flex flex-col gap-2'>
-              <p className='text-xl tracking-wide font-Kallisto font-semibold text-black-400 dark:text-white sm:text-base'> {formatPrice(parseFloat(ethers.utils.formatEther(String(collectionStats.totalVolumeTraded || "0"))).toFixed(2))} BTTC</p>
-              <p className='text-[12px] tracking-wide font-Kallisto font-normal text-black-50 dark:text-white sm:text-[10px]'>TOTAL VOLUME</p>
-            </span>
-            <span className='flex flex-col gap-2'>
-              <p className='text-xl tracking-wide font-Kallisto font-semibold text-black-400 dark:text-white sm:text-base'> {formatPrice(parseFloat(ethers.utils.formatEther(String(collectionStats.floorPrice || "0"))).toFixed(2))}</p>
-              <p className='text-[12px] tracking-wide font-Kallisto font-normal text-black-50 dark:text-white sm:text-[10px]'>FLOOR PRICE</p>
-            </span>
-            <span className='flex flex-col gap-2'>
-              <p className='text-xl tracking-wide font-Kallisto font-semibold text-black-400 dark:text-white sm:text-base'>{formatPrice(parseFloat(ethers.utils.formatEther(String(collectionStats.totalVolumeTradedWETH || "0"))).toFixed(2))}</p>
-              <p className='text-[12px] tracking-wide font-Kallisto font-normal text-black-50 dark:text-white sm:text-[10px]'>WBTTC VOLUME</p>
-            </span>
-            <span className='flex flex-col gap-2'>
-              <p className='text-xl tracking-wide font-Kallisto font-semibold text-black-400 dark:text-white sm:text-base'>{nftCount}</p>
-              <p className='text-[12px] tracking-wide font-Kallisto font-normal text-black-50 dark:text-white sm:text-[10px]'>LISTED</p>
-            </span>
-            {/* <span className='flex flex-col gap-2'>
+              <div className='flex justify-start items-center gap-14 my-6 sm:flex-wrap sm:gap-7'>
+                <span className='flex flex-col gap-2'>
+                  <p className='text-xl tracking-wide font-Kallisto font-semibold text-black-400 dark:text-white sm:text-base'> {formatPrice(parseFloat(ethers.utils.formatEther(String(collectionStats.totalVolumeTraded || "0"))).toFixed(2))} BTTC</p>
+                  <p className='text-[12px] tracking-wide font-Kallisto font-normal text-black-50 dark:text-white sm:text-[10px]'>TOTAL VOLUME</p>
+                </span>
+                <span className='flex flex-col gap-2'>
+                  <p className='text-xl tracking-wide font-Kallisto font-semibold text-black-400 dark:text-white sm:text-base'> {formatPrice(parseFloat(ethers.utils.formatEther(String(collectionStats.floorPrice || "0"))).toFixed(2))}</p>
+                  <p className='text-[12px] tracking-wide font-Kallisto font-normal text-black-50 dark:text-white sm:text-[10px]'>FLOOR PRICE</p>
+                </span>
+                <span className='flex flex-col gap-2'>
+                  <p className='text-xl tracking-wide font-Kallisto font-semibold text-black-400 dark:text-white sm:text-base'>{formatPrice(parseFloat(ethers.utils.formatEther(String(collectionStats.totalVolumeTradedWETH || "0"))).toFixed(2))}</p>
+                  <p className='text-[12px] tracking-wide font-Kallisto font-normal text-black-50 dark:text-white sm:text-[10px]'>WBTTC VOLUME</p>
+                </span>
+                <span className='flex flex-col gap-2'>
+                  <p className='text-xl tracking-wide font-Kallisto font-semibold text-black-400 dark:text-white sm:text-base'>{nftCount}</p>
+                  <p className='text-[12px] tracking-wide font-Kallisto font-normal text-black-50 dark:text-white sm:text-[10px]'>LISTED</p>
+                </span>
+                {/* <span className='flex flex-col gap-2'>
             <p className='text-xl tracking-wide font-Kallisto font-semibold text-black-400 dark:text-white sm:text-base'>7589</p>
             <p className='text-[12px] tracking-wide font-Kallisto font-normal text-black-50 dark:text-white sm:text-[10px]'>Total Volume</p>
           </span> */}
-          </div>
+              </div>
 
-          {/* state for sales and mynft */}
-          {/* <div className='flex justify-center items-center mt-4 mb-4'> */}
-          <div className='flex justify-start items-center mt-4 mb-4'>
-            <button
-              className={`px-3 py-1 text-lg font-Kallisto font-bold tracking-wide transition duration-300 ${currentSection === 'sales' ? 'text-blue-200 dark:text-blue-100 border-b-4 border-blue-200 dark:border-blue-100' : 'text-grey-100 dark:text-black-50'}`}
-              onClick={() => handleSectionChange('sales')}
-            >
-              SALES
-            </button>
-            <button
-              className={`px-3 py-1 text-lg font-Kallisto font-bold tracking-wide transition duration-300 ${currentSection === 'mynft' ? 'text-blue-200 dark:text-blue-100 border-b-4 border-blue-200 dark:border-blue-100' : 'text-grey-100 dark:text-black-50'}`}
-              onClick={() => handleSectionChange('mynft')}
-            >
-              MY NFTs
-            </button>
-          </div>
+              {/* state for sales and mynft */}
+              {/* <div className='flex justify-center items-center mt-4 mb-4'> */}
+              <div className='flex justify-start items-center mt-4 mb-4'>
+                <button
+                  className={`px-3 py-1 text-lg font-Kallisto font-bold tracking-wide transition duration-300 ${currentSection === 'sales' ? 'text-blue-200 dark:text-blue-100 border-b-4 border-blue-200 dark:border-blue-100' : 'text-grey-100 dark:text-black-50'}`}
+                  onClick={() => handleSectionChange('sales')}
+                >
+                  SALES
+                </button>
+                <button
+                  className={`px-3 py-1 text-lg font-Kallisto font-bold tracking-wide transition duration-300 ${currentSection === 'mynft' ? 'text-blue-200 dark:text-blue-100 border-b-4 border-blue-200 dark:border-blue-100' : 'text-grey-100 dark:text-black-50'}`}
+                  onClick={() => handleSectionChange('mynft')}
+                >
+                  MY NFTs
+                </button>
+              </div>
 
 
-          <div className='flex justify-center items-start'>
-            <div className='w-[1257px] overflow-hidden md:w-[95%]'>
-              <div className={`mt-6 flex justify-center items-start gap-9`}>
-                {/* {sidebar && <span className='w-[287px] sm:w-full sm:top-[45px] overflow-hidden sm:fixed sm:z-50 sm:h-screen'>
+              <div className='flex justify-center items-start'>
+                <div className='w-[1257px] overflow-hidden md:w-[95%]'>
+                  <div className={`mt-6 flex justify-center items-start gap-9`}>
+                    {/* {sidebar && <span className='w-[287px] sm:w-full sm:top-[45px] overflow-hidden sm:fixed sm:z-50 sm:h-screen'>
                   <div className='relative z-30 border-[1px]  rounded-md bg-white dark:bg-transparent sm:dark:bg-black-600 border-grey-50'>
                     <div className='px-5 py-2  flex justify-between items-center gap-3 cursor-pointer' onClick={() => setSideBar(s => !s)}>
                       <p className='text-[13px] font-medium tracking-wider uppercase font-Kallisto text-black-50 dark:text-grey-100'>Filter</p>
@@ -484,9 +502,9 @@ function Collection() {
                   </div>
                 </span>} */}
 
-                <div className={`${sidebar ? 'w-[75%]' : 'w-full'} self-end sm:w-full w-full`}>
-                  <div className={`flex ${sidebar ? 'justify-end' : 'justify-between'} items-stretch gap-9 sm:flex-col sm:gap-2`}>
-                    {/* {!sidebar && <span className='w-[282px] sm:hidden '>
+                    <div className={`${sidebar ? 'w-[75%]' : 'w-full'} self-end sm:w-full w-full`}>
+                      <div className={`flex ${sidebar ? 'justify-end' : 'justify-between'} items-stretch gap-9 sm:flex-col sm:gap-2`}>
+                        {/* {!sidebar && <span className='w-[282px] sm:hidden '>
                       <div className='relative w-full z-30 border-[1px]  rounded-md bg-white dark:bg-black-600 border-grey-50'>
                         <div className='px-5 py-2  flex justify-between items-center gap-3 cursor-pointer' onClick={() => setSideBar(s => !s)}>
                           <p className='text-[12px] font-medium tracking-wider uppercase font-Kallisto text-black-50 dark:text-grey-100'>Filter</p>
@@ -494,14 +512,14 @@ function Collection() {
                         </div>
                       </div>
                     </span>} */}
-                    <span className={`w-[282px] sm:hidden`}>
-                      <Dropdown transparent={true} placeHolder={"Filter"} options={[{ id: 'Trending', value: 'Price low to hight' }, { id: 'Top', value: 'price high to low' }]} selectedOption={() => { }} />
-                    </span>
-                    <div className='justify-between items-center gap-2 hidden sm:flex'>
-                      <span className={`w-[282px] sm:w-[50%]`}>
-                        <Dropdown transparent={true} placeHolder={"Filter"} options={[{ id: 'Trending', value: 'Price low to hight' }, { id: 'Top', value: 'price high to low' }]} selectedOption={() => { }} />
-                      </span>
-                      {/* <span className='w-[282px] sm:w-[50%] hidden sm:flex '>
+                        <span className={`w-[282px] sm:hidden`}>
+                          <Dropdown transparent={true} placeHolder={"Filter"} options={[{ id: 'Trending', value: 'Price low to hight' }, { id: 'Top', value: 'price high to low' }]} selectedOption={() => { }} />
+                        </span>
+                        <div className='justify-between items-center gap-2 hidden sm:flex'>
+                          <span className={`w-[282px] sm:w-[50%]`}>
+                            <Dropdown transparent={true} placeHolder={"Filter"} options={[{ id: 'Trending', value: 'Price low to hight' }, { id: 'Top', value: 'price high to low' }]} selectedOption={() => { }} />
+                          </span>
+                          {/* <span className='w-[282px] sm:w-[50%] hidden sm:flex '>
                         <div className='relative w-full z-30 border-[1px]  rounded-md bg-white dark:bg-black-600 border-grey-50'>
                           <div className='px-5 py-2  flex justify-between items-center gap-3 cursor-pointer' onClick={() => setSideBar(s => !s)}>
                             <p className='text-[12px] font-medium tracking-wider uppercase font-Kallisto text-black-50 dark:text-grey-100'>Filter</p>
@@ -509,88 +527,96 @@ function Collection() {
                           </div>
                         </div>
                       </span> */}
-                    </div>
-                  </div>
+                        </div>
+                      </div>
 
-                  {/* SHOW LISTED NFT/ ON SALES NFT */}
-                  <div className='flex justify-start mb-0'>
-                    <div className={`flex justify-start items-stretch gap-9 sm:gap-2 flex-wrap mt-4 sm:mt-4`}>
-                      {currentSection === 'sales' && listings.map((listing, index) => {
-                        return (
-                          <div key={index} className={`rounded-lg overflow-hidden card w-[285px] sm:w-[48%] flex flex-col bg-white dark:bg-black-500 shadow-md relative`}>
-                            <Link to={`/collection/${contractAddress}/${listing.tokenId}`} className='h-[300px] sm:h-[150px] overflow-hidden'>
-                              <img src={listing.image} alt={listing.name} className='w-full h-full object-cover transition-all ease-linear saturate-100' />
-                            </Link>
-                            <div className='px-6 py-4 sm:px-3 sm:py-22'>
-                              <h1 className='flex justify-start items-center gap-2 text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>{listing.name}
-                                <GoCheckCircleFill className='text-blue-200 text-base sm:text-sm dark:bg-white rounded-full border-blue-200 dark:border-[1px]' />
-                              </h1>
-                              <p className='text-xl font-Kallisto font-bold mt-2 sm:mt-1 text-grey-100 dark:text-white sm:text-sm flex items-center gap-1'>
-                                <img src={require('../assets/logo/bttc.png')} alt="BTTC Logo" className='w-5 h-5' />
-                                {/* {ethers.utils.formatEther(String(listing.price))} 
+                      {/* SHOW LISTED NFT/ ON SALES NFT */}
+                      <div className='flex justify-start mb-0'>
+                        <div className={`flex justify-start items-stretch gap-9 sm:gap-2 flex-wrap mt-4 sm:mt-4`}>
+                          {currentSection === 'sales' && listings.map((listing, index) => {
+                            return (
+                              <div key={index} className={`rounded-lg overflow-hidden card w-[285px] sm:w-[48%] flex flex-col bg-white dark:bg-black-500 shadow-md relative`}>
+                                <Link to={`/collection/${contractAddress}/${listing.tokenId}`} className='h-[300px] sm:h-[150px] overflow-hidden'>
+                                  <img src={listing.image} alt={listing.name} className='w-full h-full object-cover transition-all ease-linear saturate-100' />
+                                </Link>
+                                <div className='px-6 py-4 sm:px-3 sm:py-22'>
+                                  <h1 className='flex justify-start items-center gap-2 text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>{listing.name}
+                                    <GoCheckCircleFill className='text-blue-200 text-base sm:text-sm dark:bg-white rounded-full border-blue-200 dark:border-[1px]' />
+                                  </h1>
+                                  <p className='text-xl font-Kallisto font-bold mt-2 sm:mt-1 text-grey-100 dark:text-white sm:text-sm flex items-center gap-1'>
+                                    <img src={require('../assets/logo/bttc.png')} alt="BTTC Logo" className='w-5 h-5' />
+                                    {/* {ethers.utils.formatEther(String(listing.price))} 
                                 {formatPrice(parseFloat(ethers.utils.formatEther(String(listing.price))).toFixed(2))} BTTC */}
-                                {formatPriceWithUSD(listing.price)}
-                              </p>
-                              <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:text-[10px]'>
-                                {listing.lastSale ? `Last Sale ${parseFloat(ethers.utils.formatEther(String(listing.lastSale))).toFixed(2)}` : "No sales yet"}
-                              </p>
-                            </div>
-                            <BuyNow
-                              erc721Address={contractAddress}
-                              tokenId={listing.tokenId}
-                              price={listing.price}
-                              className='text-sm font-Kallisto font-medium uppercase text-center text-white/75 tracking-wider bg-blue-100 w-full py-2 absolute div -bottom-20 cursor-pointer transition-all ease-linear duration-250'
-                              // onSuccess={() => {
-                              //   nftStateUpdated().then(() => { })
-                              // }}
-                              onSuccess={() => {
-                                setTimeout(() => {
-                                  nftStateUpdated().then(() => { })
-                                }, 500);
-                              }}
-                            />
-                          </div>
-                        );
-                      })}
+                                    {formatPriceWithUSD(listing.price)}
+                                  </p>
+                                  <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:text-[10px]'>
+                                    {listing.lastSale ? `Last Sale ${parseFloat(ethers.utils.formatEther(String(listing.lastSale))).toFixed(2)}` : "No sales yet"}
+                                  </p>
+                                </div>
+                                <BuyNow
+                                  erc721Address={contractAddress}
+                                  tokenId={listing.tokenId}
+                                  price={listing.price}
+                                  className='text-sm font-Kallisto font-medium uppercase text-center text-white/75 tracking-wider bg-blue-100 w-full py-2 absolute div -bottom-20 cursor-pointer transition-all ease-linear duration-250'
+                                  // onSuccess={() => {
+                                  //   nftStateUpdated().then(() => { })
+                                  // }}
+                                  onSuccess={() => {
+                                    setTimeout(() => {
+                                      nftStateUpdated().then(() => { })
+                                    }, 500);
+                                  }}
+                                />
+                              </div>
+                            );
+                          })}
 
-                    </div>
-                  </div>
+                        </div>
+                      </div>
 
-                  {/* SHOW NFT IN WALLET */}
-                  <div className='flex justify-start mb-20'>
-                    <div className={`flex justify-start items-stretch gap-9 sm:gap-2 flex-wrap mt-1 sm:mt-0`}>
-                      {currentSection === 'mynft' && ownedNfts.map((nft, index) => {
-                        return (
-                          <div key={index} className={`rounded-lg overflow-hidden card w-[285px] sm:w-[48%] flex flex-col bg-white dark:bg-black-500 shadow-md relative`}>
-                            <Link to={`/collection/${contractAddress}/${nft.tokenId}`} className='h-[250px] sm:h-[100px] overflow-hidden'>
-                              <img src={nft.image} alt={nft.name} className='w-full h-full object-cover transition-all ease-linear saturate-100' />
-                            </Link>
-                            <div className='px-6 py-4 sm:px-3 sm:py-22'>
-                              <h1 className='flex justify-start items-center gap-2 text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>{nft.name}
-                                <GoCheckCircleFill className='text-blue-200 text-base sm:text-sm dark:bg-white rounded-full border-blue-200 dark:border-[1px]' />
-                              </h1>
-                              <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:text-[10px]'>
-                                {nft.lastSale ? `Last Sale ${parseFloat(ethers.utils.formatEther(String(nft.lastSale))).toFixed(2)}` : "No sales yet"}
-                              </p>
-                            </div>
-                            <ListNFTModal
-                              isOpen={isListModalOpen}
-                              onClose={() => {
-                                setIsListModalOpen(false)
-                                fetchOwnedMetadata().then(() => { });
-                              }}
-                              contractAddress={selectedNFT?.contractAddress}
-                              tokenId={selectedNFT?.tokenId}
-                            />
-                            <button onClick={() => handleListForSaleClick(nft)} className='bg-blue-100 w-full py-2 absolute div -bottom-20 cursor-pointer transition-all ease-linear duration-250'>
-                              <p className='text-sm font-Kallisto font-medium uppercase text-center text-white/75 tracking-wider'>
-                                {"List For Sale"}
-                              </p>
-                            </button>
-                          </div>
-                        );
-                      })}
+                      {/* SHOW NFT IN WALLET */}
+                      <div className='flex justify-start mb-20'>
+                        <div className={`flex justify-start items-stretch gap-9 sm:gap-2 flex-wrap mt-1 sm:mt-0`}>
+                          {currentSection === 'mynft' && ownedNfts
+                            .filter(nft => !listedTokenIds.has(nft.tokenId)) // Exclude listed NFTs
+                            .map((nft, index) => {
+                              return (
+                                <div key={index} className={`rounded-lg overflow-hidden card w-[285px] sm:w-[48%] flex flex-col bg-white dark:bg-black-500 shadow-md relative`}>
+                                  <Link to={`/collection/${contractAddress}/${nft.tokenId}`} className='h-[250px] sm:h-[100px] overflow-hidden'>
+                                    <img src={nft.image} alt={nft.name} className='w-full h-full object-cover transition-all ease-linear saturate-100' />
+                                  </Link>
+                                  <div className='px-6 py-4 sm:px-3 sm:py-22'>
+                                    <h1 className='flex justify-start items-center gap-2 text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>{nft.name}
+                                      <GoCheckCircleFill className='text-blue-200 text-base sm:text-sm dark:bg-white rounded-full border-blue-200 dark:border-[1px]' />
+                                    </h1>
+                                    <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:text-[10px]'>
+                                      {nft.lastSale ? `Last Sale ${parseFloat(ethers.utils.formatEther(String(nft.lastSale))).toFixed(2)}` : "No sales yet"}
+                                    </p>
+                                  </div>
+                                  <ListNFTModal
+                                    isOpen={isListModalOpen}
+                                    onClose={() => {
+                                      setIsListModalOpen(false)
+                                      fetchOwnedMetadata().then(() => { });
+                                    }}
+                                    contractAddress={selectedNFT?.contractAddress}
+                                    tokenId={selectedNFT?.tokenId}
 
+                                    onSuccess={() => {
+                                      nftStateUpdated();
+                                    }}
+                                  />
+                                  <button onClick={() => handleListForSaleClick(nft)} className='bg-blue-100 w-full py-2 absolute div -bottom-20 cursor-pointer transition-all ease-linear duration-250'>
+                                    <p className='text-sm font-Kallisto font-medium uppercase text-center text-white/75 tracking-wider'>
+                                      {"List For Sale"}
+                                    </p>
+                                  </button>
+                                </div>
+                              );
+                            })}
+
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -598,9 +624,7 @@ function Collection() {
             </div>
           </div>
         </div>
-      </div>
-    </div>
-}
+      }
     </>
   )
 }

@@ -1,20 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import ERC721ABI from '../../abi/erc721.json';
 import MarketABI from '../../abi/market.json';
 import { useWallet } from '../../hooks/useWallet';
 
+import MarketplaceApi from "../../utils/MarketplaceApi";
+
 import {
     useToast
 } from '@chakra-ui/react';
 
-const ListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
+const ListNFTModal = ({ isOpen, onClose, contractAddress, tokenId, onSuccess }) => {
     const [price, setPrice] = useState('');
     const [duration, setDuration] = useState('24h');
     const marketplaceAddress = process.env.REACT_APP_MARKETPLACE_ADDRESS;
     const { account, library } = useWallet();
     const toast = useToast();
     const [isLoading, setIsLoading] = useState(false); // State to track loading
+
+    //price in usd
+    const [bttToUsdPrice, setBttToUsdPrice] = useState(null);
+    const [usdPrice, setUsdPrice] = useState('');
+
+    // fetch price
+    useEffect(() => {
+        const fetchBttPrice = async () => {
+            try {
+                const price = await MarketplaceApi.fetchCurrentPrice();
+                setBttToUsdPrice(price);
+            } catch (error) {
+                console.error("Failed to fetch BTT price", error);
+            }
+        };
+
+        fetchBttPrice();
+    }, []);
+
+    useEffect(() => {
+        if (price && bttToUsdPrice) {
+            const num = parseFloat(price);
+            const calculatedUsdPrice = (num * bttToUsdPrice).toFixed(4);
+            setUsdPrice(calculatedUsdPrice);
+        }
+    }, [price, bttToUsdPrice]);
 
     const listNFT = async () => {
         if (!price || !duration || !account || !library) {
@@ -25,6 +53,9 @@ const ListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
                 duration: 5000,
                 isClosable: true,
             });
+            if (onSuccess) {
+                onSuccess()
+            }
             return;
         }
 
@@ -67,11 +98,14 @@ const ListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
 
             toast({
                 title: 'Listing Successful',
-                description: 'Your NFT has been successfully listed.',
+                description: 'Your NFT has been successfully listed. Loading...',
                 status: 'success',
                 duration: 5000,
                 isClosable: true,
             });
+            if (onSuccess) {
+                onSuccess()
+            }
             onClose();
         } catch (error) {
             console.error('Failed to list NFT:', error);
@@ -103,6 +137,7 @@ const ListNFTModal = ({ isOpen, onClose, contractAddress, tokenId }) => {
                     <div className="mb-4 w-[50%] flex-col flex gap-1">
                         <label htmlFor="price" className="text-sm text-black-50 font-Kallisto dark:text-grey-100">Price in BTTC</label>
                         <input type="text" id="price" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full p-2 mb-3 text-sm bg-transparent border-[1px] border-black-50 rounded-md outline-none text-black-50 font-Kallisto dark:text-grey-100" placeholder="Enter price in BTTC" />
+                        <p className="text-xs text-black-50 font-Kallisto dark:text-grey-100">${usdPrice || '0.00'}</p>
                     </div>
                     <div className="mb-4 w-[50%] flex-col flex gap-1">
                         <label htmlFor="duration" className="text-sm text-black-50 font-Kallisto dark:text-grey-100">Duration</label>
