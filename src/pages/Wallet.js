@@ -321,20 +321,24 @@ function Wallet() {
 
                 {!active &&
                     <>
-                        <button
-                            className='bg-black py-3 left-5 w-full mt-[20px] bg-black-400 dark:bg-black-500 rounded-[4px] text-[12px] uppercase font-Kallisto font-bold tracking-widest text-white cursor-pointer outline-none hover:bg-grey-100/40 hover:text-black transition-all ease-linear duration-150'
-                            onClick={!active ? connect : undefined} // Connect wallet when not active
-                        >
-                            {(chainId ? 'Chain not supported' : 'Connect Wallet')}
-                        </button>
+                        <div className="flex justify-center">
+                            <button
+                                // className='bg-black py-3 left-5 w-full mt-[20px] bg-black-400 dark:bg-black-500 rounded-[4px] text-[12px] uppercase font-Kallisto font-bold tracking-widest text-white cursor-pointer outline-none hover:bg-grey-100/40 hover:text-black transition-all ease-linear duration-150'
+                                className='bg-black py-3 px-6 left-5 mt-[30px] bg-black-400 dark:bg-black-500 rounded-[4px] text-[12px] uppercase font-Kallisto font-bold tracking-widest text-white cursor-pointer outline-none hover:bg-grey-100/40 hover:text-black transition-all ease-linear duration-150'
+                                onClick={!active ? connect : undefined} // Connect wallet when not active
+                            >
+                                {(chainId ? 'Chain not supported' : 'Connect Wallet')}
+                            </button>
+                        </div>
                     </>
+
                 }
 
                 {account && <div className='mt-6'>
                     {/* Assets */}
                     {state === 0 && <div className='flex justify-start items-stretch gap-9 flex-wrap sm:gap-3'>
                         {fetchingNFTs &&
-                            <div className={`w-full`}>
+                            <div className={`w-full text-white`}>
                                 {/* <Spinner /> */}
                                 {/* <Spinner size="xl" /> */}
                                 <Spinner
