@@ -25,6 +25,9 @@ function Home() {
 
   const [floorPrices, setFloorPrices] = useState({});
 
+  const [marketStats, setMarketStats] = useState({ totalVolumeTraded: '0', totalVolumeTradedWETH: '0' });
+
+
 
   //fetching recent listings
   useEffect(() => {
@@ -74,6 +77,21 @@ function Home() {
     };
     fetchRecentSales();
   }, []);
+
+
+  //total volume traded
+  useEffect(() => {
+    const fetchMarketStats = async () => {
+      try {
+        const stats = await MarketplaceApi.fetchMarketStats();
+        setMarketStats(stats);
+      } catch (error) {
+        console.error('Failed to fetch market stats:', error);
+      }
+    };
+    fetchMarketStats();
+  }, []);
+
 
   // Convert whitelist object to array and map to include name and index
   const collectionsArray = Object.entries(whitelist).map(([name, details], index) => ({
@@ -147,40 +165,13 @@ function Home() {
 
         <h1 className='text-black-400 font-Kallisto font-semibold text-[40px] text-center dark:text-black-50 tracking-wider sm:text-sm'>A Fully Decentralized Bittorent Chain Marketplace</h1>
         <h1 className='text-black-50 font-Kallisto font-medium text-xl text-center dark:text-white sm:text-[12px]'>Buy, Sell, Mint and Trade Non-Fungible Digital Assets</h1>
-
-        {/* <Slides /> */}
-        {/* 
-        <div className="slider-container w-[1280px] mt-4 sm:mt-0 sm:w-full sm:px-0">
-          <Slider {...settings}>
-            {[1, 1, 11, 1, 1, 1,].map((s, index) => {
-              return <Link key={index} to={`/collection/${0}`} className="h-[400px] sm:h-[350px] overflow-hidden rounded-lg px-4 sm:px-2 relative">
-                <div className="overflow-hidden rounded-lg">
-                  <img className="w-full h-full object-cover hover:scale-110 transition-all ease-in duration-150" src={"https://marketplace-image.onxrp.com/?uri=https%3A%2F%2Fnftimg.onxrp.com%2F1706711759180pfp.jpeg&width=840&height=840"} />
-                </div>
-                <div className="bg-white py-2 px-3 rounded-md absolute top-4 right-8 dark:bg-black-500 sm:right-4 sm:top-3">
-                  <h2 className="font-Kallisto font-medium text-[12px] sm:text-[10px] sm:gap-2 tracking-widest text-black-400 dark:text-white flex items-center gap-3">
-                    RANK {index}
-                    <FaMeta />
-                    <span className="font-normal dark:text-white/60 text-black-50">715 Burnt</span>
-                  </h2>
-                </div>
-                <div className="flex flex-col absolute left-8 bottom-5 sm:left-5 sm:bottom-24 ">
-                  <h1 className="font-Kallisto capitalize text-2xl font-semibold text-white tracking-wider sm:text-lg">UINXPUNK</h1>
-                  <p className="font-Kallisto font-medium text-white/75 text-sm uppercase tracking-wider sm:text-[12px]">FLoor $ 84</p>
-                </div>
-              </Link>
-            })}
-          </Slider>
-        </div> */}
-
-
         <div className='bg-grey-50 px-10 py-8 flex sm:py-4 sm:px-5 sm:gap-5 justify-between items-center w-full mt-8 sm:mt-0 rounded-lg sm:overflow-x-scroll'>
           <div className='flex justify-start items-center gap-3'>
             <span className='bg-grey-100 rounded-full p-[3px] sm:p-[2px] flex justify-center items-center'>
               <RxCross2 className='text-white text-lg' />
             </span>
             <p className='font-semibold font-Kallisto text-black-400 dark:text-white text-base sm:text-sm flex gap-2 sm:gap-1'>
-              38.6M
+              {formatPrice(parseFloat(ethers.utils.formatEther(String(marketStats.totalVolumeTraded || '0'))).toFixed(5))}
               <span className='text-[12px] text-black-50 capitalize font-medium dark:text-[#babac9] whitespace-nowrap'>Total Volume</span>
             </p>
           </div>
@@ -189,8 +180,8 @@ function Home() {
               <IoStatsChart className='text-white text-base' />
             </span>
             <p className='font-semibold font-Kallisto text-black-400 dark:text-white text-base sm:text-sm flex gap-2 sm:gap-1'>
-              9568
-              <span className='text-[12px] text-black-50 capitalize font-medium dark:text-[#babac9] whitespace-nowrap'>Daily Total Volume</span>
+              {formatPrice(parseFloat(ethers.utils.formatEther(String(marketStats.totalVolumeTradedWETH || '0'))).toFixed(5))}
+              <span className='text-[12px] text-black-50 capitalize font-medium dark:text-[#babac9] whitespace-nowrap'>WBTT Total Volume</span>
             </p>
           </div>
           <div className='flex justify-start items-center gap-3'>
@@ -198,7 +189,7 @@ function Home() {
               <IoDiamond className='text-white text-lg' />
             </span>
             <p className='font-semibold font-Kallisto text-black-400 dark:text-white text-base sm:text-sm flex gap-2 sm:gap-1'>
-              860K
+              ...
               <span className='text-[12px] text-black-50 capitalize font-medium dark:text-[#babac9] whitespace-nowrap'>Total Royalties</span>
             </p>
           </div>
@@ -216,7 +207,7 @@ function Home() {
               <FaCrown className='text-white text-lg' />
             </span>
             <p className='font-semibold font-Kallisto text-black-400 dark:text-white text-base sm:text-sm flex gap-2 sm:gap-1'>
-              38.6M
+              ...
               <span className='text-[12px] text-black-50 capitalize font-medium dark:text-[#babac9] whitespace-nowrap'>Total Minited NFTs</span>
             </p>
           </div>

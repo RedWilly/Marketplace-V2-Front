@@ -269,7 +269,7 @@ function Collection() {
   const fetchOwnedMetadata = useCallback(async () => {
     if (!account) return; // Make sure the user's wallet is connected
 
-    setDataLoaded(false); // Show loading animation
+    setDataLoaded(false);
     setFetchingOwnedNfts(true);
     try {
       const contract = new ethers.Contract(contractAddress, ERC721ABI, new ethers.providers.Web3Provider(window.ethereum));
@@ -346,11 +346,11 @@ function Collection() {
 
   const nftStateUpdated = async () => {
     console.log('NFT state updated');
-    setDataLoaded(false); // Set loading to false to show the loading animation
+    setDataLoaded(false);
     setOwnedNftsLoaded(false);
     fetchOwnedMetadata().then(() => {
       setOwnedNftsLoaded(true);
-      setDataLoaded(true); // Reset data loaded once the fetch is complete
+      setDataLoaded(true);
     });
     fetchListingsMetadata().then(() => { });
   }

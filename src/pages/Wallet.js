@@ -43,7 +43,7 @@ function Wallet() {
     // //fetch nft for owned(assets) and listing ( exclude listed nft from assets page)
 
     async function fetchNFTs() {
-        if(!account || fetchingNFTs) 
+        if (!account || fetchingNFTs)
             return
 
         fetchingNFTs = true
@@ -123,7 +123,7 @@ function Wallet() {
 
 
     const fetchBids = async () => {
-        if (!account || fetchingBids) 
+        if (!account || fetchingBids)
             return
 
         fetchingBids = true
@@ -163,11 +163,11 @@ function Wallet() {
 
         fetchingBids = false
     }
-    
+
 
     //for my bid section
     const fetchOffers = async () => {
-        if (!account || fetchingOffers || unfilteredNfts.length === 0) 
+        if (!account || fetchingOffers || unfilteredNfts.length === 0)
             return
 
         fetchingOffers = true
@@ -319,7 +319,7 @@ function Wallet() {
 
                 </div>
 
-                {!active && 
+                {!active &&
                     <>
                         <button
                             className='bg-black py-3 left-5 w-full mt-[20px] bg-black-400 dark:bg-black-500 rounded-[4px] text-[12px] uppercase font-Kallisto font-bold tracking-widest text-white cursor-pointer outline-none hover:bg-grey-100/40 hover:text-black transition-all ease-linear duration-150'
@@ -333,13 +333,21 @@ function Wallet() {
                 {account && <div className='mt-6'>
                     {/* Assets */}
                     {state === 0 && <div className='flex justify-start items-stretch gap-9 flex-wrap sm:gap-3'>
-                        { fetchingNFTs && 
+                        {fetchingNFTs &&
                             <div className={`w-full`}>
-                                <Spinner />
+                                {/* <Spinner /> */}
+                                {/* <Spinner size="xl" /> */}
+                                <Spinner
+                                    thickness='10px'
+                                    speed='0.65s'
+                                    emptyColor='gray.200'
+                                    color='blue.500'
+                                    size='xl'
+                                />
                                 <div>Loading assets...</div>
                             </div>
-                         }
-                        { nfts.length > 0 && nfts.map((nft, index) => {
+                        }
+                        {nfts.length > 0 && nfts.map((nft, index) => {
                             return <div key={index} className={`rounded-lg overflow-hidden card w-[285px] sm:w-[48%] flex flex-col bg-white dark:bg-black-500 shadow-md relative`}>
                                 <Link to={`/collection/${nft.contractAddress}/${nft.tokenId}`} className='h-[300px] sm:h-[150px] overflow-hidden'>
                                     <img src={nft.image} alt={nft.name} className='w-full h-full object-cover transition-all ease-linear saturate-100' />
@@ -368,14 +376,21 @@ function Wallet() {
                             </div>
                         })}
 
-                        { nfts.length == 0 && !fetchingNFTs && <div>You have no assets in your wallet.</div> }
+                        {nfts.length == 0 && !fetchingNFTs && <div>You have no assets in your wallet.</div>}
                     </div>}
 
                     {/* Listing NFTS */}
                     {state === 1 && <div className='flex justify-start items-stretch gap-9 flex-wrap sm:gap-3'>
-                        { fetchingNFTs && 
+                        {fetchingNFTs &&
                             <div className={`w-full`}>
-                                <Spinner />
+                                {/* <Spinner /> */}
+                                <Spinner
+                                    thickness='10px'
+                                    speed='0.65s'
+                                    emptyColor='gray.200'
+                                    color='blue.500'
+                                    size='xl'
+                                />
                                 <div>Loading assets...</div>
                             </div>
                         }
@@ -413,16 +428,23 @@ function Wallet() {
                             </div>
                         })}
 
-                        {listings.length == 0 && !fetchingNFTs && <div>You have no assets listed.</div> }
+                        {listings.length == 0 && !fetchingNFTs && <div>You have no assets listed.</div>}
                     </div>}
 
 
                     {/* MY BIDS*/}
                     {state === 2 && <div className='flex justify-start items-stretch gap-9 flex-wrap sm:gap-3'>
-                        { fetchingBids && <div className={`w-full`}>
-                                <Spinner />
-                                <div>Loading bids...</div>
-                            </div> }
+                        {fetchingBids && <div className={`w-full`}>
+                            {/* <Spinner /> */}
+                            <Spinner
+                                thickness='10px'
+                                speed='0.65s'
+                                emptyColor='gray.200'
+                                color='blue.500'
+                                size='xl'
+                            />
+                            <div>Loading bids...</div>
+                        </div>}
                         {bids.length > 0 && bids.map((bid, index) => {
                             return <div key={index} className={`rounded-lg overflow-hidden card w-[285px] sm:w-[48%] flex flex-col bg-white dark:bg-black-500 shadow-md relative`}>
                                 <Link to={`/collection/${bid.contractAddress}/${bid.tokenId}`} className='h-[300px] sm:h-[150px] overflow-hidden'>
@@ -458,18 +480,25 @@ function Wallet() {
                             </div>
                         })}
 
-                        { bids.length == 0 && !fetchingBids && <div>You have no outstanding bids.</div> }
+                        {bids.length == 0 && !fetchingBids && <div>You have no outstanding bids.</div>}
                     </div>}
 
                     {/* BID RECEIVED */}
                     {state === 3 && <div className='flex justify-start items-stretch gap-9 flex-wrap sm:gap-3'>
-                        { fetchingOffers && 
+                        {fetchingOffers &&
                             <div className={`w-full`}>
-                                <Spinner />
+                                {/* <Spinner /> */}
+                                <Spinner
+                                    thickness='10px'
+                                    speed='0.65s'
+                                    emptyColor='gray.200'
+                                    color='blue.500'
+                                    size='xl'
+                                />
                                 <div>Loading offers...</div>
                             </div>
                         }
-                        { offers.length > 0 && offers.map((offer, index) => {
+                        {offers.length > 0 && offers.map((offer, index) => {
                             return <div key={index} className={`rounded-lg overflow-hidden card w-[285px] sm:w-[48%] flex flex-col bg-white dark:bg-black-500 shadow-md relative`}>
                                 <Link to={`/collection/${offer.contractAddress}/${offer.tokenId}`} className='h-[300px] sm:h-[150px] overflow-hidden'>
                                     <img src={offer.image} alt={offer.name} className='w-full h-full object-cover transition-all ease-linear saturate-100' />
@@ -505,7 +534,7 @@ function Wallet() {
                             </div>
                         })}
 
-                        { offers.length == 0 && !fetchingOffers && <div>You have no outstanding bids.</div> }
+                        {offers.length == 0 && !fetchingOffers && <div>You have no outstanding bids.</div>}
                     </div>}
 
                 </div>

@@ -29,22 +29,29 @@ function Footer() {
                         <h1 className='font-medium font-Kallisto text-black-400/80 uppercase tracking-widest text-[15px] dark:text-white sm:text-[12px]'>Marketplace</h1>
                         <nav className='flex flex-col gap-1'>
                             <Link to='/explore/nfts' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>ALL NFTS</Link>
-                            <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>STATISTICS</Link>
+                            <Link to='/statstics' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>STATISTICS</Link>
                             <Link to='/explore/collections' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>COLLECTIBLES</Link>
                         </nav>
                     </div>
-                    <div className='flex flex-col gap-4'>
+                    {/* <div className='flex flex-col gap-4'>
                         <h1 className='font-medium font-Kallisto text-black-400/80 uppercase tracking-widest text-[15px] dark:text-white sm:text-[12px]'>LAUNCHPAD</h1>
                         <nav className='flex flex-col gap-1'>
                             <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>APPLY FOR LAUNCHPAD</Link>
                             <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>NFT LAUNCHES</Link>
                         </nav>
-                    </div>
+                    </div> */}
                     <div className='flex flex-col gap-4'>
                         <h1 className='font-medium font-Kallisto text-black-400/80 uppercase tracking-widest text-[15px] dark:text-white sm:text-[12px]'>HELP CENTER</h1>
                         <nav className='flex flex-col gap-1'>
-                            <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>FAQ</Link>
-                            <Link to='/' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>GETTING STARTED</Link>
+                            <Link to='https://t.me/roonibtt/' target='_blank' rel='noopener noreferrer' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>TELEGRAM</Link>
+                            {/* <Link to='#' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>GETTING STARTED</Link> */}
+                            <Link to='#' className='text-[12px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[10px]'>
+                                DOCS
+                                {/* <span className='text-[10px] font-normal text-blue-500 ml-1'>soon</span> */}
+                                <span className='text-[10px] font-normal text-blue-500 ml-1' style={{ color: 'blue' }}>soon</span>
+
+                            </Link>
+
                         </nav>
                     </div>
                     <div className='flex flex-col gap-4'>
@@ -58,7 +65,7 @@ function Footer() {
                 <div className='flex justify-between items-center sm:flex-col'>
                     <p className='mt-4 w-[420px] sm:mt-4 text-[11px] tracking-widest sm:w-full sm:text-center  font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[9px]'>Rooni @ {new Date().getFullYear()} ALL RIGHTS RESERVED</p>
                     <div className="flex justify-end sm:flex-col items-center gap-2">
-                        <p className='flex sm:flex-col mt-4 sm:mt-4 text-[11px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[9px]'>TERMS AND CONDITIONS PRIVACY POLICY</p>
+                        <p className='flex sm:flex-col mt-4 sm:mt-4 text-[11px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[9px]'>TERMS AND CONDITIONS</p>
                         <span className='flex gap-2'>
                             <PiYoutubeLogoLight className='cursor-pointer -mb-2 text-2xl text-black-400 dark:text-grey-100' />
                             <CiTwitter className='cursor-pointer text-2xl  -mb-2 text-black-400 dark:text-grey-100' />

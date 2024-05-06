@@ -8,6 +8,19 @@ class MarketplaceApi {
         this.apiBaseURL = apiBaseURL;
     }
 
+    // fetch market stats - total sales btt & wbtt
+    async fetchMarketStats() {
+        try {
+            const response = await axios.get(`${this.apiBaseURL}/market-stats`);
+            return response.data;
+        } catch (error) {
+            if (error.response && error.response.status !== 404) {
+                console.error('Error fetching market stats:', error);
+            }
+            throw new Error('Failed to fetch market stats from API');
+        }
+    }
+
 
     // fetch the current price of BTT in USD
     async fetchCurrentPrice() {
