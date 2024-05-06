@@ -379,7 +379,7 @@ function Wallet() {
                         })}
 
                         {nfts.length == 0 && !fetchingNFTs && (
-                            <div className='text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>
+                            <div className='text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]  mt-4'>
                                 You have no assets in your wallet.
                             </div>
                         )}
@@ -435,7 +435,7 @@ function Wallet() {
 
                         {/* {listings.length == 0 && !fetchingNFTs && <div>You have no assets listed.</div>} */}
                         {listings.length == 0 && !fetchingNFTs && (
-                            <div className='text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>
+                            <div className='text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]  mt-4'>
                                 You have no assets listed.
                             </div>
                         )}
@@ -493,7 +493,7 @@ function Wallet() {
                         })}
 
                         {bids.length == 0 && !fetchingBids && (
-                            <div className='text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>
+                            <div className='text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]  mt-4'>
                                 You have no outstanding bids.
                             </div>
                         )}
@@ -550,7 +550,7 @@ function Wallet() {
                         })}
 
                         {offers.length == 0 && !fetchingOffers && (
-                            <div className='text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>
+                            <div className='text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px] mt-4'>
                                 You have no outstanding bids.
                             </div>
                         )}
