@@ -338,9 +338,7 @@ function Wallet() {
                     {/* Assets */}
                     {state === 0 && <div className='flex justify-start items-stretch gap-9 flex-wrap sm:gap-3'>
                         {fetchingNFTs &&
-                            <div className={`w-full text-white`}>
-                                {/* <Spinner /> */}
-                                {/* <Spinner size="xl" /> */}
+                            <div className={`w-full flex justify-start items-center gap-2 text-white`}>
                                 <Spinner
                                     thickness='10px'
                                     speed='0.65s'
@@ -348,7 +346,7 @@ function Wallet() {
                                     color='blue.500'
                                     size='xl'
                                 />
-                                <div>Loading assets...</div>
+                                <h1 className='text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>Loading assets...</h1>
                             </div>
                         }
                         {nfts.length > 0 && nfts.map((nft, index) => {
@@ -380,14 +378,17 @@ function Wallet() {
                             </div>
                         })}
 
-                        {nfts.length == 0 && !fetchingNFTs && <div>You have no assets in your wallet.</div>}
+                        {nfts.length == 0 && !fetchingNFTs && (
+                            <div className='text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>
+                                You have no assets in your wallet.
+                            </div>
+                        )}
                     </div>}
 
                     {/* Listing NFTS */}
                     {state === 1 && <div className='flex justify-start items-stretch gap-9 flex-wrap sm:gap-3'>
                         {fetchingNFTs &&
-                            <div className={`w-full`}>
-                                {/* <Spinner /> */}
+                            <div className={`w-full flex justify-start items-center gap-2 text-white`}>
                                 <Spinner
                                     thickness='10px'
                                     speed='0.65s'
@@ -395,7 +396,7 @@ function Wallet() {
                                     color='blue.500'
                                     size='xl'
                                 />
-                                <div>Loading assets...</div>
+                                <h1 className='text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>Loading assets...</h1>
                             </div>
                         }
                         {listings.length > 0 && listings.map((listing, index) => {
@@ -432,23 +433,30 @@ function Wallet() {
                             </div>
                         })}
 
-                        {listings.length == 0 && !fetchingNFTs && <div>You have no assets listed.</div>}
+                        {/* {listings.length == 0 && !fetchingNFTs && <div>You have no assets listed.</div>} */}
+                        {listings.length == 0 && !fetchingNFTs && (
+                            <div className='text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>
+                                You have no assets listed.
+                            </div>
+                        )}
+
                     </div>}
 
 
                     {/* MY BIDS*/}
                     {state === 2 && <div className='flex justify-start items-stretch gap-9 flex-wrap sm:gap-3'>
-                        {fetchingBids && <div className={`w-full`}>
-                            {/* <Spinner /> */}
-                            <Spinner
-                                thickness='10px'
-                                speed='0.65s'
-                                emptyColor='gray.200'
-                                color='blue.500'
-                                size='xl'
-                            />
-                            <div>Loading bids...</div>
-                        </div>}
+                        {fetchingBids &&
+                            <div className={`w-full flex justify-start items-center gap-2 text-white`}>
+                                <Spinner
+                                    thickness='10px'
+                                    speed='0.65s'
+                                    emptyColor='gray.200'
+                                    color='blue.500'
+                                    size='xl'
+                                />
+                                <h1 className='text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>Loading bids....</h1>
+                            </div>
+                        }
                         {bids.length > 0 && bids.map((bid, index) => {
                             return <div key={index} className={`rounded-lg overflow-hidden card w-[285px] sm:w-[48%] flex flex-col bg-white dark:bg-black-500 shadow-md relative`}>
                                 <Link to={`/collection/${bid.contractAddress}/${bid.tokenId}`} className='h-[300px] sm:h-[150px] overflow-hidden'>
@@ -484,14 +492,17 @@ function Wallet() {
                             </div>
                         })}
 
-                        {bids.length == 0 && !fetchingBids && <div>You have no outstanding bids.</div>}
+                        {bids.length == 0 && !fetchingBids && (
+                            <div className='text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>
+                                You have no outstanding bids.
+                            </div>
+                        )}
                     </div>}
 
                     {/* BID RECEIVED */}
                     {state === 3 && <div className='flex justify-start items-stretch gap-9 flex-wrap sm:gap-3'>
                         {fetchingOffers &&
-                            <div className={`w-full`}>
-                                {/* <Spinner /> */}
+                            <div className={`w-full flex justify-start items-center gap-2 text-white`}>
                                 <Spinner
                                     thickness='10px'
                                     speed='0.65s'
@@ -499,7 +510,7 @@ function Wallet() {
                                     color='blue.500'
                                     size='xl'
                                 />
-                                <div>Loading offers...</div>
+                                <h1 className='text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>Loading offers...</h1>
                             </div>
                         }
                         {offers.length > 0 && offers.map((offer, index) => {
@@ -538,7 +549,11 @@ function Wallet() {
                             </div>
                         })}
 
-                        {offers.length == 0 && !fetchingOffers && <div>You have no outstanding bids.</div>}
+                        {offers.length == 0 && !fetchingOffers && (
+                            <div className='text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>
+                                You have no outstanding bids.
+                            </div>
+                        )}
                     </div>}
 
                 </div>
