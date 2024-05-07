@@ -1,6 +1,6 @@
 import React from 'react'
 import { CiTwitter } from 'react-icons/ci'
-import { PiYoutubeLogoLight } from 'react-icons/pi'
+import { PiYoutubeLogoLight, PiTelegramLogoFill } from 'react-icons/pi'
 import { Link } from 'react-router-dom'
 
 function Footer() {
@@ -63,12 +63,16 @@ function Footer() {
                 </div>
 
                 <div className='flex justify-between items-center sm:flex-col'>
-                    <p className='mt-4 w-[420px] sm:mt-4 text-[11px] tracking-widest sm:w-full sm:text-center  font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[9px]'>Rooni @ {new Date().getFullYear()} ALL RIGHTS RESERVED</p>
+                    <p className='mt-4 w-[420px] sm:mt-4 text-[11px] tracking-widest sm:w-full sm:text-center font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[9px]'>Rooni @ {new Date().getFullYear()} ALL RIGHTS RESERVED</p>
                     <div className="flex justify-end sm:flex-col items-center gap-2">
-                        <p className='flex sm:flex-col mt-4 sm:mt-4 text-[11px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[9px]'>TERMS AND CONDITIONS</p>
+                        <Link to="/terms" className='flex sm:flex-col mt-4 sm:mt-4 text-[11px] tracking-widest font-Kallisto font-medium text-black-50/80 dark:text-grey-100 sm:text-[9px]'>TERMS AND CONDITIONS</Link>
                         <span className='flex gap-2'>
-                            <PiYoutubeLogoLight className='cursor-pointer -mb-2 text-2xl text-black-400 dark:text-grey-100' />
-                            <CiTwitter className='cursor-pointer text-2xl  -mb-2 text-black-400 dark:text-grey-100' />
+                            <a href="https://twitter.com/Rooni_bttc" target="_blank" rel="noopener noreferrer">
+                                <CiTwitter className='cursor-pointer -mb-2 text-2xl text-black-400 dark:text-grey-100' />
+                            </a>
+                            <a href="https://t.me/roonibtt" target="_blank" rel="noopener noreferrer">
+                                <PiTelegramLogoFill className='cursor-pointer text-2xl  -mb-2 text-black-400 dark:text-grey-100' />
+                            </a>
                         </span>
                     </div>
                 </div>
