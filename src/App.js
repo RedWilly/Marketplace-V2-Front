@@ -7,6 +7,7 @@ import NFTDetail from './pages/NFTDetail';
 import Wallet from './pages/Wallet';
 import Collection from './pages/Collection';
 import Footer from './components/Footer';
+import Terms from './components/terms';
 
 import { Web3ReactProvider } from '@web3-react/core';
 import { ethers } from 'ethers';
@@ -36,6 +37,7 @@ function App() {
               <Route path='/statstics' element={<Statstics />} />
               <Route path="/collection/:contractAddress/:tokenId" element={<NFTDetail />} />
               <Route path="/collection/:contractAddress" element={<Collection />} />
+              <Route path='/Terms' element={<Terms />} />
             </Routes>
           </div>
           <Footer />
