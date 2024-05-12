@@ -151,9 +151,9 @@ function Home() {
     if (num >= 1e9) { // For billions
       return (num / 1e9).toFixed(2) + 'B';
     } else if (num >= 1e6) { // For millions
-      return (num / 1e6).toFixed(2) + 'M';
+      return (num / 1e6).toFixed(1) + 'M';
     } else if (num >= 1e3) { // For thousands
-      return (num / 1e3).toFixed(2) + 'K';
+      return (num / 1e3).toFixed(1) + 'K';
     } else { // For numbers less than 1000
       return num.toString();
     }
@@ -171,7 +171,7 @@ function Home() {
               <RxCross2 className='text-white text-lg' />
             </span>
             <p className='font-semibold font-Kallisto text-black-400 dark:text-white text-base sm:text-sm flex gap-2 sm:gap-1'>
-              {formatPrice(parseFloat(ethers.utils.formatEther(String(marketStats.totalVolumeTraded || '0'))).toFixed(5))}
+              {formatPrice(parseFloat(ethers.utils.formatEther(String(marketStats.totalVolumeTraded || '0'))))}
               <span className='text-[12px] text-black-50 capitalize font-medium dark:text-[#babac9] whitespace-nowrap'>Total Volume</span>
             </p>
           </div>
@@ -180,7 +180,7 @@ function Home() {
               <IoStatsChart className='text-white text-base' />
             </span>
             <p className='font-semibold font-Kallisto text-black-400 dark:text-white text-base sm:text-sm flex gap-2 sm:gap-1'>
-              {formatPrice(parseFloat(ethers.utils.formatEther(String(marketStats.totalVolumeTradedWETH || '0'))).toFixed(5))}
+              {formatPrice(parseFloat(ethers.utils.formatEther(String(marketStats.totalVolumeTradedWETH || '0'))))}
               <span className='text-[12px] text-black-50 capitalize font-medium dark:text-[#babac9] whitespace-nowrap'>WBTT Total Volume</span>
             </p>
           </div>
@@ -251,7 +251,7 @@ function Home() {
                     <div className='flex justify-start gap-10 items-center w-[30%] sm:w-[35%] sm:gap-8'>
                       <p className='text-sm sm:text-[10px] uppercase font-Kallisto font-semibold text-black-400 dark:text-grey-100 text-left flex items-center'>
                         <img src={require('../assets/logo/bttc.png')} className='w-5 mr-1' alt="BTTC Logo" />
-                        {formatPrice(parseFloat(ethers.utils.formatEther(String(floorPrice || '0'))).toFixed(5))}
+                        {formatPrice(parseFloat(ethers.utils.formatEther(String(floorPrice || '0'))).toFixed(2))}
                       </p>
                     </div>
                   </Link>
@@ -311,7 +311,7 @@ function Home() {
                           <p className='text-sm uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left sm:text-[12px]'>{recentListing.name}</p>
                           <div className='text-[12px] uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left sm:text-[12px] flex gap-1 items-center'>
                             <img src={require('../assets/logo/bttc.png')} className='w-5' alt="BTTC Logo" />
-                            {recentListing.displayPrice}
+                            {formatPrice(recentListing.displayPrice)}
                           </div>
                         </div>
                       </div>
@@ -340,7 +340,7 @@ function Home() {
                         <p className='text-sm uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left sm:text-[12px]'>{recentSales.name}</p>
                         <p className='text-[12px] uppercase font-Kallisto font-medium text-black-400 dark:text-grey-100 text-left sm:text-[12px] flex gap-1 items-center'>
                           <img src={require('../assets/logo/bttc.png')} className='w-5' />
-                          {recentSales.price}
+                          {formatPrice(recentSales.price)}
                         </p>
                       </div>
                     </div>

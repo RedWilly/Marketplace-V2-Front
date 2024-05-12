@@ -22,6 +22,9 @@ import AcceptOffer from '../components/Market/AcceptOffer';
 import DeListNFTModal from '../components/Market/DeListNFTModal';
 import ListNFTModal from '../components/Market/ListNFTModal';
 
+import { Helmet } from 'react-helmet'; // seo mark
+
+
 
 
 
@@ -109,6 +112,7 @@ function NFTDetail() {
 
     fetchBttPrice();
   }, []);
+
 
   //price section - format to usd 
   const formatPriceWithUSD = (bttAmount) => {
@@ -294,272 +298,281 @@ function NFTDetail() {
 
 
   return (
-    <div className='flex justify-between items-start gap-8 sm:gap-5 py-20 sm:py-16 px-28 sm:px-5 sm:pb-10 sm:flex-col-reverse'>
-      <div className='w-[47%] flex flex-col gap-9 sm:gap-5 sm:w-full'>
-        {/* NFT IMAGE SECTION */}
-        {nftDetails.image &&
-          <div className='sm:hidden relative h-[600px] cursor-pointer sm:h-[300px]' onClick={() => setImage(nftDetails.image)}>
-            <img className='rounded-lg w-full h-full object-cover' src={nftDetails.image || "../assets/IMG/pfp_not_found.png"} alt={nftDetails.name} />
+    <>
+
+
+      <Helmet>
+        <title>{nftDetails.name}</title>
+        <meta name="description" content={nftDetails.description} />
+      </Helmet>
+
+      <div className='flex justify-between items-start gap-8 sm:gap-5 py-20 sm:py-16 px-28 sm:px-5 sm:pb-10 sm:flex-col-reverse'>
+        <div className='w-[47%] flex flex-col gap-9 sm:gap-5 sm:w-full'>
+          {/* NFT IMAGE SECTION */}
+          {nftDetails.image &&
+            <div className='sm:hidden relative h-[600px] cursor-pointer sm:h-[300px]' onClick={() => setImage(nftDetails.image)}>
+              <img className='rounded-lg w-full h-full object-cover' src={nftDetails.image || "../assets/IMG/pfp_not_found.png"} alt={nftDetails.name} />
+              <div className='absolute w-full h-full bg-black-400/30 top-0 left-0 opacity-0 hover:opacity-100 transition-all ease-in duration-150 flex justify-center items-center'>
+                <span className='bg-grey-100/30 p-5 rounded-full flex justify-center items-center'>
+                  <BsArrowsAngleExpand className='text-white text-lg' />
+                </span>
+              </div>
+            </div>
+          }
+
+          {/* DESCRIPTION SECTION  */}
+
+          <Card title="ABOUT">
+            <p className='text-[15px] sm:text-[12px] tracking-wide font-Kallisto font-normal text-black-400 dark:text-white'> {nftDetails.description} </p>
+          </Card>
+
+          {/* ATTRIBUTES OR TRAITS */}
+          <Card title="ATTRIBUTES">
+            <div className='flex justify-start items-start gap-3 flex-wrap sm:gap-2'>
+              {nftDetails.attributes?.map((attr, index) => (
+                <div key={index} className='flex justify-start items-start gap-3 flex-wrap'>
+                  <div className='rounded-md bg-grey-100/5 dark:bg-black-500 p-5 flex flex-col gap-1 cursor-pointer min-w-[110px] sm:max-w-[120px] sm:p-3 hover:bg-white hover:shadow-lg transition-all ease-in duration-100'>
+                    <p className='text-[10px] font-Kallisto tracking-wider font-semibold capitalize text-black-50 dark:text-grey-100'>{attr.trait_type}</p>
+                    <p className='text-[12px] font-Kallisto font-medium tracking-wide capitalize text-black-400 dark:text-white'>{attr.value}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+        </div >
+
+        <div className='w-[53%] flex flex-col gap-2 sm:w-full'>
+
+          <Link to={`/collection/${contractAddress}`} className='text-[12px] sm:text-[10px] text-blue-200 dark:text-blue-100 capitalize font-Kallisto font-medium underline flex items-center gap-2'>
+            {/* using {nftDetails.name} to get the collection name while remove the part after and including the "#" character. */}
+            {nftDetails.name ? nftDetails.name.split(" #")[0] : "Loading..."}
+            {/* Conditionally render GoCheckCircleFill if the contract address is in the whitelist */}
+            {Object.values(whitelist).some(entry => entry.address.toLowerCase() === contractAddress) && (
+              <GoCheckCircleFill className='text-blue-200 text-sm dark:bg-white rounded-full border-blue-200 dark:border-[1px]' />
+            )}
+          </Link>
+
+          <div className='flex justify-between items-center relative'>
+            <h1 className='text-black-400 font-Kallisto text-2xl font-semibold dark:text-white uppercase sm:text-base'>{nftDetails.name}</h1>
+            <div className='flex justify-end items-center gap-3 sm:absolute sm:right-0 -top-7 sm:gap-1'>
+              {/* <FiRefreshCcw className='cursor-pointer text-lg sm:text-sm text-black-50 dark:text-grey-100' /> */}
+              <FiRefreshCcw
+                className='cursor-pointer text-lg sm:text-sm text-black-50 dark:text-grey-100'
+                onClick={nftStateUpdated} // Call nftStateUpdated when the icon is clicked
+              />
+              <CiShare2 className='cursor-pointer text-2xl sm:text-lg text-black-50 dark:text-grey-100' />
+            </div>
+          </div>
+
+          <div className='hidden sm:flex relative h-[600px] cursor-pointer sm:h-[300px]' onClick={() => setImage(nftDetails.image)}>
+            <img className=' rounded-lg w-full h-full object-cover' src={nftDetails.image} alt={nftDetails.name} />
             <div className='absolute w-full h-full bg-black-400/30 top-0 left-0 opacity-0 hover:opacity-100 transition-all ease-in duration-150 flex justify-center items-center'>
               <span className='bg-grey-100/30 p-5 rounded-full flex justify-center items-center'>
                 <BsArrowsAngleExpand className='text-white text-lg' />
               </span>
             </div>
           </div>
-        }
 
-        {/* DESCRIPTION SECTION  */}
-
-        <Card title="ABOUT">
-          <p className='text-[15px] sm:text-[12px] tracking-wide font-Kallisto font-normal text-black-400 dark:text-white'> {nftDetails.description} </p>
-        </Card>
-
-        {/* ATTRIBUTES OR TRAITS */}
-        <Card title="ATTRIBUTES">
-          <div className='flex justify-start items-start gap-3 flex-wrap sm:gap-2'>
-            {nftDetails.attributes?.map((attr, index) => (
-              <div key={index} className='flex justify-start items-start gap-3 flex-wrap'>
-                <div className='rounded-md bg-grey-100/5 dark:bg-black-500 p-5 flex flex-col gap-1 cursor-pointer min-w-[110px] sm:max-w-[120px] sm:p-3 hover:bg-white hover:shadow-lg transition-all ease-in duration-100'>
-                  <p className='text-[10px] font-Kallisto tracking-wider font-semibold capitalize text-black-50 dark:text-grey-100'>{attr.trait_type}</p>
-                  <p className='text-[12px] font-Kallisto font-medium tracking-wide capitalize text-black-400 dark:text-white'>{attr.value}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-      </div >
-
-      <div className='w-[53%] flex flex-col gap-2 sm:w-full'>
-
-        <Link to={`/collection/${contractAddress}`} className='text-[12px] sm:text-[10px] text-blue-200 dark:text-blue-100 capitalize font-Kallisto font-medium underline flex items-center gap-2'>
-          {/* using {nftDetails.name} to get the collection name while remove the part after and including the "#" character. */}
-          {nftDetails.name ? nftDetails.name.split(" #")[0] : "Loading..."}
-          {/* Conditionally render GoCheckCircleFill if the contract address is in the whitelist */}
-          {Object.values(whitelist).some(entry => entry.address.toLowerCase() === contractAddress) && (
-            <GoCheckCircleFill className='text-blue-200 text-sm dark:bg-white rounded-full border-blue-200 dark:border-[1px]' />
-          )}
-        </Link>
-
-        <div className='flex justify-between items-center relative'>
-          <h1 className='text-black-400 font-Kallisto text-2xl font-semibold dark:text-white uppercase sm:text-base'>{nftDetails.name}</h1>
-          <div className='flex justify-end items-center gap-3 sm:absolute sm:right-0 -top-7 sm:gap-1'>
-            {/* <FiRefreshCcw className='cursor-pointer text-lg sm:text-sm text-black-50 dark:text-grey-100' /> */}
-            <FiRefreshCcw
-              className='cursor-pointer text-lg sm:text-sm text-black-50 dark:text-grey-100'
-              onClick={nftStateUpdated} // Call nftStateUpdated when the icon is clicked
-            />
-            <CiShare2 className='cursor-pointer text-2xl sm:text-lg text-black-50 dark:text-grey-100' />
-          </div>
-        </div>
-
-        <div className='hidden sm:flex relative h-[600px] cursor-pointer sm:h-[300px]' onClick={() => setImage(nftDetails.image)}>
-          <img className=' rounded-lg w-full h-full object-cover' src={nftDetails.image} alt={nftDetails.name} />
-          <div className='absolute w-full h-full bg-black-400/30 top-0 left-0 opacity-0 hover:opacity-100 transition-all ease-in duration-150 flex justify-center items-center'>
-            <span className='bg-grey-100/30 p-5 rounded-full flex justify-center items-center'>
-              <BsArrowsAngleExpand className='text-white text-lg' />
-            </span>
-          </div>
-        </div>
-
-        <div className='rounded-lg border-grey-50 py-3 px-5 gap-3 sm:gap-2 sm:p-5 bg-white border-[1px] flex dark:bg-transparent mt-6 flex-col'>
-          <div className='flex justify-start items-center gap-5 sm:gap-3'>
-            <h1 className='text-black-400 font-Kallisto text-base font-medium dark:text-white uppercase sm:text-[12px]'>
-              {isListed ? "ON SALE FOR" : "NOT LISTED"}
-            </h1>
-            {isListed && (
-              <h1 className='text-black-400 font-Kallisto text-base font-medium dark:text-white uppercase sm:text-[12px] flex items-center gap-1'>
-                <img src={require('../assets/logo/bttc.png')} alt="BTTC Logo" className='w-5 h-5' />
-                {/* {formatPrice(nftDetails.price)} BTTC */}
-                {formatPriceWithUSD(nftDetails.price)}
+          <div className='rounded-lg border-grey-50 py-3 px-5 gap-3 sm:gap-2 sm:p-5 bg-white border-[1px] flex dark:bg-transparent mt-6 flex-col'>
+            <div className='flex justify-start items-center gap-5 sm:gap-3'>
+              <h1 className='text-black-400 font-Kallisto text-base font-medium dark:text-white uppercase sm:text-[12px]'>
+                {isListed ? "ON SALE FOR" : "NOT LISTED"}
               </h1>
+              {isListed && (
+                <h1 className='text-black-400 font-Kallisto text-base font-medium dark:text-white uppercase sm:text-[12px] flex items-center gap-1'>
+                  <img src={require('../assets/logo/bttc.png')} alt="BTTC Logo" className='w-5 h-5' />
+                  {/* {formatPrice(nftDetails.price)} BTTC */}
+                  {formatPriceWithUSD(nftDetails.price)}
+                </h1>
+              )}
+            </div>
+            {/* {active && nftDetails.price && isListed && !isSeller && ( */}
+            {nftDetails.price && isListed && !isSeller && (
+              <BuyNow
+                erc721Address={contractAddress}
+                tokenId={tokenId}
+                price={ethers.utils.parseUnits(nftDetails.price, 'ether')}
+                className='mt-3 sm:mt-1 sm:text-[10px] bg-black px-11 py-[10px] bg-black-400 dark:bg-black-500 rounded-[4px] text-[12px] uppercase font-Kallisto font-medium tracking-widest text-white cursor-pointer outline-none hover:text-black-400 hover:bg-grey-100/20 hover:text-black transition-all ease-linear duration-150 dark:hover:text-white dark:hover:bg-grey-100'
+                onSuccess={() => {
+                  setTimeout(() => {
+                    nftStateUpdated().then(() => { })
+                  }, 500);
+                }}
+              />
             )}
-          </div>
-          {/* {active && nftDetails.price && isListed && !isSeller && ( */}
-          {nftDetails.price && isListed && !isSeller && (
-            <BuyNow
+            {/* Make an Offer Button */}
+            {!isOwner && !isSeller && (
+              <button
+                className='bg-black sm:text-[10px] px-11 py-[10px] bg-black-400 dark:bg-black-500 rounded-[4px] text-[12px] uppercase font-Kallisto font-medium tracking-widest text-white cursor-pointer outline-none hover:text-black-400 hover:bg-grey-100/20 hover:text-black transition-all ease-linear duration-150 dark:hover:text-white dark:hover:bg-grey-100'
+                onClick={onOfferOpen} // Open the MakeOffer modal
+              >
+                Make an Offer
+              </button>
+            )}
+            <MakeOffer
+              isOpen={isOfferOpen}
+              onClose={onOfferClose}
               erc721Address={contractAddress}
               tokenId={tokenId}
-              price={ethers.utils.parseUnits(nftDetails.price, 'ether')}
-              className='mt-3 sm:mt-1 sm:text-[10px] bg-black px-11 py-[10px] bg-black-400 dark:bg-black-500 rounded-[4px] text-[12px] uppercase font-Kallisto font-medium tracking-widest text-white cursor-pointer outline-none hover:text-black-400 hover:bg-grey-100/20 hover:text-black transition-all ease-linear duration-150 dark:hover:text-white dark:hover:bg-grey-100'
-              onSuccess={() => {
+              nft={{ name: nftDetails.name, image: nftDetails.image }}
+            />
+            {/* Conditional show Listing Button or cancel listing if owner or seller is connected */}
+            {active && isListed && isSeller && (
+              <button
+                className='bg-black sm:text-[10px] px-11 py-[10px] bg-black-400 dark:bg-black-500 rounded-[4px] text-[12px] uppercase font-Kallisto font-medium tracking-widest text-white cursor-pointer outline-none hover:text-black-400 hover:bg-grey-100/20 hover:text-black transition-all ease-linear duration-150 dark:hover:text-white dark:hover:bg-grey-100'
+                onClick={() => setIsCancelBidModalOpen(true)}
+              >
+                Cancel Listing
+              </button>
+            )}
+            <DeListNFTModal
+              isOpen={isCancelBidModalOpen}
+              onClose={() => {
+                setIsCancelBidModalOpen(false)
+                setTimeout(() => {
+                  nftStateUpdated().then(() => { })
+                }, 500)
+              }}
+              contractAddress={contractAddress}
+              tokenId={tokenId}
+            />
+
+            {active && !isListed && isOwner && (
+              <button
+                className='bg-black sm:text-[10px] px-11 py-[10px] bg-black-400 dark:bg-black-500 rounded-[4px] text-[12px] uppercase font-Kallisto font-medium tracking-widest text-white cursor-pointer outline-none hover:text-black-400 hover:bg-grey-100/20 hover:text-black transition-all ease-linear duration-150 dark:hover:text-white dark:hover:bg-grey-100'
+                onClick={() => setIsListModalOpen(true)}
+              >
+                List for Sale
+              </button>
+            )}
+            <ListNFTModal
+              isOpen={isListModalOpen}
+              onClose={() => {
+                setIsListModalOpen(false)
                 setTimeout(() => {
                   nftStateUpdated().then(() => { })
                 }, 500);
               }}
+              contractAddress={contractAddress}
+              tokenId={tokenId}
             />
-          )}
-          {/* Make an Offer Button */}
-          {!isOwner && !isSeller && (
-            <button
-              className='bg-black sm:text-[10px] px-11 py-[10px] bg-black-400 dark:bg-black-500 rounded-[4px] text-[12px] uppercase font-Kallisto font-medium tracking-widest text-white cursor-pointer outline-none hover:text-black-400 hover:bg-grey-100/20 hover:text-black transition-all ease-linear duration-150 dark:hover:text-white dark:hover:bg-grey-100'
-              onClick={onOfferOpen} // Open the MakeOffer modal
-            >
-              Make an Offer
-            </button>
-          )}
-          <MakeOffer
-            isOpen={isOfferOpen}
-            onClose={onOfferClose}
-            erc721Address={contractAddress}
-            tokenId={tokenId}
-            nft={{ name: nftDetails.name, image: nftDetails.image }}
-          />
-          {/* Conditional show Listing Button or cancel listing if owner or seller is connected */}
-          {active && isListed && isSeller && (
-            <button
-              className='bg-black sm:text-[10px] px-11 py-[10px] bg-black-400 dark:bg-black-500 rounded-[4px] text-[12px] uppercase font-Kallisto font-medium tracking-widest text-white cursor-pointer outline-none hover:text-black-400 hover:bg-grey-100/20 hover:text-black transition-all ease-linear duration-150 dark:hover:text-white dark:hover:bg-grey-100'
-              onClick={() => setIsCancelBidModalOpen(true)}
-            >
-              Cancel Listing
-            </button>
-          )}
-          <DeListNFTModal
-            isOpen={isCancelBidModalOpen}
-            onClose={() => {
-              setIsCancelBidModalOpen(false)
-              setTimeout(() => {
-                nftStateUpdated().then(() => { })
-              }, 500)
-            }}
-            contractAddress={contractAddress}
-            tokenId={tokenId}
-          />
+          </div>
 
-          {active && !isListed && isOwner && (
-            <button
-              className='bg-black sm:text-[10px] px-11 py-[10px] bg-black-400 dark:bg-black-500 rounded-[4px] text-[12px] uppercase font-Kallisto font-medium tracking-widest text-white cursor-pointer outline-none hover:text-black-400 hover:bg-grey-100/20 hover:text-black transition-all ease-linear duration-150 dark:hover:text-white dark:hover:bg-grey-100'
-              onClick={() => setIsListModalOpen(true)}
-            >
-              List for Sale
-            </button>
-          )}
-          <ListNFTModal
-            isOpen={isListModalOpen}
-            onClose={() => {
-              setIsListModalOpen(false)
-              setTimeout(() => {
-                nftStateUpdated().then(() => { })
-              }, 500);
-            }}
-            contractAddress={contractAddress}
-            tokenId={tokenId}
-          />
-        </div>
-
-        <div className='flex flex-col gap-9 sm:gap-5 mt-8 sm:mt-4'>
-          {/* <NFTDetails /> */}
-          <Card title="Details">
-            <div className='mt-2 flex flex-col gap-2'>
-              <div className='flex justify-between items-center'>
-                <p className='text-[12px] text-black-50 dark:text-grey-100 font-Kallisto font-medium'>Token ID</p>
-                <p className='text-[12px] text-black-400 cursor-pointer font-semibold dark:text-white font-Kallisto underline hover:no-underline'>{formatTokenId(tokenId)}</p>
-              </div>
-              <div className='flex justify-between items-center'>
-                <p className='text-[12px] text-black-50 dark:text-grey-100 font-Kallisto font-medium'>Token standard</p>
-                <p className='text-[12px] text-black-400 cursor-pointer font-medium dark:text-white font-Kallisto '>ERC-721</p>
-              </div>
-              <div className='flex justify-between items-center'>
-                <p className='text-[12px] text-black-50 dark:text-grey-100 font-Kallisto font-medium'>Owner</p>
-                <p className='text-[12px] text-black-400 cursor-pointer font-semibold dark:text-white font-Kallisto underline hover:no-underline'>{formatAddress(nftDetails.owner)}</p>
-              </div>
-              {/* <div className='flex justify-between items-center'>
+          <div className='flex flex-col gap-9 sm:gap-5 mt-8 sm:mt-4'>
+            {/* <NFTDetails /> */}
+            <Card title="Details">
+              <div className='mt-2 flex flex-col gap-2'>
+                <div className='flex justify-between items-center'>
+                  <p className='text-[12px] text-black-50 dark:text-grey-100 font-Kallisto font-medium'>Token ID</p>
+                  <p className='text-[12px] text-black-400 cursor-pointer font-semibold dark:text-white font-Kallisto underline hover:no-underline'>{formatTokenId(tokenId)}</p>
+                </div>
+                <div className='flex justify-between items-center'>
+                  <p className='text-[12px] text-black-50 dark:text-grey-100 font-Kallisto font-medium'>Token standard</p>
+                  <p className='text-[12px] text-black-400 cursor-pointer font-medium dark:text-white font-Kallisto '>ERC-721</p>
+                </div>
+                <div className='flex justify-between items-center'>
+                  <p className='text-[12px] text-black-50 dark:text-grey-100 font-Kallisto font-medium'>Owner</p>
+                  <p className='text-[12px] text-black-400 cursor-pointer font-semibold dark:text-white font-Kallisto underline hover:no-underline'>{formatAddress(nftDetails.owner)}</p>
+                </div>
+                {/* <div className='flex justify-between items-center'>
                 <p className='text-[12px] text-black-50 dark:text-grey-100 font-Kallisto font-medium'>Royalties</p>
                 <p className='text-[12px] text-black-400 cursor-pointer font-medium dark:text-white font-Kallisto '>7 %</p>
               </div> */}
-              {/* 
+                {/* 
               <div className='flex justify-between items-center'>
                 <p className='text-[12px] text-black-50 dark:text-grey-100 font-Kallisto font-medium'>NFT Rank</p>
                 <p className='text-[12px] text-black-400 cursor-pointer font-medium dark:text-white font-Kallisto '>7582</p>
               </div> */}
 
-            </div>
-            {/* <Offers /> */}
-          </Card>
-          <Card title="Offers">
-            <div className="min-h-[50px] max-h-[200px] overflow-y-scroll sm:overflow-x-scroll">
-              <table className='w-full'>
-                <thead>
-                  <tr className='flex'>
-                    <th className='text-[12px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left min-w-[120px]'>PRICE</th>
-                    <th className='text-[12px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left min-w-[120px]'>EXPIRED ON</th>
-                    <th className='text-[12px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left min-w-[120px]'>FROM</th>
-                    {/* <th className='pb-1 text-[12px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left min-w-[120px]'>DIFF.</th> */}
-                  </tr>
-                </thead>
-                <tbody className=''>
-                  {bidsData.map((bid, index) => (
-                    <tr className='flex' key={index}>
-                      <td className='py-1 text-[12px] sm:text-[10px] uppercase font-Kallisto font-semibold text-black-400 dark:text-white min-w-[120px]'>{formatPrice(ethers.utils.formatEther(String(bid.value)))} WBTTC</td>
-                      <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white min-w-[120px]'>{formatExpiration(bid.expireTimestamp)}</td>
-                      <td className='text-[12px] sm:text-[10px] font-Kallisto font-normal text-black-400 dark:text-white uppercase min-w-[120px]'>{formatAddress(bid.bidder)}</td>
-                      {/* <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white min-w-[120px]'>ACCEPT OFFER</td> */}
-                      <td className='min-w-[120px]'>
-                        {isOwner && (
-                          <button
-                            onClick={() => handleSelectBid(bid)}
-                            className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white bg-transparent cursor-pointer hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-150 ease-in-out'
-                          >
-                            ACCEPT OFFER
-                          </button>
-                        )}
-                        {selectedBid && isOwner && (
-                          <AcceptOffer
-                            isOpen={isAcceptOfferOpen}
-                            onClose={onAcceptOfferClose}
-                            onAccepted={() => {
-                              setTimeout(() => {
-                                nftStateUpdated().then(() => { })
-                              }, 500)
-                            }}
-                            erc721Address={selectedBid.erc721Address}
-                            tokenId={tokenId}
-                            bidder={selectedBid.bidder}
-                            value={selectedBid.value}
-                          />
-                        )}
-                      </td>
+              </div>
+              {/* <Offers /> */}
+            </Card>
+            <Card title="Offers">
+              <div className="min-h-[50px] max-h-[200px] overflow-y-scroll sm:overflow-x-scroll">
+                <table className='w-full'>
+                  <thead>
+                    <tr className='flex'>
+                      <th className='text-[12px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left min-w-[120px]'>PRICE</th>
+                      <th className='text-[12px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left min-w-[120px]'>EXPIRED ON</th>
+                      <th className='text-[12px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left min-w-[120px]'>FROM</th>
+                      {/* <th className='pb-1 text-[12px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left min-w-[120px]'>DIFF.</th> */}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
+                  </thead>
+                  <tbody className=''>
+                    {bidsData.map((bid, index) => (
+                      <tr className='flex' key={index}>
+                        <td className='py-1 text-[12px] sm:text-[10px] uppercase font-Kallisto font-semibold text-black-400 dark:text-white min-w-[120px]'>{formatPrice(ethers.utils.formatEther(String(bid.value)))} WBTTC</td>
+                        <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white min-w-[120px]'>{formatExpiration(bid.expireTimestamp)}</td>
+                        <td className='text-[12px] sm:text-[10px] font-Kallisto font-normal text-black-400 dark:text-white uppercase min-w-[120px]'>{formatAddress(bid.bidder)}</td>
+                        {/* <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white min-w-[120px]'>ACCEPT OFFER</td> */}
+                        <td className='min-w-[120px]'>
+                          {isOwner && (
+                            <button
+                              onClick={() => handleSelectBid(bid)}
+                              className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white bg-transparent cursor-pointer hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-150 ease-in-out'
+                            >
+                              ACCEPT OFFER
+                            </button>
+                          )}
+                          {selectedBid && isOwner && (
+                            <AcceptOffer
+                              isOpen={isAcceptOfferOpen}
+                              onClose={onAcceptOfferClose}
+                              onAccepted={() => {
+                                setTimeout(() => {
+                                  nftStateUpdated().then(() => { })
+                                }, 500)
+                              }}
+                              erc721Address={selectedBid.erc721Address}
+                              tokenId={tokenId}
+                              bidder={selectedBid.bidder}
+                              value={selectedBid.value}
+                            />
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
 
-          {/* <Activity /> */}
-          <Card title="SALES">
-            <div className="min-h-[50px] max-h-[200px] overflow-y-scroll sm:overflow-x-scroll">
-              <table className='w-full'>
-                <thead>
-                  <tr className='flex'>
-                    <th className='text-[12px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left min-w-[100px]'>TXID</th>
-                    <th className='text-[12px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left min-w-[80px]'>Price</th>
-                    <th className='text-[12px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left min-w-[120px]'>FROM</th>
-                    <th className='text-[12px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left min-w-[120px]'>TO</th>
-                    <th className='text-[12px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left min-w-[100px]'>Date</th>
-                  </tr>
-                </thead>
-                <tbody className=''>
-                  {salesData.map((sale, index) => (
-                    <tr className='flex' key={index}>
-                      <td className='py-1 text-[12px] sm:text-[10px] uppercase font-Kallisto font-semibold text-black-400 dark:text-white min-w-[100px]'>
-                        <a href={`https://bttcscan.com/tx/${sale.txid}`} target="_blank" rel="noopener noreferrer">View</a>
-                      </td>
-                      <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white  min-w-[80px]'>{formatPrice(ethers.utils.formatEther(String(sale.price)))} BTT</td>
-                      <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white  min-w-[120px]'>{formatAddressSOLD(sale.seller)}</td>
-                      <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white  min-w-[120px]'>{formatAddressSOLD(sale.buyer)}</td>
-                      <td className='text-[12px] sm:text-[10px] font-Kallisto font-normal text-black-400 dark:text-white uppercase  min-w-[100px]'>{formatDate(sale.timestamp)}</td>
+            {/* <Activity /> */}
+            <Card title="SALES">
+              <div className="min-h-[50px] max-h-[200px] overflow-y-scroll sm:overflow-x-scroll">
+                <table className='w-full'>
+                  <thead>
+                    <tr className='flex'>
+                      <th className='text-[12px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left min-w-[100px]'>TXID</th>
+                      <th className='text-[12px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left min-w-[80px]'>Price</th>
+                      <th className='text-[12px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left min-w-[120px]'>FROM</th>
+                      <th className='text-[12px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left min-w-[120px]'>TO</th>
+                      <th className='text-[12px] uppercase font-Kallisto font-medium text-black-50 dark:text-grey-100 text-left min-w-[100px]'>Date</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
+                  </thead>
+                  <tbody className=''>
+                    {salesData.map((sale, index) => (
+                      <tr className='flex' key={index}>
+                        <td className='py-1 text-[12px] sm:text-[10px] uppercase font-Kallisto font-semibold text-black-400 dark:text-white min-w-[100px]'>
+                          <a href={`https://bttcscan.com/tx/${sale.txid}`} target="_blank" rel="noopener noreferrer">View</a>
+                        </td>
+                        <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white  min-w-[80px]'>{formatPrice(ethers.utils.formatEther(String(sale.price)))} BTT</td>
+                        <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white  min-w-[120px]'>{formatAddressSOLD(sale.seller)}</td>
+                        <td className='text-[12px] sm:text-[10px] uppercase font-Kallisto font-normal text-black-400 dark:text-white  min-w-[120px]'>{formatAddressSOLD(sale.buyer)}</td>
+                        <td className='text-[12px] sm:text-[10px] font-Kallisto font-normal text-black-400 dark:text-white uppercase  min-w-[100px]'>{formatDate(sale.timestamp)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </div>
+
         </div>
-
-      </div>
-      {image && <Image image={image} setImage={setImage} alt={nftDetails.name || "NFT"} />}
-    </div >
+        {image && <Image image={image} setImage={setImage} alt={nftDetails.name || "NFT"} />}
+      </div >
+    </>
   )
 }
 

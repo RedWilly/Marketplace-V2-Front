@@ -23,7 +23,7 @@ import ListNFTModal from '../components/Market/ListNFTModal';
 import LoadingNFT from '../components/LoadingNFT'
 import LoadingCollection from '../components/LoadingCollection';
 
-
+import { Helmet } from 'react-helmet'; // seo mark
 
 
 function Collection() {
@@ -45,6 +45,8 @@ function Collection() {
   const [listedTokenIds, setListedTokenIds] = useState(new Set());
   const [dataLoaded, setDataLoaded] = useState(false);
 
+  const [noData, setNoData] = useState(false); // state variable to track when there's no data
+
 
 
   const [collectionDetails, setCollectionDetails] = useState({});
@@ -61,6 +63,9 @@ function Collection() {
 
   //price in usd
   const [bttToUsdPrice, setBttToUsdPrice] = useState(null);
+
+
+  const [metaDescription, setMetaDescription] = useState({});
 
 
 
@@ -186,6 +191,7 @@ function Collection() {
 
   //fetch listing metadata
   const fetchListingsMetadata = async () => {
+    setDataLoaded(false);
     const currentTimestamp = Math.floor(Date.now() / 1000);
     if (listingsData && listingsData.listings) {
       console.log("Processing listings data...");
@@ -253,10 +259,14 @@ function Collection() {
       setListings(validListings);
       setNftCount(validListings.length);
       // setIsSeller(sellerIsCurrentUser);
+      if (validListings.length === 0) {
+        setNoData(true);
+      }
 
       // Update the set of listed token IDs
       const newSet = new Set(validListings.map(listing => listing.tokenId));
       setListedTokenIds(newSet);
+      setDataLoaded(true);
     }
   };
 
@@ -313,6 +323,10 @@ function Collection() {
 
       setOwnedNfts(ownedNftsMetadata.filter(nft => nft !== null)); // Filter out any failed fetches
       console.log('Owned NFTs:', ownedNftsMetadata.filter(nft => nft !== null));
+      setDataLoaded(true);
+      if (ownedNftsMetadata.filter(nft => nft !== null).length === 0) {
+        setNoData(true);
+      }
     } catch (error) {
       console.error("Failed to fetch owned NFTs:", error);
     } finally {
@@ -356,16 +370,34 @@ function Collection() {
   }
 
 
+  // Fetch collection details based on contractAddress
+  useEffect(() => {
+    const details = Object.values(whitelist).find(collection => collection.address.toLowerCase() === contractAddress);
+    if (details) {
+      setCollectionDetails(details);
+      setCollectionName(details.name); // Set the collection name
+
+      // Set the meta description
+      const metaDescription = details.description || "This collection has no description yet. Contact the owner of this collection to get whitelisted.";
+      setMetaDescription(metaDescription);
+    }
+  }, [contractAddress]);
+
 
   return (
     <>
+      <Helmet>
+        <title>{collectionName}</title>
+        <meta name="description" content={metaDescription} />
+      </Helmet>
+
       {!dataLoaded ?
         <LoadingCollection />
         :
         <div className='pt-[75px]'>
-          <img className='w-full h-[400px] sm:h-[150px] md:h-[300px] object-cover z-0' src={collectionDetails?.coverImage} alt="Collection Cover" />
+          {/* <img className='w-full h-[400px] sm:h-[150px] md:h-[300px] object-cover z-0' src={collectionDetails?.coverImage} alt="Collection Cover" /> */}
           {/* <img className='w-full h-[400px] sm:h-[150px] object-cover sm:object-contain z-0' src={collectionDetails?.coverImage} alt="Collection Cover" /> second version*/}
-          {/* <img className='w-full h-[400px] sm:h-[250px] object-cover z-0' src={collectionDetails?.coverImage || require("../assets/fallback_cover.png")} alt="Collection Cover" />  old first version*/}
+          <img className='w-full h-[400px] sm:h-[150px] md:h-[300px] object-cover z-0' src={collectionDetails?.coverImage || require("../assets/IMG/cover.png")} alt="Collection Cover" />
 
           <div className='flex justify-center items-center -mt-20 z-30 relative sm:px-5 sm:-mt-14'>
             <div className='w-[1257px] sm:w-full md:w-[95%]'>
@@ -471,10 +503,11 @@ function Collection() {
               </div>
 
 
-              <div className='flex justify-center items-start'>
-                <div className='w-[1257px] overflow-hidden md:w-[95%]'>
-                  <div className={`mt-6 flex justify-center items-start gap-9`}>
-                    {/* {sidebar && <span className='w-[287px] sm:w-full sm:top-[45px] overflow-hidden sm:fixed sm:z-50 sm:h-screen'>
+              {noData && (
+                <div className='flex justify-center items-start'>
+                  <div className='w-[1257px] overflow-hidden md:w-[95%]'>
+                    <div className={`mt-6 flex justify-center items-start gap-9`}>
+                      {/* {sidebar && <span className='w-[287px] sm:w-full sm:top-[45px] overflow-hidden sm:fixed sm:z-50 sm:h-screen'>
                   <div className='relative z-30 border-[1px]  rounded-md bg-white dark:bg-transparent sm:dark:bg-black-600 border-grey-50'>
                     <div className='px-5 py-2  flex justify-between items-center gap-3 cursor-pointer' onClick={() => setSideBar(s => !s)}>
                       <p className='text-[13px] font-medium tracking-wider uppercase font-Kallisto text-black-50 dark:text-grey-100'>Filter</p>
@@ -502,9 +535,9 @@ function Collection() {
                   </div>
                 </span>} */}
 
-                    <div className={`${sidebar ? 'w-[75%]' : 'w-full'} self-end sm:w-full w-full`}>
-                      <div className={`flex ${sidebar ? 'justify-end' : 'justify-between'} items-stretch gap-9 sm:flex-col sm:gap-2`}>
-                        {/* {!sidebar && <span className='w-[282px] sm:hidden '>
+                      <div className={`${sidebar ? 'w-[75%]' : 'w-full'} self-end sm:w-full w-full`}>
+                        <div className={`flex ${sidebar ? 'justify-end' : 'justify-between'} items-stretch gap-9 sm:flex-col sm:gap-2`}>
+                          {/* {!sidebar && <span className='w-[282px] sm:hidden '>
                       <div className='relative w-full z-30 border-[1px]  rounded-md bg-white dark:bg-black-600 border-grey-50'>
                         <div className='px-5 py-2  flex justify-between items-center gap-3 cursor-pointer' onClick={() => setSideBar(s => !s)}>
                           <p className='text-[12px] font-medium tracking-wider uppercase font-Kallisto text-black-50 dark:text-grey-100'>Filter</p>
@@ -512,14 +545,14 @@ function Collection() {
                         </div>
                       </div>
                     </span>} */}
-                        <span className={`w-[282px] sm:hidden`}>
-                          <Dropdown transparent={true} placeHolder={"Filter"} options={[{ id: 'Trending', value: 'Price low to hight' }, { id: 'Top', value: 'price high to low' }]} selectedOption={() => { }} />
-                        </span>
-                        <div className='justify-between items-center gap-2 hidden sm:flex'>
-                          <span className={`w-[282px] sm:w-[50%]`}>
+                          <span className={`w-[282px] sm:hidden`}>
                             <Dropdown transparent={true} placeHolder={"Filter"} options={[{ id: 'Trending', value: 'Price low to hight' }, { id: 'Top', value: 'price high to low' }]} selectedOption={() => { }} />
                           </span>
-                          {/* <span className='w-[282px] sm:w-[50%] hidden sm:flex '>
+                          <div className='justify-between items-center gap-2 hidden sm:flex'>
+                            <span className={`w-[282px] sm:w-[50%]`}>
+                              <Dropdown transparent={true} placeHolder={"Filter"} options={[{ id: 'Trending', value: 'Price low to hight' }, { id: 'Top', value: 'price high to low' }]} selectedOption={() => { }} />
+                            </span>
+                            {/* <span className='w-[282px] sm:w-[50%] hidden sm:flex '>
                         <div className='relative w-full z-30 border-[1px]  rounded-md bg-white dark:bg-black-600 border-grey-50'>
                           <div className='px-5 py-2  flex justify-between items-center gap-3 cursor-pointer' onClick={() => setSideBar(s => !s)}>
                             <p className='text-[12px] font-medium tracking-wider uppercase font-Kallisto text-black-50 dark:text-grey-100'>Filter</p>
@@ -527,100 +560,101 @@ function Collection() {
                           </div>
                         </div>
                       </span> */}
+                          </div>
                         </div>
-                      </div>
 
-                      {/* SHOW LISTED NFT/ ON SALES NFT */}
-                      <div className='flex justify-start mb-0'>
-                        <div className={`flex justify-start items-stretch gap-9 sm:gap-2 flex-wrap mt-4 sm:mt-4`}>
-                          {currentSection === 'sales' && listings.map((listing, index) => {
-                            return (
-                              <div key={index} className={`rounded-lg overflow-hidden card w-[285px] sm:w-[48%] flex flex-col bg-white dark:bg-black-500 shadow-md relative`}>
-                                <Link to={`/collection/${contractAddress}/${listing.tokenId}`} className='h-[300px] sm:h-[150px] overflow-hidden'>
-                                  <img src={listing.image} alt={listing.name} className='w-full h-full object-cover transition-all ease-linear saturate-100' />
-                                </Link>
-                                <div className='px-6 py-4 sm:px-3 sm:py-22'>
-                                  <h1 className='flex justify-start items-center gap-2 text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>{listing.name}
-                                    <GoCheckCircleFill className='text-blue-200 text-base sm:text-sm dark:bg-white rounded-full border-blue-200 dark:border-[1px]' />
-                                  </h1>
-                                  <p className='text-xl font-Kallisto font-bold mt-2 sm:mt-1 text-grey-100 dark:text-white sm:text-sm flex items-center gap-1'>
-                                    <img src={require('../assets/logo/bttc.png')} alt="BTTC Logo" className='w-5 h-5' />
-                                    {/* {ethers.utils.formatEther(String(listing.price))} 
-                                {formatPrice(parseFloat(ethers.utils.formatEther(String(listing.price))).toFixed(2))} BTTC */}
-                                    {formatPriceWithUSD(listing.price)}
-                                  </p>
-                                  <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:text-[10px]'>
-                                    {listing.lastSale ? `Last Sale ${parseFloat(ethers.utils.formatEther(String(listing.lastSale))).toFixed(2)}` : "No sales yet"}
-                                  </p>
-                                </div>
-                                <BuyNow
-                                  erc721Address={contractAddress}
-                                  tokenId={listing.tokenId}
-                                  price={listing.price}
-                                  className='text-sm font-Kallisto font-medium uppercase text-center text-white/75 tracking-wider bg-blue-100 w-full py-2 absolute div -bottom-20 cursor-pointer transition-all ease-linear duration-250'
-                                  // onSuccess={() => {
-                                  //   nftStateUpdated().then(() => { })
-                                  // }}
-                                  onSuccess={() => {
-                                    setTimeout(() => {
-                                      nftStateUpdated().then(() => { })
-                                    }, 500);
-                                  }}
-                                />
-                              </div>
-                            );
-                          })}
-
-                        </div>
-                      </div>
-
-                      {/* SHOW NFT IN WALLET */}
-                      <div className='flex justify-start mb-20'>
-                        <div className={`flex justify-start items-stretch gap-9 sm:gap-2 flex-wrap mt-1 sm:mt-0`}>
-                          {currentSection === 'mynft' && ownedNfts
-                            .filter(nft => !listedTokenIds.has(nft.tokenId)) // Exclude listed NFTs
-                            .map((nft, index) => {
+                        {/* SHOW LISTED NFT/ ON SALES NFT */}
+                        <div className='flex justify-start mb-0'>
+                          <div className={`flex justify-start items-stretch gap-9 sm:gap-2 flex-wrap mt-4 sm:mt-4`}>
+                            {currentSection === 'sales' && listings.map((listing, index) => {
                               return (
                                 <div key={index} className={`rounded-lg overflow-hidden card w-[285px] sm:w-[48%] flex flex-col bg-white dark:bg-black-500 shadow-md relative`}>
-                                  <Link to={`/collection/${contractAddress}/${nft.tokenId}`} className='h-[250px] sm:h-[100px] overflow-hidden'>
-                                    <img src={nft.image} alt={nft.name} className='w-full h-full object-cover transition-all ease-linear saturate-100' />
+                                  <Link to={`/collection/${contractAddress}/${listing.tokenId}`} className='h-[300px] sm:h-[150px] overflow-hidden'>
+                                    <img src={listing.image} alt={listing.name} className='w-full h-full object-cover transition-all ease-linear saturate-100' />
                                   </Link>
                                   <div className='px-6 py-4 sm:px-3 sm:py-22'>
-                                    <h1 className='flex justify-start items-center gap-2 text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>{nft.name}
+                                    <h1 className='flex justify-start items-center gap-2 text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>{listing.name}
                                       <GoCheckCircleFill className='text-blue-200 text-base sm:text-sm dark:bg-white rounded-full border-blue-200 dark:border-[1px]' />
                                     </h1>
+                                    <p className='text-xl font-Kallisto font-bold mt-2 sm:mt-1 text-grey-100 dark:text-white sm:text-sm flex items-center gap-1'>
+                                      <img src={require('../assets/logo/bttc.png')} alt="BTTC Logo" className='w-5 h-5' />
+                                      {/* {ethers.utils.formatEther(String(listing.price))} 
+                                {formatPrice(parseFloat(ethers.utils.formatEther(String(listing.price))).toFixed(2))} BTTC */}
+                                      {formatPriceWithUSD(listing.price)}
+                                    </p>
                                     <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:text-[10px]'>
-                                      {nft.lastSale ? `Last Sale ${parseFloat(ethers.utils.formatEther(String(nft.lastSale))).toFixed(2)}` : "No sales yet"}
+                                      {listing.lastSale ? `Last Sale ${parseFloat(ethers.utils.formatEther(String(listing.lastSale))).toFixed(2)}` : "No sales yet"}
                                     </p>
                                   </div>
-                                  <ListNFTModal
-                                    isOpen={isListModalOpen}
-                                    onClose={() => {
-                                      setIsListModalOpen(false)
-                                      fetchOwnedMetadata().then(() => { });
-                                    }}
-                                    contractAddress={selectedNFT?.contractAddress}
-                                    tokenId={selectedNFT?.tokenId}
-
+                                  <BuyNow
+                                    erc721Address={contractAddress}
+                                    tokenId={listing.tokenId}
+                                    price={listing.price}
+                                    className='text-sm font-Kallisto font-medium uppercase text-center text-white/75 tracking-wider bg-blue-100 w-full py-2 absolute div -bottom-20 cursor-pointer transition-all ease-linear duration-250'
+                                    // onSuccess={() => {
+                                    //   nftStateUpdated().then(() => { })
+                                    // }}
                                     onSuccess={() => {
-                                      nftStateUpdated();
+                                      setTimeout(() => {
+                                        nftStateUpdated().then(() => { })
+                                      }, 500);
                                     }}
                                   />
-                                  <button onClick={() => handleListForSaleClick(nft)} className='bg-blue-100 w-full py-2 absolute div -bottom-20 cursor-pointer transition-all ease-linear duration-250'>
-                                    <p className='text-sm font-Kallisto font-medium uppercase text-center text-white/75 tracking-wider'>
-                                      {"List For Sale"}
-                                    </p>
-                                  </button>
                                 </div>
                               );
                             })}
 
+                          </div>
+                        </div>
+
+                        {/* SHOW NFT IN WALLET */}
+                        <div className='flex justify-start mb-20'>
+                          <div className={`flex justify-start items-stretch gap-9 sm:gap-2 flex-wrap mt-1 sm:mt-0`}>
+                            {currentSection === 'mynft' && ownedNfts
+                              .filter(nft => !listedTokenIds.has(nft.tokenId)) // Exclude listed NFTs
+                              .map((nft, index) => {
+                                return (
+                                  <div key={index} className={`rounded-lg overflow-hidden card w-[285px] sm:w-[48%] flex flex-col bg-white dark:bg-black-500 shadow-md relative`}>
+                                    <Link to={`/collection/${contractAddress}/${nft.tokenId}`} className='h-[250px] sm:h-[100px] overflow-hidden'>
+                                      <img src={nft.image} alt={nft.name} className='w-full h-full object-cover transition-all ease-linear saturate-100' />
+                                    </Link>
+                                    <div className='px-6 py-4 sm:px-3 sm:py-22'>
+                                      <h1 className='flex justify-start items-center gap-2 text-black-400 font-Kallisto font-medium text-[13px] dark:text-white uppercase sm:text-[11px]'>{nft.name}
+                                        <GoCheckCircleFill className='text-blue-200 text-base sm:text-sm dark:bg-white rounded-full border-blue-200 dark:border-[1px]' />
+                                      </h1>
+                                      <p className='text-black-50 text-[11px] font-Kallisto font-medium tracking-wider mt-2 sm:mt-1 dark:text-grey-100 sm:text-[10px]'>
+                                        {nft.lastSale ? `Last Sale ${parseFloat(ethers.utils.formatEther(String(nft.lastSale))).toFixed(2)}` : "No sales yet"}
+                                      </p>
+                                    </div>
+                                    <ListNFTModal
+                                      isOpen={isListModalOpen}
+                                      onClose={() => {
+                                        setIsListModalOpen(false)
+                                        fetchOwnedMetadata().then(() => { });
+                                      }}
+                                      contractAddress={selectedNFT?.contractAddress}
+                                      tokenId={selectedNFT?.tokenId}
+
+                                      onSuccess={() => {
+                                        nftStateUpdated();
+                                      }}
+                                    />
+                                    <button onClick={() => handleListForSaleClick(nft)} className='bg-blue-100 w-full py-2 absolute div -bottom-20 cursor-pointer transition-all ease-linear duration-250'>
+                                      <p className='text-sm font-Kallisto font-medium uppercase text-center text-white/75 tracking-wider'>
+                                        {"List For Sale"}
+                                      </p>
+                                    </button>
+                                  </div>
+                                );
+                              })}
+
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
