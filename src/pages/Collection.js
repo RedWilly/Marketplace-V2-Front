@@ -386,10 +386,17 @@ function Collection() {
 
   return (
     <>
-      <Helmet>
-        <title>{collectionName}</title>
-        <meta name="description" content={metaDescription} />
-      </Helmet>
+      {collectionName && metaDescription ? (
+        <Helmet>
+          <title>{collectionName}</title>
+          <meta name="description" content={metaDescription} />
+        </Helmet>
+      ) : (
+        <Helmet>
+          <title>Loading...</title>
+          <meta name="description" content="Loading..." />
+        </Helmet>
+      )}
 
       {!dataLoaded ?
         <LoadingCollection />
