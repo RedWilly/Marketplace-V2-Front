@@ -1,3 +1,5 @@
+import { Helmet } from 'react-helmet';
+
 import React from 'react'
 import Navbar from './components/Navbar';
 import { Route, Routes } from 'react-router-dom';
@@ -27,21 +29,23 @@ function App() {
   return (
     <Web3ReactProvider getLibrary={getLibrary}>
       <ChakraProvider>
-        <div className='dark:bg-black-600 bg-grey-10'>
-          <Navbar />
+        <Helmet>
           <div className='dark:bg-black-600 bg-grey-10'>
-            <Routes>
-              <Route path='/' element={<Home />} />
-              <Route path='/explore/*' element={<Explore />} />
-              <Route path='/wallet/*' element={<Wallet />} />
-              <Route path='/statstics' element={<Statstics />} />
-              <Route path="/collection/:contractAddress/:tokenId" element={<NFTDetail />} />
-              <Route path="/collection/:contractAddress" element={<Collection />} />
-              <Route path='/Terms' element={<Terms />} />
-            </Routes>
+            <Navbar />
+            <div className='dark:bg-black-600 bg-grey-10'>
+              <Routes>
+                <Route path='/' element={<Home />} />
+                <Route path='/explore/*' element={<Explore />} />
+                <Route path='/wallet/*' element={<Wallet />} />
+                <Route path='/statstics' element={<Statstics />} />
+                <Route path="/collection/:contractAddress/:tokenId" element={<NFTDetail />} />
+                <Route path="/collection/:contractAddress" element={<Collection />} />
+                <Route path='/Terms' element={<Terms />} />
+              </Routes>
+            </div>
+            <Footer />
           </div>
-          <Footer />
-        </div>
+        </Helmet>
       </ChakraProvider>
     </Web3ReactProvider>
   )
